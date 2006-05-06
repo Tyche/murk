@@ -1,0 +1,61 @@
+.AUTODEPEND
+BCCROOT = $(MAKEDIR)\..
+CC = $(BCCROOT)\bin\bcc32
+LD = $(BCCROOT)\bin\ilink32
+WINZIP = C:\apps\Winzip\wzzip
+
+# Compiler directives for debugging
+!ifdef DEBUG
+DEBUG_CFLAGS = -v -y -Od -r- 
+DEBUG_LFLAGS = -v 
+!else
+DEBUG_CFLAGS = -v- -O2 
+DEBUG_LFLAGS = -v- 
+!endif
+INCDIRS = -I$(BCCROOT)\include
+
+# Compiler/linker directives for linking static or dynamic
+!ifdef STATIC
+STATIC_CFLAGS =
+LIBS      = import32.lib cw32mt.lib ws2_32.lib
+!else
+STATIC_CFLAGS = -tWR
+LIBS      = import32.lib cw32mti.lib ws2_32.lib
+!endif
+BCC32STARTUP = c0x32.obj
+
+MSGS= -w -w-sig -w-par  -w-use -w-pia 
+DEFS= -DWIN32 -DWIN32_LEAN_AND_MEAN -D_NO_VCL 
+OPTIM= $(STATIC_CFLAGS) $(DEBUG_CFLAGS) -tWM -tWC -$(PROCESSOR_LEVEL) 
+CFLAGS= $(OPTIM) $(MSGS) $(DEFS)
+LDFLAGS = -Tpe -ap -c -Gn $(DEBUG_LFLAGS) 
+
+
+O_FILES = murk.obj
+
+# Files in the standard distribution
+DISTFILES = Makefile Makefile.bor Makefile.vc One area.lst beggar.prg \
+  crier.prg doc.txt drunk.prg gategrd.prg gategrd2.prg help.are janitor.prg  \
+  license.crypt license.diku license.merc license.murk++ limbo.are \
+  mid_cit.prg midgaard.are murk.cpp school.are startup vagabond.prg
+
+!ifndef RELEASE
+RELEASE=dist
+!endif
+
+murk.exe: $(O_FILES)
+	$(LD) $(LDFLAGS) $(BCC32STARTUP) $**, $<,, $(LIBS) 
+
+clean:
+	-del *.tds *.map *.TR2 murk.exe *.obj
+	
+dist : $(DISTFILES)
+	@echo "Building distribution..."
+	@-md murk++
+	@&copy /y "$**" "murk++" 1>NUL
+	@$(WINZIP) -Pr murk++-$(RELEASE).zip murk++ 1>NUL 2>NUL
+	@rd /s /q murk++
+	@echo "Done."
+
+.cpp.obj:
+	$(CC) $(CFLAGS) $(INCDIRS) -c -n$(@D) $<
