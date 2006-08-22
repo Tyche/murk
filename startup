@@ -25,7 +25,7 @@ while ( 1 )
     date > $logfile
 
     # Run mud.
-    ../murk $port >&! $logfile
+    ./murk $port >&! $logfile
 
     # Restart, giving old connections a chance to die.
     if ( -e shutdown.txt ) then
