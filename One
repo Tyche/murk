@@ -10,9 +10,9 @@ Race         0
 Level        40
 Trust        0
 Wizbit       1
-Played       6011
+Played       7201
 Note         1146299794
-Room         3014
+Room         3001
 HpManaMove   302 302 232 232 490 490
 Gold         0
 Exp          40000
@@ -34,7 +34,7 @@ Title         the Implementor~
 AttrPerm     18 18 16 18 18
 AttrMod      0 0 0 0 0
 Condition    0 45 45
-Pagelen      20
+Pagelen      40
 Skill        95'fireball'
 End
 

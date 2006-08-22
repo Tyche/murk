@@ -13,9 +13,7 @@ wizard. He is equipped with fine clothing, and is wearing many fine
 rings and bracelets.
 ~
 2 0 900 S
-23 2 2 1d1+30000 1d8+32
-100000 80000
-8 8 1
+23 1
 #3001
 baker~
 the baker~
@@ -25,9 +23,7 @@ A fat, nice looking baker. But you can see that he has many scars on his
 body.
 ~
 2 0 900 S
-23 2 2 1d1+30000 1d8+20
-12000 80000
-8 8 1
+23 1
 #3002
 grocer~
 the grocer~
@@ -36,9 +32,7 @@ A grocer stands at the counter, with a slightly impatient look on his face.
 A tall grocer, who moves two 200 pounds bag of flour around on his shoulders.
 ~
 2 0 900 S
-23 2 2 1d1+30000 1d8+20
-12000 80000
-8 8 1
+23 1
 #3003
 weaponsmith~
 the weaponsmith~
@@ -47,9 +41,7 @@ A weaponsmith.
 A young weaponsmith, who still has lots to learn.
 ~
 2 0 900 S
-23 2 2 1d1+30000 1d8+32
-100000 80000
-8 8 1
+23 1
 #3004
 armourer armorer~
 the armourer~
@@ -59,9 +51,7 @@ An old but very strong armourer, he has made more armours in his
 lifetime than you have ever seen.
 ~
 2 0 900 S
-23 2 2 1d1+30000 1d8+32
-150000 80000
-8 8 1
+23 1
 #3005
 thief~
 the thief~
@@ -70,9 +60,7 @@ A thief, all dressed in black.
 Well COUNT your money!
 ~
 133 98304 100 S
-8 13 3 8d8+80 1d5+5
-100 4000
-8 8 1
+8 1
 #3006
 captain~
 the captain~
@@ -81,9 +69,7 @@ A retired captain stands here, selling boats.
 This captain has killed more sharks than you have eaten peas.
 ~
 2 0 900 S
-23 2 2 1d1+30000 1d8+32
-12000 80000
-8 8 1
+23 1
 #3007
 sailor~
 the sailor~
@@ -92,9 +78,7 @@ A sailor stands here, waiting to train you.
 He looks like a strong, fit sailor.
 ~
 2|512 0 900 S
-23 -2 -13 23d23+230 1d4+23
-2000 -15000
-8 8 1
+23 1
 #3008
 boy~
 the pet shop boy~
@@ -103,9 +87,7 @@ A pet shop boy is here, humming gently.
 He is young and close-cropped and looks quite happy.
 ~
 2 0 900 S
-23 2 2 1d1+30000 1d8+20
-12000 80000
-8 8 1
+23 1
 #3009
 jeweller~
 the jeweller~
@@ -114,9 +96,7 @@ The jeweller is standing behind the desk.
 He is fat and has a content although watchful look on his face.
 ~
 2 0 900 S
-23 2 -10 1d1+30000 1d8+22
-300000 80000
-8 8 1
+23 1
 #3010
 leather worker~
 the leather worker~
@@ -126,9 +106,7 @@ He looks as an honest, hard-working artisan who only just earns enough to
 keep himself going.
 ~
 2 0 900 S
-23 2 2 1d1+30000 1d8+20
-100000 80000
-8 8 1
+23 1
 #3011
 executioner~
 the executioner~
@@ -138,9 +116,7 @@ A masked man with muscles bulging all over his body.  You can tell by
 the look in his eyes that he enjoys seeing you cower in his presence.
 ~
 2|64 8|128 1000 S
-50 -10 -20 1d1+1499 1d4+30
-5000 500000
-8 8 1
+50 1
 >fight_prog 40~
 cackle
 ~
@@ -175,9 +151,7 @@ A healer is here.
 Although retired from adventuring, the healer still lends a hand.
 ~
 2|64 8|128 1000 S
-40 -10 -20 1d1+29999 2d4+30
-0 -99000
-8 8 1
+40 1
 >greet_prog 40~
 bow $n
 say How may I help you?
@@ -196,9 +170,7 @@ vast amount of knowledge she possesses. She is wearing fine magic clothing,
 and you notice that she is surrounded by a blue shimmering aura.
 ~
 2|1024 0 1000 S
-24 0 0 6d10+440 3d8+24
-8794 100000
-8 8 2
+24 2
 #3021
 guildmaster master~
 the guildmaster~
@@ -208,9 +180,7 @@ You are in no doubt that this guildmaster is truly close to your god; he has
 a peaceful, loving look. You notice that he is surrounded by a white aura.
 ~
 2|1024 128 1000 S
-24 0 0 6d10+440 3d8+24
-8794 100000
-8 8 1
+24 1
 #3022
 guildmaster master~
 the guildmaster~
@@ -221,9 +191,7 @@ the way of the true thief.  She is dressed in poor clothing, having
 the appearance of a beggar.
 ~
 2|1024 0 1000 S
-24 0 0 6d10+440 3d8+24
-8794 100000
-8 8 2
+24 2
 #3023
 guildmaster master~
 the guildmaster~
@@ -234,9 +202,7 @@ across his body prove that he was using arms before you were born.  He
 has a calm look on his face.
 ~
 2|1024 0 1000 S
-24 0 0 6d10+440 3d8+24
-8794 100000
-8 8 1
+24 1
 #3024
 sorcerer~
 the sorcerer~
@@ -247,9 +213,7 @@ He is here to guard the Mage's Guild and his superior knowledge of offensive
 as well as defensive spells make him a deadly opponent.
 ~
 2 2 800 S
-23 2 2 6d10+3900 1d8+22
-2000 80000
-8 8 1
+23 1
 #3025
 templar~
 the knight templar~
@@ -261,9 +225,7 @@ his religious devotion combined with his superior skill makes him a deadly
 opponent.
 ~
 2 0 800 S
-23 2 2 6d10+3900 1d8+22
-2000 80000
-8 8 1
+23 1
 #3026
 assassin~
 the assassin~
@@ -274,9 +236,7 @@ using all sorts of weapons.  His superior knowledge of how and where to use
 them combined with his extraordinary stealth makes him a deadly opponent.
 ~
 2 65536 800 S
-23 4 4 6d10+3900 1d8+22
-2000 80000
-8 8 1
+23 1
 #3027
 knight~
 the knight~
@@ -288,9 +248,7 @@ extreme skill combined with his experience in warfare makes him a deadly
 opponent.
 ~
 2 0 800 S
-23 0 0 6d10+5900 1d8+32
-2000 80000
-8 8 1
+23 1
 #3040
 bartender~
 the bartender~
@@ -299,9 +257,7 @@ A bartender watches you calmly, while he skillfully mixes a drink.
 A tired looking Bartender who hates trouble in his bar.
 ~
 2 0 900 S
-23 2 2 1d1+30000 1d8+18
-2000 80000
-8 8 1
+23 1
 #3041
 waiter~
 the waiter~
@@ -310,9 +266,7 @@ A waiter is going around from one place to another.
 A tired looking waiter.
 ~
 2 0 900 S
-23 2 2 6d10+390 1d8+18
-2000 20000
-8 8 1
+23 1
 #3042
 waiter~
 the waiter~
@@ -321,9 +275,7 @@ peaceful life as a waiter.
 ~
 ~
 2 0 600 S
-23 1 2 6d10+390 1d8+18
-2000 20000
-8 8 1
+23 1
 #3043
 waiter~
 the waiter~
@@ -331,9 +283,7 @@ A waiter who seems to have reached contact with God.
 ~
 ~
 2 0 600 S
-23 1 2 6d10+390 1d8+18
-2000 20000
-8 8 1
+23 1
 #3044
 waiter~
 the waiter~
@@ -341,9 +291,7 @@ A waiter who knows where all his customers keep their money.
 ~
 ~
 2 0 600 S
-23 1 2 6d10+390 1d8+18
-2000 20000
-8 8 1
+23 1
 #3045
 waiter~
 the waiter~
@@ -351,9 +299,7 @@ A waiter who easily could kill you, and still carry quite a few firebreathers.
 ~
 ~
 2 0 600 S
-23 1 2 6d10+390 1d8+18
-2000 20000
-8 8 1
+23 1
 #3046
 filthy~
 Filthy~
@@ -363,9 +309,7 @@ Filthy looks real, ehm, dirty. He likes to keep his costumers happy,
 but do not mess with him or else he'll get upset.
 ~
 2 0 600 S
-23 1 2 1d1+30000 1d8+18
-2000 80000
-8 8 1
+23 1
 #3050
 dealer~
 Aod the Dealer~
@@ -379,9 +323,7 @@ with him from Generic Mud.
 
 Since he practices safe sex, ~
 4|64 8|32|512 0 S
-15 15 -2 1d1+999 2d10+20
-500 19000
-8 8 1
+15 1
 #3060
 cityguard guard~
 the cityguard~
@@ -390,9 +332,7 @@ A cityguard stands here.
 A big, strong, helpful, trustworthy guard.
 ~
 69 0 1000 S
-15 15 -2 15d15+150 1d4+10
-500 19000
-8 8 1
+15 1
 #3061
 janitor~
 the janitor~
@@ -400,9 +340,7 @@ A janitor is walking around, cleaning up.
 ~
 ~
 1 0 900 S
-1 20 9 2d6+10 1d5+0
-34 100
-8 8 1
+1 1
 #3062
 fido dog~
 the beastly fido~
@@ -412,9 +350,7 @@ Fido is a small dog that has a foul smell and pieces of rotted meat hanging
 around his teeth.
 ~
 161 0 -200 S
-0 20 10 1d6+4 1d4+0
-10 25
-8 8 1
+0 1
 >greet_prog 40~
 bark $n
 if name($n) == mayor
@@ -434,9 +370,7 @@ A vagabond is here, looking for victims.
 He looks pretty mean.
 ~
 4 0 -200 S
-5 16 5 2d6+60 1d8+0
-47 900
-8 8 1
+5 1
 #3064
 drunk~
 the drunk~
@@ -445,9 +379,7 @@ A singing, happy drunk.
 A drunk who seems to be too happy, and to carry too much money.
 ~
 0 0 400 S
-2 19 8 2d6+22 1d6+0
-85 200
-8 8 1
+2 1
 #3065
 beggar~
 the beggar~
@@ -456,9 +388,7 @@ A beggar is here, asking for a few coins.
 The beggar looks like she is fed up with life.
 ~
 2 0 400 S
-1 20 9 2d6+10 1d5+0
-0 100
-8 8 2
+1 2
 #3066
 cat~
 an alley cat~
@@ -467,9 +397,7 @@ An alley cat hisses at you.
 The alley cat is half starved and more than a little feral.
 ~
 161 0 -200 S
-0 20 10 1d6+4 1d4+0
-10 25
-8 8 1
+0 1
 #3067
 cityguard guard~
 the cityguard~
@@ -478,9 +406,7 @@ A cityguard is here, guarding the gate.
 A big, strong, helpful, trustworthy guard.
 ~
 67 0 1000 S
-15 5 -2 15d15+150 1d4+10
-500 19000
-8 8 1
+15 1
 #3068
 cityguard guard~
 the cityguard~
@@ -489,9 +415,7 @@ A cityguard is here, guarding the gate.
 A big, strong, helpful, trustworthy guard.
 ~
 67 0 1000 S
-15 5 -2 15d15+150 1d4+10
-500 19000
-8 8 1
+15 1
 #3069
 cityguard guard~
 the cityguard~
@@ -500,9 +424,7 @@ A cityguard is here, guarding the mayor.
 A big, strong, helpful, trustworthy guard.
 ~
 67 2|65536 1000 S
-20 0 -7 20d20+200 1d4+15
-500 40000
-8 8 1
+20 1
 #3090
 kitten~
 the kitten~
@@ -511,9 +433,7 @@ A small loyal kitten is here.
 The kitten looks like a cute, little, fierce fighter.
 ~
 6 0 400 S
-1 20 9 1d6+11 1d4+0
-0 100
-8 8 0
+1 0
 #3091
 puppy~
 the puppy~
@@ -522,9 +442,7 @@ A small loyal puppy is here.
 The puppy looks like a cute, little, fierce fighter.
 ~
 6 0 400 S
-3 20 9 1d6+11 1d4+0
-0 100
-8 8 0
+3 0
 #3092
 beagle~
 the beagle~
@@ -533,9 +451,7 @@ A small, quick, loyal beagle is here.
 The beagle looks like a fierce fighter.
 ~
 6 0 400 S
-5 19 8 1d12+22 1d6+0
-0 200
-8 8 0
+5 0
 #3093
 rottweiler~
 the rottweiler~
@@ -544,9 +460,7 @@ A large, loyal rottweiler is here.
 The rottweiler looks like a strong, fierce fighter.
 ~
 6 0 400 S
-7 18 7 1d12+35 1d7+0
-0 800
-8 8 0
+7 0
 #3094
 wolf~
 the wolf~
@@ -555,9 +469,7 @@ A large, trained wolf is here.
 The wolf looks like a strong, fearless fighter.
 ~
 6 0 0 S
-9 17 6 1d12+47 1d8+0
-0 1600
-8 8 0
+9 0
 #3100
 maid~
 the maid~
@@ -567,9 +479,7 @@ She is very beautiful with golden hair, and deep blue eyes. A good reason
 for coming here more often.
 ~
 2 0 1000 S
-23 2 -2 6d10+390 1d8+12
-2000 80000
-8 8 2
+23 2
 >act_prog shivers~
 shiver
 say Oh!  I would never work in a graveyard let alone walk past it.
@@ -583,9 +493,7 @@ A sexton is sitting here, drinking hot tea.
 The sexton looks like he is relaxing after another grave-digging job.
 ~
 2 0 800 S
-3 18 7 2d6+35 1d7+0
-13 350
-6 6 1
+3 1
 >rand_prog 20~
 if rand(70)
 	say I tell ya.  All those dead bodies are giving me the creeps.
@@ -601,9 +509,7 @@ A swan is swimming around in the pond.
 The white swan is very elegant.
 ~
 2 0 1000 S
-1 20 9 2d6+10 1d5+0
-0 100
-8 8 0
+1 0
 #3122
 duckling~
 the duckling~
@@ -612,9 +518,7 @@ A duckling is swimming around in the pond.
 The duckling is adorable, it looks most of all like a tiny furball.
 ~
 2 0 1000 S
-0 20 10 1d1+0 1d1+0
-0 10
-8 8 0
+0 0
 #3123
 sparrow~
 the sparrow~
@@ -623,9 +527,7 @@ A sparrow is flapping around on the ground.
 The sparrow looks like it is enjoying life.
 ~
 192 0 1000 S
-0 20 10 2d6+0 1d3+0
-0 25
-8 8 0
+0 0
 #3124
 duck~
 the duck~
@@ -634,9 +536,7 @@ A duck is here, quacking happily.
 The duck is quite fat.  It looks like it is enjoying life.
 ~
 64 0 1000 S
-1 20 10 2d6+5 1d4+0
-0 75
-8 8 0
+1 0
 #3140
 captain~
 the captain~
@@ -645,9 +545,7 @@ The captain of the guard is looking very upset.
 A big, strong, angry captain.
 ~
 38 8 1000 S
-17 4 1 1d12+210 1d8+8
-0 28000
-8 8 1
+17 1
 #3141
 cityguard guard~
 the cityguard~
@@ -656,9 +554,7 @@ A cityguard stands here, looking very upset.
 A big, strong, angry guard.
 ~
 38 0 1000 S
-15 5 -2 15d15+150 1d4+10
-0 9000
-8 8 1
+15 1
 #3142
 secretary~
 the secretary~
@@ -669,9 +565,7 @@ The Secretary says 'Sorry, but the Mayor is extremely busy today'.
 The Secretary says 'Please sit down and have a seat in the meantime'.
 ~
 2 0 900 S
-12 9 2 1d12+148 2d7+1
-100 3000
-8 8 2
+12 2
 #3143
 mayor~
 the mayor~
@@ -680,9 +574,7 @@ The mayor is here.  He shakes your hand.
 He is a stocky, middle-aged man with thin, grey hair.
 ~
 3 8192 900 S
-23 2 -2 6d10+500 1d8+12
-1000 120000
-4 4 1
+23 1
 >rand_prog 20~
 if isfight($i)
 else
@@ -719,9 +611,7 @@ The town crier is here, weeping quietly.
 He is very good at his job - completely dissolved in tears.
 ~
 128 0 900 S
-1 20 9 2d6+10 1d5+0
-34 100
-8 8 1
+1 1
 #0
 
 #MOBPROGS

@@ -19,8 +19,8 @@
  MurkMUD++ - A Windows compatible, C++ compatible Merc 2.2 Mud.
 
  \author Jon A. Lambert
- \date 03/16/2006
- \version 1.0
+ \date 08/16/2006
+ \version 1.1
  \remarks
   This source code copyright (C) 2005, 2006 by Jon A. Lambert
   All rights reserved.
@@ -87,6 +87,7 @@
 #include <algorithm>
 #include <list>
 #include <map>
+//#include "boost/format.hpp"
 
 // replacement or substitute for itoa
 std::string itoa(int value, int base) {
@@ -110,9 +111,6 @@ std::string itoa(int value, int base) {
 /* WINDOWS DEFINITIONS SECTION                                           */
 /*-----------------------------------------------------------------------*/
 #ifdef WIN32                    /* Windows portability */
-#if defined _MSC_VER
-#define NOMINMAX
-#endif
 #define FD_SETSIZE 1024
 #include <winsock2.h>
 
@@ -150,9 +148,7 @@ void gettimeofday (struct timeval *tp, struct timezone *tzp)
   tp->tv_usec = (GetTickCount () % 1000) * 1000;
 }
 
-
 /*-------------------------------------------------------------------*/
-
 /*
  Crypt is from Andy Tanenbaum's book "Computer Networks", rewritten in C.
 
@@ -197,7 +193,6 @@ void gettimeofday (struct timeval *tp, struct timezone *tzp)
   OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 
 struct block {
   unsigned char b_data[64];
@@ -483,7 +478,6 @@ char *crypt (char *pw, const char *salt)
   return result;
 }
 
-
 /*-----------------------------------------------------------------------*/
 /* UNIX DEFINITION SECTION                                               */
 /*-----------------------------------------------------------------------*/
@@ -513,7 +507,6 @@ char *crypt (char *pw, const char *salt)
 #define WILL    251     /* I will use option */
 #define GA  249     /* you may reverse the line */
 #define TELOPT_ECHO 1   /* echo */
-
 
 
 /*-----------------------------------------------------------------------*/
@@ -562,7 +555,6 @@ typedef bool SPEC_FUN (Character * ch);
  * Adjust the pulse numbers to suit yourself.
  */
 #define MAX_SKILL          90
-#define MAX_CLASS           4
 #define MAX_LEVEL          40
 #define LEVEL_HERO         (MAX_LEVEL - 4)
 #define LEVEL_IMMORTAL         (MAX_LEVEL - 3)
@@ -573,42 +565,23 @@ typedef bool SPEC_FUN (Character * ch);
 #define PULSE_TICK        (30 * PULSE_PER_SECOND)
 #define PULSE_AREA        (60 * PULSE_PER_SECOND)
 
-/* for skills/spells */
-#define SLOT(n) n
-
 /*
  * Time and weather stuff.
  */
-#define SUN_DARK            0
-#define SUN_RISE            1
-#define SUN_LIGHT           2
-#define SUN_SET             3
-
-#define SKY_CLOUDLESS           0
-#define SKY_CLOUDY          1
-#define SKY_RAINING         2
-#define SKY_LIGHTNING           3
+enum {SUN_DARK, SUN_RISE, SUN_LIGHT, SUN_SET };
+enum {SKY_CLOUDLESS, SKY_CLOUDY, SKY_RAINING, SKY_LIGHTNING};
 
 /*
  * Connected state for a channel.
  */
-#define CON_PLAYING          0
-#define CON_GET_NAME             1
-#define CON_GET_OLD_PASSWORD         2
-#define CON_CONFIRM_NEW_NAME         3
-#define CON_GET_NEW_PASSWORD         4
-#define CON_CONFIRM_NEW_PASSWORD     5
-#define CON_GET_NEW_SEX          6
-#define CON_GET_NEW_CLASS        7
-#define CON_READ_MOTD            8
+enum {CON_PLAYING, CON_GET_NAME, CON_GET_OLD_PASSWORD, CON_CONFIRM_NEW_NAME,
+      CON_GET_NEW_PASSWORD, CON_CONFIRM_NEW_PASSWORD, CON_GET_NEW_SEX,
+      CON_GET_NEW_CLASS, CON_READ_MOTD};
 
 /*
  * TO types for actflags.
  */
-#define TO_ROOM         0
-#define TO_NOTVICT      1
-#define TO_VICT         2
-#define TO_CHAR         3
+enum {TO_ROOM, TO_NOTVICT, TO_VICT, TO_CHAR };
 
 /***************************************************************************
  *                                                                         *
@@ -627,49 +600,47 @@ typedef bool SPEC_FUN (Character * ch);
  * ACT bits for mobs.
  * Used in #MOBILES.
  */
-#define ACT_IS_NPC            1 /* Auto set for mobs    */
-#define ACT_SENTINEL              2     /* Stays in one room    */
-#define ACT_SCAVENGER             4     /* Picks up objects */
-#define ACT_AGGRESSIVE           32     /* Attacks PC's     */
-#define ACT_STAY_AREA            64     /* Won't leave area */
-#define ACT_WIMPY           128 /* Flees when hurt  */
-#define ACT_PET             256 /* Auto set for pets    */
-#define ACT_TRAIN           512 /* Can train PC's   */
-#define ACT_PRACTICE           1024     /* Can practice PC's    */
+#define ACT_IS_NPC      1 << 0  /* Auto set for mobs    */
+#define ACT_SENTINEL    1 << 1  /* Stays in one room    */
+#define ACT_SCAVENGER   1 << 2  /* Picks up objects */
+#define ACT_AGGRESSIVE  1 << 5  /* Attacks PC's     */
+#define ACT_STAY_AREA   1 << 6  /* Won't leave area */
+#define ACT_WIMPY       1 << 7 /* Flees when hurt  */
+#define ACT_PET         1 << 8 /* Auto set for pets    */
+#define ACT_TRAIN       1 << 9 /* Can train PC's   */
+#define ACT_PRACTICE    1 << 10     /* Can practice PC's    */
 
 /*
  * Bits for 'affected_by'.
  * Used in #MOBILES.
  */
-#define AFF_BLIND             1
-#define AFF_INVISIBLE             2
-#define AFF_DETECT_EVIL           4
-#define AFF_DETECT_INVIS          8
-#define AFF_DETECT_MAGIC         16
-#define AFF_DETECT_HIDDEN        32
-#define AFF_HOLD             64 /* Unused   */
-#define AFF_SANCTUARY           128
-#define AFF_FAERIE_FIRE         256
-#define AFF_INFRARED            512
-#define AFF_CURSE          1024
-#define AFF_FLAMING        2048 /* Unused   */
-#define AFF_POISON         4096
-#define AFF_PROTECT        8192
-#define AFF_PARALYSIS         16384     /* Unused   */
-#define AFF_SNEAK         32768
-#define AFF_HIDE          65536
-#define AFF_SLEEP        131072
-#define AFF_CHARM        262144
-#define AFF_FLYING       524288
-#define AFF_PASS_DOOR       1048576
+#define AFF_BLIND          1 << 0
+#define AFF_INVISIBLE      1 << 1
+#define AFF_DETECT_EVIL    1 << 2
+#define AFF_DETECT_INVIS   1 << 3
+#define AFF_DETECT_MAGIC   1 << 4
+#define AFF_DETECT_HIDDEN  1 << 5
+
+#define AFF_SANCTUARY      1 << 7
+#define AFF_FAERIE_FIRE    1 << 8
+#define AFF_INFRARED       1 << 9
+#define AFF_CURSE          1 << 10
+
+#define AFF_POISON         1 << 12
+#define AFF_PROTECT        1 << 13
+
+#define AFF_SNEAK          1 << 15
+#define AFF_HIDE           1 << 16
+#define AFF_SLEEP          1 << 17
+#define AFF_CHARM          1 << 18
+#define AFF_FLYING         1 << 19
+#define AFF_PASS_DOOR      1 << 20
 
 /*
  * Sex.
  * Used in #MOBILES.
  */
-#define SEX_NEUTRAL           0
-#define SEX_MALE              1
-#define SEX_FEMALE            2
+enum {SEX_NEUTRAL, SEX_MALE, SEX_FEMALE};
 
 /*
  * Well known object virtual numbers.
@@ -680,7 +651,7 @@ typedef bool SPEC_FUN (Character * ch);
 
 #define OBJ_VNUM_CORPSE_NPC      10
 #define OBJ_VNUM_CORPSE_PC       11
-#define OBJ_VNUM_SEVERED_HEAD        12
+#define OBJ_VNUM_SEVERED_HEAD    12
 #define OBJ_VNUM_TORN_HEART      13
 #define OBJ_VNUM_SLICED_ARM      14
 #define OBJ_VNUM_SLICED_LEG      15
@@ -706,99 +677,80 @@ typedef bool SPEC_FUN (Character * ch);
 #define ITEM_WAND             3
 #define ITEM_STAFF            4
 #define ITEM_WEAPON           5
-#define ITEM_TREASURE             8
+#define ITEM_TREASURE         8
 #define ITEM_ARMOR            9
 #define ITEM_POTION          10
-#define ITEM_FURNITURE           12
+#define ITEM_FURNITURE       12
 #define ITEM_TRASH           13
-#define ITEM_CONTAINER           15
-#define ITEM_DRINK_CON           17
+#define ITEM_CONTAINER       15
+#define ITEM_DRINK_CON       17
 #define ITEM_KEY             18
 #define ITEM_FOOD            19
 #define ITEM_MONEY           20
 #define ITEM_BOAT            22
-#define ITEM_CORPSE_NPC          23
-#define ITEM_CORPSE_PC           24
-#define ITEM_FOUNTAIN            25
+#define ITEM_CORPSE_NPC      23
+#define ITEM_CORPSE_PC       24
+#define ITEM_FOUNTAIN        25
 #define ITEM_PILL            26
 
 /*
  * Extra flags.
  * Used in #OBJECTS.
  */
-#define ITEM_GLOW             1
-#define ITEM_HUM              2
-#define ITEM_DARK             4
-#define ITEM_LOCK             8
-#define ITEM_EVIL            16
-#define ITEM_INVIS           32
-#define ITEM_MAGIC           64
-#define ITEM_NODROP         128
-#define ITEM_BLESS          256
-#define ITEM_ANTI_GOOD          512
-#define ITEM_ANTI_EVIL         1024
-#define ITEM_ANTI_NEUTRAL      2048
-#define ITEM_NOREMOVE          4096
-#define ITEM_INVENTORY         8192
+#define ITEM_GLOW          1 << 0
+#define ITEM_HUM           1 << 1
+#define ITEM_DARK          1 << 2
+#define ITEM_LOCK          1 << 3
+#define ITEM_EVIL          1 << 4
+#define ITEM_INVIS         1 << 5
+#define ITEM_MAGIC         1 << 6
+#define ITEM_NODROP        1 << 7
+#define ITEM_BLESS         1 << 8
+#define ITEM_ANTI_GOOD     1 << 9
+#define ITEM_ANTI_EVIL     1 << 10
+#define ITEM_ANTI_NEUTRAL  1 << 11
+#define ITEM_NOREMOVE      1 << 12
+#define ITEM_INVENTORY     1 << 13
 
 /*
  * Wear flags.
  * Used in #OBJECTS.
  */
-#define ITEM_TAKE             1
-#define ITEM_WEAR_FINGER          2
-#define ITEM_WEAR_NECK            4
-#define ITEM_WEAR_BODY            8
-#define ITEM_WEAR_HEAD           16
-#define ITEM_WEAR_LEGS           32
-#define ITEM_WEAR_FEET           64
-#define ITEM_WEAR_HANDS         128
-#define ITEM_WEAR_ARMS          256
-#define ITEM_WEAR_SHIELD        512
-#define ITEM_WEAR_ABOUT        1024
-#define ITEM_WEAR_WAIST        2048
-#define ITEM_WEAR_WRIST        4096
-#define ITEM_WIELD         8192
-#define ITEM_HOLD         16384
+#define ITEM_TAKE          1 << 0
+#define ITEM_WEAR_FINGER   1 << 1
+#define ITEM_WEAR_NECK     1 << 2
+#define ITEM_WEAR_BODY     1 << 3
+#define ITEM_WEAR_HEAD     1 << 4
+#define ITEM_WEAR_LEGS     1 << 5
+#define ITEM_WEAR_FEET     1 << 6
+#define ITEM_WEAR_HANDS    1 << 7
+#define ITEM_WEAR_ARMS     1 << 8
+#define ITEM_WEAR_SHIELD   1 << 9
+#define ITEM_WEAR_ABOUT    1 << 10
+#define ITEM_WEAR_WAIST    1 << 11
+#define ITEM_WEAR_WRIST    1 << 12
+#define ITEM_WIELD         1 << 13
+#define ITEM_HOLD          1 << 14
 
 /*
  * Apply types (for affects).
  * Used in #OBJECTS.
  */
-#define APPLY_NONE            0
-#define APPLY_STR             1
-#define APPLY_DEX             2
-#define APPLY_INT             3
-#define APPLY_WIS             4
-#define APPLY_CON             5
-#define APPLY_SEX             6
-#define APPLY_CLASS           7
-#define APPLY_LEVEL           8
-#define APPLY_AGE             9
-#define APPLY_HEIGHT             10
-#define APPLY_WEIGHT             11
-#define APPLY_MANA           12
-#define APPLY_HIT            13
-#define APPLY_MOVE           14
-#define APPLY_GOLD           15
-#define APPLY_EXP            16
-#define APPLY_AC             17
-#define APPLY_HITROLL            18
-#define APPLY_DAMROLL            19
-#define APPLY_SAVING_PARA        20
-#define APPLY_SAVING_ROD         21
-#define APPLY_SAVING_PETRI       22
-#define APPLY_SAVING_BREATH      23
-#define APPLY_SAVING_SPELL       24
+enum {APPLY_NONE, APPLY_STR, APPLY_DEX, APPLY_INT, APPLY_WIS, APPLY_CON,
+      APPLY_SEX, APPLY_CLASS, APPLY_LEVEL, APPLY_AGE, APPLY_HEIGHT,
+      APPLY_WEIGHT, APPLY_MANA, APPLY_HIT, APPLY_MOVE, APPLY_GOLD, APPLY_EXP,
+      APPLY_AC, APPLY_HITROLL, APPLY_DAMROLL, APPLY_SAVING_PARA,
+      APPLY_SAVING_ROD, APPLY_SAVING_PETRI, APPLY_SAVING_BREATH,
+      APPLY_SAVING_SPELL};
 
 /*
  * Values for containers (value[1]).
  * Used in #OBJECTS.
  */
-#define CONT_CLOSEABLE            1
-#define CONT_PICKPROOF            2
-#define CONT_CLOSED           4
-#define CONT_LOCKED           8
+#define CONT_CLOSEABLE   1 << 0
+#define CONT_PICKPROOF   1 << 1
+#define CONT_CLOSED      1 << 2
+#define CONT_LOCKED      1 << 3
 
 /*
  * Well known room virtual numbers.
@@ -814,76 +766,47 @@ typedef bool SPEC_FUN (Character * ch);
  * Room flags.
  * Used in #ROOMS.
  */
-#define ROOM_DARK             1
-#define ROOM_NO_MOB           4
-#define ROOM_INDOORS              8
-#define ROOM_PRIVATE            512
-#define ROOM_SAFE          1024
-#define ROOM_SOLITARY          2048
-#define ROOM_PET_SHOP          4096
-#define ROOM_NO_RECALL         8192
+#define ROOM_DARK      1 << 0
+#define ROOM_NO_MOB    1 << 2
+#define ROOM_INDOORS   1 << 3
+#define ROOM_PRIVATE   1 << 9
+#define ROOM_SAFE      1 << 10
+#define ROOM_SOLITARY  1 << 11
+#define ROOM_PET_SHOP  1 << 12
+#define ROOM_NO_RECALL 1 << 13
 
 /*
  * Directions.
  * Used in #ROOMS.
  */
-#define DIR_NORTH             0
-#define DIR_EAST              1
-#define DIR_SOUTH             2
-#define DIR_WEST              3
-#define DIR_UP                4
-#define DIR_DOWN              5
+enum {DIR_NORTH, DIR_EAST, DIR_SOUTH, DIR_WEST, DIR_UP, DIR_DOWN };
 
 /*
  * Exit flags.
  * Used in #ROOMS.
  */
-#define EX_ISDOOR             1
-#define EX_CLOSED             2
-#define EX_LOCKED             4
-#define EX_PICKPROOF             32
+#define EX_ISDOOR     1 << 0
+#define EX_CLOSED     1 << 1
+#define EX_LOCKED     1 << 2
+#define EX_PICKPROOF  1 << 5
 
 /*
  * Sector types.
  * Used in #ROOMS.
  */
-#define SECT_INSIDE           0
-#define SECT_CITY             1
-#define SECT_FIELD            2
-#define SECT_FOREST           3
-#define SECT_HILLS            4
-#define SECT_MOUNTAIN             5
-#define SECT_WATER_SWIM           6
-#define SECT_WATER_NOSWIM         7
-#define SECT_UNUSED           8
-#define SECT_AIR              9
-#define SECT_DESERT          10
-#define SECT_MAX             11
+enum {SECT_INSIDE, SECT_CITY, SECT_FIELD, SECT_FOREST, SECT_HILLS,
+      SECT_MOUNTAIN, SECT_WATER_SWIM, SECT_WATER_NOSWIM, SECT_UNUSED,
+      SECT_AIR, SECT_DESERT, SECT_MAX};
 
 /*
  * Equpiment wear locations.
  * Used in #RESETS.
  */
-#define WEAR_NONE            -1
-#define WEAR_LIGHT            0
-#define WEAR_FINGER_L             1
-#define WEAR_FINGER_R             2
-#define WEAR_NECK_1           3
-#define WEAR_NECK_2           4
-#define WEAR_BODY             5
-#define WEAR_HEAD             6
-#define WEAR_LEGS             7
-#define WEAR_FEET             8
-#define WEAR_HANDS            9
-#define WEAR_ARMS            10
-#define WEAR_SHIELD          11
-#define WEAR_ABOUT           12
-#define WEAR_WAIST           13
-#define WEAR_WRIST_L             14
-#define WEAR_WRIST_R             15
-#define WEAR_WIELD           16
-#define WEAR_HOLD            17
-#define MAX_WEAR             18
+enum {WEAR_NONE=-1, WEAR_LIGHT=0, WEAR_FINGER_L, WEAR_FINGER_R,
+      WEAR_NECK_1, WEAR_NECK_2, WEAR_BODY, WEAR_HEAD, WEAR_LEGS,
+      WEAR_FEET, WEAR_HANDS, WEAR_ARMS, WEAR_SHIELD, WEAR_ABOUT,
+      WEAR_WAIST, WEAR_WRIST_L, WEAR_WRIST_R, WEAR_WIELD,
+      WEAR_HOLD, MAX_WEAR};
 
 /***************************************************************************
  *                                                                         *
@@ -894,79 +817,70 @@ typedef bool SPEC_FUN (Character * ch);
 /*
  * Conditions.
  */
-#define COND_DRUNK            0
-#define COND_FULL             1
-#define COND_THIRST           2
+enum {COND_DRUNK, COND_FULL, COND_THIRST};
 
 /*
  * Positions.
  */
-#define POS_DEAD              0
-#define POS_MORTAL            1
-#define POS_INCAP             2
-#define POS_STUNNED           3
-#define POS_SLEEPING              4
-#define POS_RESTING           5
-#define POS_FIGHTING              6
-#define POS_STANDING              7
+enum {POS_DEAD, POS_MORTAL, POS_INCAP, POS_STUNNED, POS_SLEEPING,
+      POS_RESTING, POS_FIGHTING, POS_STANDING};
 
 /*
  * ACT bits for players.
  */
-#define PLR_IS_NPC            1 /* Don't EVER set.  */
-#define PLR_BOUGHT_PET            2
+#define PLR_IS_NPC      1 << 0 /* Don't EVER set.  */
+#define PLR_BOUGHT_PET  1 << 1
 
-#define PLR_AUTOEXIT              8
-#define PLR_AUTOLOOT             16
-#define PLR_AUTOSAC                  32
-#define PLR_BLANK            64
-#define PLR_BRIEF           128
-#define PLR_COMBINE         512
-#define PLR_PROMPT         1024
-#define PLR_TELNET_GA          2048
+#define PLR_AUTOEXIT    1 << 3
+#define PLR_AUTOLOOT    1 << 4
+#define PLR_AUTOSAC     1 << 5
+#define PLR_BLANK       1 << 6
+#define PLR_BRIEF       1 << 7
+#define PLR_COMBINE     1 << 9
+#define PLR_PROMPT      1 << 10
+#define PLR_TELNET_GA   1 << 11
+#define PLR_HOLYLIGHT   1 << 12
+#define PLR_WIZINVIS    1 << 13
 
-#define PLR_HOLYLIGHT          4096
-#define PLR_WIZINVIS           8192
-
-#define PLR_SILENCE       32768
-#define PLR_NO_EMOTE          65536
-#define PLR_NO_TELL      262144
-#define PLR_LOG          524288
-#define PLR_DENY        1048576
-#define PLR_FREEZE      2097152
-#define PLR_THIEF       4194304
-#define PLR_KILLER      8388608
+#define PLR_SILENCE     1 << 15
+#define PLR_NO_EMOTE    1 << 16
+#define PLR_NO_TELL     1 << 18
+#define PLR_DENY        1 << 20
+#define PLR_FREEZE      1 << 21
+#define PLR_THIEF       1 << 22
+#define PLR_KILLER      1 << 23
 
 /*
  * Channel bits.
  */
-#define CHANNEL_AUCTION           1
-#define CHANNEL_CHAT              2
-#define CHANNEL_HACKER            4
-#define CHANNEL_IMMTALK           8
-#define CHANNEL_MUSIC            16
-#define CHANNEL_QUESTION         32
-#define CHANNEL_SHOUT            64
-#define CHANNEL_YELL            128
+#define CHANNEL_AUCTION    1 << 0
+#define CHANNEL_CHAT       1 << 1
+#define CHANNEL_HACKER     1 << 2
+#define CHANNEL_IMMTALK    1 << 3
+#define CHANNEL_MUSIC      1 << 4
+#define CHANNEL_QUESTION   1 << 5
+#define CHANNEL_SHOUT      1 << 6
+#define CHANNEL_YELL       1 << 7
 
 #define ERROR_PROG        -1
 #define IN_FILE_PROG       0
-#define ACT_PROG           1
-#define SPEECH_PROG        2
-#define RAND_PROG          4
-#define FIGHT_PROG         8
-#define DEATH_PROG        16
-#define HITPRCNT_PROG     32
-#define ENTRY_PROG        64
-#define GREET_PROG       128
-#define ALL_GREET_PROG   256
-#define GIVE_PROG        512
-#define BRIBE_PROG      1024
+
+#define ACT_PROG        1 << 0
+#define SPEECH_PROG     1 << 1
+#define RAND_PROG       1 << 2
+#define FIGHT_PROG      1 << 3
+#define DEATH_PROG      1 << 4
+#define HITPRCNT_PROG   1 << 5
+#define ENTRY_PROG      1 << 6
+#define GREET_PROG      1 << 7
+#define ALL_GREET_PROG  1 << 8
+#define GIVE_PROG       1 << 9
+#define BRIBE_PROG      1 << 10
 
 /*
  * Liquids.
  */
-#define LIQ_WATER        0
+#define LIQ_WATER    0
 #define LIQ_MAX     16
 
 #define MAX_TRADE    5
@@ -981,11 +895,8 @@ typedef bool SPEC_FUN (Character * ch);
 /*
  *  Target types.
  */
-#define TAR_IGNORE          0
-#define TAR_CHAR_OFFENSIVE      1
-#define TAR_CHAR_DEFENSIVE      2
-#define TAR_CHAR_SELF           3
-#define TAR_OBJ_INV         4
+enum {TAR_IGNORE, TAR_CHAR_OFFENSIVE,
+  TAR_CHAR_DEFENSIVE, TAR_CHAR_SELF, TAR_OBJ_INV};
 
 /*
  * Data files used by the server.
@@ -1011,13 +922,6 @@ typedef bool SPEC_FUN (Character * ch);
 #define SHUTDOWN_FILE   "shutdown.txt"  /* For 'shutdown'       */
 
 /*
- * Command logging types.
- */
-#define LOG_NORMAL  0
-#define LOG_ALWAYS  1
-#define LOG_NEVER   2
-
-/*
  * God Levels
  */
 #define L_GOD       MAX_LEVEL
@@ -1026,10 +930,7 @@ typedef bool SPEC_FUN (Character * ch);
 #define L_ANG       L_DEI - 1
 #define L_HER       L_ANG - 1
 
-#define CLASS_MAGE       0
-#define CLASS_CLERIC     1
-#define CLASS_THIEF      2
-#define CLASS_WARRIOR    3
+enum {CLASS_MAGE, CLASS_CLERIC, CLASS_THIEF, CLASS_WARRIOR, CLASS_MAX};
 
 /*
  * Utility macros.
@@ -1123,11 +1024,6 @@ std::string help_greeting;
  */
 std::string target_name;
 
-/*
- * Log-all switch.
- */
-bool fLogAll = false;
-
 bool fBootDb;
 std::ifstream * fpArea;
 std::string strArea;
@@ -1166,7 +1062,6 @@ sh_int gsn_invis;
 sh_int gsn_mass_invis;
 sh_int gsn_poison;
 sh_int gsn_sleep;
-
 
 const std::string dir_name[] = {
   "north", "east", "south", "west", "up", "down"
@@ -1213,218 +1108,6 @@ const std::string where_name[] = {
   "<held>              "
 };
 
-
-/*
- * All the posing stuff.
- */
-const struct pose_table_type {
-  const char * message[2 * MAX_CLASS];
-} pose_table[] = {
-  {
-      {
-          "You sizzle with energy.",
-          "$n sizzles with energy.",
-          "You feel very holy.",
-          "$n looks very holy.",
-          "You perform a small card trick.",
-          "$n performs a small card trick.",
-          "You show your bulging muscles.",
-        "$n shows $s bulging muscles."}
-    },
-
-  {
-      {
-          "You turn into a butterfly, then return to your normal shape.",
-          "$n turns into a butterfly, then returns to $s normal shape.",
-          "You nonchalantly turn wine into water.",
-          "$n nonchalantly turns wine into water.",
-          "You wiggle your ears alternately.",
-          "$n wiggles $s ears alternately.",
-          "You crack nuts between your fingers.",
-        "$n cracks nuts between $s fingers."}
-    },
-
-  {
-      {
-          "Blue sparks fly from your fingers.",
-          "Blue sparks fly from $n's fingers.",
-          "A halo appears over your head.",
-          "A halo appears over $n's head.",
-          "You nimbly tie yourself into a knot.",
-          "$n nimbly ties $mself into a knot.",
-          "You grizzle your teeth and look mean.",
-        "$n grizzles $s teeth and looks mean."}
-    },
-
-  {
-      {
-          "Little red lights dance in your eyes.",
-          "Little red lights dance in $n's eyes.",
-          "You recite words of wisdom.",
-          "$n recites words of wisdom.",
-          "You juggle with daggers, apples, and eyeballs.",
-          "$n juggles with daggers, apples, and eyeballs.",
-          "You hit your head, and your eyes roll.",
-        "$n hits $s head, and $s eyes roll."}
-    },
-
-  {
-      {
-          "A slimy green monster appears before you and bows.",
-          "A slimy green monster appears before $n and bows.",
-          "Deep in prayer, you levitate.",
-          "Deep in prayer, $n levitates.",
-          "You steal the underwear off every person in the room.",
-          "Your underwear is gone!  $n stole it!",
-          "Crunch, crunch -- you munch a bottle.",
-        "Crunch, crunch -- $n munches a bottle."}
-    },
-
-  {
-      {
-          "You turn everybody into a little pink elephant.",
-          "You are turned into a little pink elephant by $n.",
-          "An angel consults you.",
-          "An angel consults $n.",
-          "The dice roll ... and you win again.",
-          "The dice roll ... and $n wins again.",
-          "... 98, 99, 100 ... you do pushups.",
-        "... 98, 99, 100 ... $n does pushups."}
-    },
-
-  {
-      {
-          "A small ball of light dances on your fingertips.",
-          "A small ball of light dances on $n's fingertips.",
-          "Your body glows with an unearthly light.",
-          "$n's body glows with an unearthly light.",
-          "You count the money in everyone's pockets.",
-          "Check your money, $n is counting it.",
-          "Arnold Schwarzenegger admires your physique.",
-        "Arnold Schwarzenegger admires $n's physique."}
-    },
-
-  {
-      {
-          "Smoke and fumes leak from your nostrils.",
-          "Smoke and fumes leak from $n's nostrils.",
-          "A spot light hits you.",
-          "A spot light hits $n.",
-          "You balance a pocket knife on your tongue.",
-          "$n balances a pocket knife on your tongue.",
-          "Watch your feet, you are juggling granite boulders.",
-        "Watch your feet, $n is juggling granite boulders."}
-    },
-
-  {
-      {
-          "The light flickers as you rap in magical languages.",
-          "The light flickers as $n raps in magical languages.",
-          "Everyone levitates as you pray.",
-          "You levitate as $n prays.",
-          "You produce a coin from everyone's ear.",
-          "$n produces a coin from your ear.",
-          "Oomph!  You squeeze water out of a granite boulder.",
-        "Oomph!  $n squeezes water out of a granite boulder."}
-    },
-
-  {
-      {
-          "Your head disappears.",
-          "$n's head disappears.",
-          "A cool breeze refreshes you.",
-          "A cool breeze refreshes $n.",
-          "You step behind your shadow.",
-          "$n steps behind $s shadow.",
-          "You pick your teeth with a spear.",
-        "$n picks $s teeth with a spear."}
-    },
-
-  {
-      {
-          "A fire elemental singes your hair.",
-          "A fire elemental singes $n's hair.",
-          "The sun pierces through the clouds to illuminate you.",
-          "The sun pierces through the clouds to illuminate $n.",
-          "Your eyes dance with greed.",
-          "$n's eyes dance with greed.",
-          "Everyone is swept off their foot by your hug.",
-        "You are swept off your feet by $n's hug."}
-    },
-
-  {
-      {
-          "The sky changes color to match your eyes.",
-          "The sky changes color to match $n's eyes.",
-          "The ocean parts before you.",
-          "The ocean parts before $n.",
-          "You deftly steal everyone's weapon.",
-          "$n deftly steals your weapon.",
-          "Your karate chop splits a tree.",
-        "$n's karate chop splits a tree."}
-    },
-
-  {
-      {
-          "The stones dance to your command.",
-          "The stones dance to $n's command.",
-          "A thunder cloud kneels to you.",
-          "A thunder cloud kneels to $n.",
-          "The Grey Mouser buys you a beer.",
-          "The Grey Mouser buys $n a beer.",
-          "A strap of your armor breaks over your mighty thews.",
-        "A strap of $n's armor breaks over $s mighty thews."}
-    },
-
-  {
-      {
-          "The heavens and grass change colour as you smile.",
-          "The heavens and grass change colour as $n smiles.",
-          "The Burning Man speaks to you.",
-          "The Burning Man speaks to $n.",
-          "Everyone's pocket explodes with your fireworks.",
-          "Your pocket explodes with $n's fireworks.",
-          "A boulder cracks at your frown.",
-        "A boulder cracks at $n's frown."}
-    },
-
-  {
-      {
-          "Everyone's clothes are transparent, and you are laughing.",
-          "Your clothes are transparent, and $n is laughing.",
-          "An eye in a pyramid winks at you.",
-          "An eye in a pyramid winks at $n.",
-          "Everyone discovers your dagger a centimeter from their eye.",
-          "You discover $n's dagger a centimeter from your eye.",
-          "Mercenaries arrive to do your bidding.",
-        "Mercenaries arrive to do $n's bidding."}
-    },
-
-  {
-      {
-          "A black hole swallows you.",
-          "A black hole swallows $n.",
-          "Valentine Michael Smith offers you a glass of water.",
-          "Valentine Michael Smith offers $n a glass of water.",
-          "Where did you go?",
-          "Where did $n go?",
-          "Four matched Percherons bring in your chariot.",
-        "Four matched Percherons bring in $n's chariot."}
-    },
-
-  {
-      {
-          "The world shimmers in time with your whistling.",
-          "The world shimmers in time with $n's whistling.",
-          "The great god Mota gives you a staff.",
-          "The great god Mota gives $n a staff.",
-          "Click.",
-          "Click.",
-          "Atlas asks you to relieve him.",
-        "Atlas asks $n to relieve him."}
-    }
-};
-
 /*
  * Class table.
  */
@@ -1439,29 +1122,21 @@ const struct class_type {
   sh_int hp_min;                /* Min hp gained on leveling    */
   sh_int hp_max;                /* Max hp gained on leveling    */
   bool fMana;                   /* Class gains mana on level    */
-} class_table[MAX_CLASS] = {
-  {
-      "Mag", APPLY_INT, OBJ_VNUM_SCHOOL_DAGGER,
+} class_table[CLASS_MAX] = {
+  { "Mag", APPLY_INT, OBJ_VNUM_SCHOOL_DAGGER,
     3018, 95, 18, 10, 6, 8, true},
-
-  {
-      "Cle", APPLY_WIS, OBJ_VNUM_SCHOOL_MACE,
+  { "Cle", APPLY_WIS, OBJ_VNUM_SCHOOL_MACE,
     3003, 95, 18, 12, 7, 10, true},
-
-  {
-      "Thi", APPLY_DEX, OBJ_VNUM_SCHOOL_DAGGER,
+  { "Thi", APPLY_DEX, OBJ_VNUM_SCHOOL_DAGGER,
     3028, 85, 18, 8, 8, 13, false},
-
-  {
-      "War", APPLY_STR, OBJ_VNUM_SCHOOL_SWORD,
+  { "War", APPLY_STR, OBJ_VNUM_SCHOOL_SWORD,
     3022, 85, 18, 6, 11, 15, false}
 };
-
 
 /*
  * Titles.
  */
-char *const title_table[MAX_CLASS][MAX_LEVEL + 1][2] = {
+char *const title_table[CLASS_MAX][MAX_LEVEL + 1][2] = {
   {
       {"Man", "Woman"},
 
@@ -1671,7 +1346,6 @@ char *const title_table[MAX_CLASS][MAX_LEVEL + 1][2] = {
     }
 };
 
-
 /*
  * Attribute bonus structures.
  */
@@ -1712,126 +1386,42 @@ const struct str_app_type {
 const struct int_app_type {
   sh_int learn;
 } int_app[26] = {
-  {3},                          /*  0 */
-  {5},                          /*  1 */
-  {7},
-  {8},                          /*  3 */
-  {9},
-  {10},                         /*  5 */
-  {11},
-  {12},
-  {13},
-  {15},
-  {17},                         /* 10 */
-  {19},
-  {22},
-  {25},
-  {28},
-  {31},                         /* 15 */
-  {34},
-  {37},
-  {40},                         /* 18 */
-  {44},
-  {49},                         /* 20 */
-  {55},
-  {60},
-  {70},
-  {85},
-  {99}                          /* 25 */
+  {3}, {5}, {7}, {8}, {9}, {10},      /*  5 */
+  {11}, {12}, {13}, {15}, {17},       /* 10 */
+  {19}, {22}, {25}, {28}, {31},       /* 15 */
+  {34}, {37}, {40}, {44}, {49},       /* 20 */
+  {55}, {60}, {70}, {85}, {99}        /* 25 */
 };
 
 const struct wis_app_type {
   sh_int practice;
 } wis_app[26] = {
-  {0},                          /*  0 */
-  {0},                          /*  1 */
-  {0},
-  {0},                          /*  3 */
-  {0},
-  {1},                          /*  5 */
-  {1},
-  {1},
-  {1},
-  {2},
-  {2},                          /* 10 */
-  {2},
-  {2},
-  {2},
-  {2},
-  {3},                          /* 15 */
-  {3},
-  {4},
-  {4},                          /* 18 */
-  {5},
-  {5},                          /* 20 */
-  {6},
-  {7},
-  {7},
-  {7},
-  {8}                           /* 25 */
+  {0}, {0}, {0}, {0}, {0}, {1},       /*  5 */
+  {1}, {1}, {1}, {2}, {2},            /* 10 */
+  {2}, {2}, {2}, {2}, {3},            /* 15 */
+  {3}, {4}, {4}, {5}, {5},            /* 20 */
+  {6}, {7}, {7}, {7}, {8}             /* 25 */
 };
 
 const struct dex_app_type {
   sh_int defensive;
 } dex_app[26] = {
-  {60},                         /* 0 */
-  {50},                         /* 1 */
-  {50},
-  {40},
-  {30},
-  {20},                         /* 5 */
-  {10},
-  {0},
-  {0},
-  {0},
-  {0},                          /* 10 */
-  {0},
-  {0},
-  {0},
-  {0},
-  {-10},                        /* 15 */
-  {-15},
-  {-20},
-  {-30},
-  {-40},
-  {-50},                        /* 20 */
-  {-65},
-  {-75},
-  {-90},
-  {-105},
-  {-120}                        /* 25 */
+  {60}, {50}, {50}, {40}, {30}, {20}, /* 5 */
+  {10}, {0}, {0}, {0}, {0},           /* 10 */
+  {0}, {0}, {0}, {0}, {-10},          /* 15 */
+  {-15}, {-20}, {-30}, {-40}, {-50},  /* 20 */
+  {-65}, {-75}, {-90}, {-105}, {-120} /* 25 */
 };
 
 const struct con_app_type {
   sh_int hitp;
   sh_int shock;
 } con_app[26] = {
-  {-4, 20},                     /*  0 */
-  {-3, 25},                     /*  1 */
-  {-2, 30},
-  {-2, 35},                     /*  3 */
-  {-1, 40},
-  {-1, 45},                     /*  5 */
-  {-1, 50},
-  {0, 55},
-  {0, 60},
-  {0, 65},
-  {0, 70},                      /* 10 */
-  {0, 75},
-  {0, 80},
-  {0, 85},
-  {0, 88},
-  {1, 90},                      /* 15 */
-  {2, 95},
-  {2, 97},
-  {3, 99},                      /* 18 */
-  {3, 99},
-  {4, 99},                      /* 20 */
-  {4, 99},
-  {5, 99},
-  {6, 99},
-  {7, 99},
-  {8, 99}                       /* 25 */
+  {-4, 20}, {-3, 25}, {-2, 30}, {-2, 35}, {-1, 40}, {-1, 45}, /*  5 */
+  {-1, 50}, {0, 55}, {0, 60}, {0, 65}, {0, 70},               /* 10 */
+  {0, 75}, {0, 80}, {0, 85}, {0, 88}, {1, 90},                /* 15 */
+  {2, 95}, {2, 97}, {3, 99}, {3, 99}, {4, 99},                /* 20 */
+  {4, 99}, {5, 99}, {6, 99}, {7, 99}, {8, 99}                 /* 25 */
 };
 
 /*
@@ -1863,7 +1453,6 @@ const struct liq_type {
 
   {"cola", "cherry", {0, 1, 5}} /* 15 */
 };
-
 
 /*
  * The social table.
@@ -2841,13 +2430,11 @@ public:
 
 };
 
-
 /*
  * Descriptor (channel) structure.
  */
 class Descriptor {
 public:
-  Descriptor *snoop_by;
   Character *character;
   Character *original;
   std::string host;
@@ -2863,7 +2450,7 @@ public:
   std::string outbuf;
 
   Descriptor(SOCKET desc) :
-    snoop_by(NULL), character(NULL), original(NULL),
+    character(NULL), original(NULL),
     descriptor(desc), connected(CON_GET_NAME), fcommand(false),
     repeat(0), showstr_head(NULL), showstr_point(NULL) {
     memset(inbuf, 0, sizeof inbuf);
@@ -2994,7 +2581,6 @@ public:
 
 };
 
-
 /*
  * Exit data.
  */
@@ -3102,7 +2688,6 @@ public:
 
 int Room::top_room = 0;
 
-
 /*
  * Prototype for an object.
  */
@@ -3189,7 +2774,6 @@ public:
 
 };
 
-
 /*
  * Prototype for a mob.
  * This is the in-memory version of #MOBILES.
@@ -3211,23 +2795,13 @@ public:
   int actflags;
   int affected_by;
   sh_int alignment;
-  sh_int hitroll;               /* Unused */
-  sh_int ac;                    /* Unused */
-  sh_int hitnodice;             /* Unused */
-  sh_int hitsizedice;           /* Unused */
-  sh_int hitplus;               /* Unused */
-  sh_int damnodice;             /* Unused */
-  sh_int damsizedice;           /* Unused */
-  sh_int damplus;               /* Unused */
-  int gold;                     /* Unused */
   MobProgram *mobprogs;         /* Used by MOBprogram */
   int progtypes;                /* Used by MOBprogram */
 
   MobPrototype() :
     spec_fun(NULL), pShop(NULL), vnum(0), count(0), killed(0),
-    sex(0), level(0), actflags(0), affected_by(0), alignment(0), hitroll(0),
-    ac(0), hitnodice(0), hitsizedice(0), hitplus(0), damnodice(0),
-    damsizedice(0), damplus(0), gold(0), mobprogs(NULL), progtypes(0) {
+    sex(0), level(0), actflags(0), affected_by(0), alignment(0),
+    mobprogs(NULL), progtypes(0) {
     top_mob++;
   }
 
@@ -3369,7 +2943,6 @@ public:
     return;
   }
 
-
   void do_areas(std::string argument);
   void do_memory(std::string argument);
   void do_kill(std::string argument);
@@ -3396,7 +2969,6 @@ public:
   void do_tell(std::string argument);
   void do_reply(std::string argument);
   void do_emote(std::string argument);
-  void do_pose(std::string argument);
   void do_bug(std::string argument);
   void do_idea(std::string argument);
   void do_typo(std::string argument);
@@ -3505,7 +3077,6 @@ public:
   void do_reboot(std::string argument);
   void do_shutdow(std::string argument);
   void do_shutdown(std::string argument);
-  void do_snoop(std::string argument);
   void do_switch(std::string argument);
   void do_return(std::string argument);
   void do_mload(std::string argument);
@@ -3515,7 +3086,6 @@ public:
   void do_trust(std::string argument);
   void do_restore(std::string argument);
   void do_freeze(std::string argument);
-  void do_log(std::string argument);
   void do_noemote(std::string argument);
   void do_notell(std::string argument);
   void do_silence(std::string argument);
@@ -3727,7 +3297,6 @@ public:
 
 int ExtraDescription::top_ed = 0;
 
-
 /*
  * Command table.
  */
@@ -3738,250 +3307,243 @@ const struct cmd_type {
   cmdfun_T do_fun;
   sh_int position;
   sh_int level;
-  sh_int log;
 } cmd_table[] = {
   /*
    * Common movement commands.
    */
-  {"north", &Character::do_north, POS_STANDING, 0, LOG_NORMAL},
-  {"east", &Character::do_east, POS_STANDING, 0, LOG_NORMAL},
-  {"south", &Character::do_south, POS_STANDING, 0, LOG_NORMAL},
-  {"west", &Character::do_west, POS_STANDING, 0, LOG_NORMAL},
-  {"up", &Character::do_up, POS_STANDING, 0, LOG_NORMAL},
-  {"down", &Character::do_down, POS_STANDING, 0, LOG_NORMAL},
+  {"north", &Character::do_north, POS_STANDING, 0},
+  {"east", &Character::do_east, POS_STANDING, 0},
+  {"south", &Character::do_south, POS_STANDING, 0},
+  {"west", &Character::do_west, POS_STANDING, 0},
+  {"up", &Character::do_up, POS_STANDING, 0},
+  {"down", &Character::do_down, POS_STANDING, 0},
 
   /*
    * Common other commands.
    * Placed here so one and two letter abbreviations work.
    */
-  {"buy", &Character::do_buy, POS_RESTING, 0, LOG_NORMAL},
-  {"cast", &Character::do_cast, POS_FIGHTING, 0, LOG_NORMAL},
-  {"exits", &Character::do_exits, POS_RESTING, 0, LOG_NORMAL},
-  {"get", &Character::do_get, POS_RESTING, 0, LOG_NORMAL},
-  {"inventory", &Character::do_inventory, POS_DEAD, 0, LOG_NORMAL},
-  {"kill", &Character::do_kill, POS_FIGHTING, 0, LOG_NORMAL},
-  {"look", &Character::do_look, POS_RESTING, 0, LOG_NORMAL},
-  {"order", &Character::do_order, POS_RESTING, 0, LOG_ALWAYS},
-  {"rest", &Character::do_rest, POS_RESTING, 0, LOG_NORMAL},
-  {"sleep", &Character::do_sleep, POS_SLEEPING, 0, LOG_NORMAL},
-  {"stand", &Character::do_stand, POS_SLEEPING, 0, LOG_NORMAL},
-  {"tell", &Character::do_tell, POS_RESTING, 0, LOG_NORMAL},
-  {"wield", &Character::do_wear, POS_RESTING, 0, LOG_NORMAL},
-  {"wizhelp", &Character::do_wizhelp, POS_DEAD, L_HER, LOG_NORMAL},
+  {"buy", &Character::do_buy, POS_RESTING, 0},
+  {"cast", &Character::do_cast, POS_FIGHTING, 0},
+  {"exits", &Character::do_exits, POS_RESTING, 0},
+  {"get", &Character::do_get, POS_RESTING, 0},
+  {"inventory", &Character::do_inventory, POS_DEAD, 0},
+  {"kill", &Character::do_kill, POS_FIGHTING, 0},
+  {"look", &Character::do_look, POS_RESTING, 0},
+  {"order", &Character::do_order, POS_RESTING, 0},
+  {"rest", &Character::do_rest, POS_RESTING, 0},
+  {"sleep", &Character::do_sleep, POS_SLEEPING, 0},
+  {"stand", &Character::do_stand, POS_SLEEPING, 0},
+  {"tell", &Character::do_tell, POS_RESTING, 0},
+  {"wield", &Character::do_wear, POS_RESTING, 0},
+  {"wizhelp", &Character::do_wizhelp, POS_DEAD, L_HER},
 
   /*
    * Informational commands.
    */
-  {"areas", &Character::do_areas, POS_DEAD, 0, LOG_NORMAL},
-  {"bug", &Character::do_bug, POS_DEAD, 0, LOG_NORMAL},
-  {"commands", &Character::do_commands, POS_DEAD, 0, LOG_NORMAL},
-  {"compare", &Character::do_compare, POS_RESTING, 0, LOG_NORMAL},
-  {"consider", &Character::do_consider, POS_RESTING, 0, LOG_NORMAL},
-  {"credits", &Character::do_credits, POS_DEAD, 0, LOG_NORMAL},
-  {"equipment", &Character::do_equipment, POS_DEAD, 0, LOG_NORMAL},
-  {"examine", &Character::do_examine, POS_RESTING, 0, LOG_NORMAL},
-  {"help", &Character::do_help, POS_DEAD, 0, LOG_NORMAL},
-  {"idea", &Character::do_idea, POS_DEAD, 0, LOG_NORMAL},
-  {"report", &Character::do_report, POS_DEAD, 0, LOG_NORMAL},
-  {"pagelength", &Character::do_pagelen, POS_DEAD, 0, LOG_NORMAL},
-  {"score", &Character::do_score, POS_DEAD, 0, LOG_NORMAL},
-  {"slist", &Character::do_slist, POS_DEAD, 0, LOG_NORMAL},
-  {"socials", &Character::do_socials, POS_DEAD, 0, LOG_NORMAL},
-  {"time", &Character::do_time, POS_DEAD, 0, LOG_NORMAL},
-  {"typo", &Character::do_typo, POS_DEAD, 0, LOG_NORMAL},
-  {"weather", &Character::do_weather, POS_RESTING, 0, LOG_NORMAL},
-  {"who", &Character::do_who, POS_DEAD, 0, LOG_NORMAL},
-  {"wizlist", &Character::do_wizlist, POS_DEAD, 0, LOG_NORMAL},
+  {"areas", &Character::do_areas, POS_DEAD, 0},
+  {"bug", &Character::do_bug, POS_DEAD, 0},
+  {"commands", &Character::do_commands, POS_DEAD, 0},
+  {"compare", &Character::do_compare, POS_RESTING, 0},
+  {"consider", &Character::do_consider, POS_RESTING, 0},
+  {"credits", &Character::do_credits, POS_DEAD, 0},
+  {"equipment", &Character::do_equipment, POS_DEAD, 0},
+  {"examine", &Character::do_examine, POS_RESTING, 0},
+  {"help", &Character::do_help, POS_DEAD, 0},
+  {"idea", &Character::do_idea, POS_DEAD, 0},
+  {"report", &Character::do_report, POS_DEAD, 0},
+  {"pagelength", &Character::do_pagelen, POS_DEAD, 0},
+  {"score", &Character::do_score, POS_DEAD, 0},
+  {"slist", &Character::do_slist, POS_DEAD, 0},
+  {"socials", &Character::do_socials, POS_DEAD, 0},
+  {"time", &Character::do_time, POS_DEAD, 0},
+  {"typo", &Character::do_typo, POS_DEAD, 0},
+  {"weather", &Character::do_weather, POS_RESTING, 0},
+  {"who", &Character::do_who, POS_DEAD, 0},
+  {"wizlist", &Character::do_wizlist, POS_DEAD, 0},
 
   /*
    * Configuration commands.
    */
-  {"auto", &Character::do_auto, POS_DEAD, 0, LOG_NORMAL},
-  {"autoexit", &Character::do_autoexit, POS_DEAD, 0, LOG_NORMAL},
-  {"autoloot", &Character::do_autoloot, POS_DEAD, 0, LOG_NORMAL},
-  {"autosac", &Character::do_autosac, POS_DEAD, 0, LOG_NORMAL},
-  {"blank", &Character::do_blank, POS_DEAD, 0, LOG_NORMAL},
-  {"brief", &Character::do_brief, POS_DEAD, 0, LOG_NORMAL},
-  {"channels", &Character::do_channels, POS_DEAD, 0, LOG_NORMAL},
-  {"combine", &Character::do_combine, POS_DEAD, 0, LOG_NORMAL},
-  {"config", &Character::do_config, POS_DEAD, 0, LOG_NORMAL},
-  {"description", &Character::do_description, POS_DEAD, 0, LOG_NORMAL},
-  {"password", &Character::do_password, POS_DEAD, 0, LOG_NEVER},
-  {"prompt", &Character::do_prompt, POS_DEAD, 0, LOG_NORMAL},
-  {"title", &Character::do_title, POS_DEAD, 0, LOG_NORMAL},
-  {"wimpy", &Character::do_wimpy, POS_DEAD, 0, LOG_NORMAL},
+  {"auto", &Character::do_auto, POS_DEAD, 0},
+  {"autoexit", &Character::do_autoexit, POS_DEAD, 0},
+  {"autoloot", &Character::do_autoloot, POS_DEAD, 0},
+  {"autosac", &Character::do_autosac, POS_DEAD, 0},
+  {"blank", &Character::do_blank, POS_DEAD, 0},
+  {"brief", &Character::do_brief, POS_DEAD, 0},
+  {"channels", &Character::do_channels, POS_DEAD, 0},
+  {"combine", &Character::do_combine, POS_DEAD, 0},
+  {"config", &Character::do_config, POS_DEAD, 0},
+  {"description", &Character::do_description, POS_DEAD, 0},
+  {"password", &Character::do_password, POS_DEAD, 0},
+  {"prompt", &Character::do_prompt, POS_DEAD, 0},
+  {"title", &Character::do_title, POS_DEAD, 0},
+  {"wimpy", &Character::do_wimpy, POS_DEAD, 0},
 
   /*
    * Communication commands.
    */
-  {"answer", &Character::do_answer, POS_SLEEPING, 0, LOG_NORMAL},
-  {"auction", &Character::do_auction, POS_SLEEPING, 0, LOG_NORMAL},
-  {"chat", &Character::do_chat, POS_SLEEPING, 0, LOG_NORMAL},
-  {".", &Character::do_chat, POS_SLEEPING, 0, LOG_NORMAL},
-  {"emote", &Character::do_emote, POS_RESTING, 0, LOG_NORMAL},
-  {",", &Character::do_emote, POS_RESTING, 0, LOG_NORMAL},
-  {"gtell", &Character::do_gtell, POS_DEAD, 0, LOG_NORMAL},
-  {";", &Character::do_gtell, POS_DEAD, 0, LOG_NORMAL},
-  {"music", &Character::do_music, POS_SLEEPING, 0, LOG_NORMAL},
-  {"note", &Character::do_note, POS_SLEEPING, 0, LOG_NORMAL},
-  {"pose", &Character::do_pose, POS_RESTING, 0, LOG_NORMAL},
-  {"question", &Character::do_question, POS_SLEEPING, 0, LOG_NORMAL},
-  {"reply", &Character::do_reply, POS_RESTING, 0, LOG_NORMAL},
-  {"say", &Character::do_say, POS_RESTING, 0, LOG_NORMAL},
-  {"'", &Character::do_say, POS_RESTING, 0, LOG_NORMAL},
-  {"shout", &Character::do_shout, POS_RESTING, 3, LOG_NORMAL},
-  {"yell", &Character::do_yell, POS_RESTING, 0, LOG_NORMAL},
+  {"answer", &Character::do_answer, POS_SLEEPING, 0},
+  {"auction", &Character::do_auction, POS_SLEEPING, 0},
+  {"chat", &Character::do_chat, POS_SLEEPING, 0},
+  {".", &Character::do_chat, POS_SLEEPING, 0},
+  {"emote", &Character::do_emote, POS_RESTING, 0},
+  {",", &Character::do_emote, POS_RESTING, 0},
+  {"gtell", &Character::do_gtell, POS_DEAD, 0},
+  {";", &Character::do_gtell, POS_DEAD, 0},
+  {"music", &Character::do_music, POS_SLEEPING, 0},
+  {"note", &Character::do_note, POS_SLEEPING, 0},
+  {"question", &Character::do_question, POS_SLEEPING, 0},
+  {"reply", &Character::do_reply, POS_RESTING, 0},
+  {"say", &Character::do_say, POS_RESTING, 0},
+  {"'", &Character::do_say, POS_RESTING, 0},
+  {"shout", &Character::do_shout, POS_RESTING, 3},
+  {"yell", &Character::do_yell, POS_RESTING, 0},
 
   /*
    * Object manipulation commands.
    */
-  {"brandish", &Character::do_brandish, POS_RESTING, 0, LOG_NORMAL},
-  {"close", &Character::do_close, POS_RESTING, 0, LOG_NORMAL},
-  {"drink", &Character::do_drink, POS_RESTING, 0, LOG_NORMAL},
-  {"drop", &Character::do_drop, POS_RESTING, 0, LOG_NORMAL},
-  {"eat", &Character::do_eat, POS_RESTING, 0, LOG_NORMAL},
-  {"fill", &Character::do_fill, POS_RESTING, 0, LOG_NORMAL},
-  {"give", &Character::do_give, POS_RESTING, 0, LOG_NORMAL},
-  {"hold", &Character::do_wear, POS_RESTING, 0, LOG_NORMAL},
-  {"list", &Character::do_list, POS_RESTING, 0, LOG_NORMAL},
-  {"lock", &Character::do_lock, POS_RESTING, 0, LOG_NORMAL},
-  {"open", &Character::do_open, POS_RESTING, 0, LOG_NORMAL},
-  {"pick", &Character::do_pick, POS_RESTING, 0, LOG_NORMAL},
-  {"put", &Character::do_put, POS_RESTING, 0, LOG_NORMAL},
-  {"quaff", &Character::do_quaff, POS_RESTING, 0, LOG_NORMAL},
-  {"recite", &Character::do_recite, POS_RESTING, 0, LOG_NORMAL},
-  {"remove", &Character::do_remove, POS_RESTING, 0, LOG_NORMAL},
-  {"sell", &Character::do_sell, POS_RESTING, 0, LOG_NORMAL},
-  {"take", &Character::do_get, POS_RESTING, 0, LOG_NORMAL},
-  {"sacrifice", &Character::do_sacrifice, POS_RESTING, 0, LOG_NORMAL},
-  {"unlock", &Character::do_unlock, POS_RESTING, 0, LOG_NORMAL},
-  {"value", &Character::do_value, POS_RESTING, 0, LOG_NORMAL},
-  {"wear", &Character::do_wear, POS_RESTING, 0, LOG_NORMAL},
-  {"zap", &Character::do_zap, POS_RESTING, 0, LOG_NORMAL},
+  {"brandish", &Character::do_brandish, POS_RESTING, 0},
+  {"close", &Character::do_close, POS_RESTING, 0},
+  {"drink", &Character::do_drink, POS_RESTING, 0},
+  {"drop", &Character::do_drop, POS_RESTING, 0},
+  {"eat", &Character::do_eat, POS_RESTING, 0},
+  {"fill", &Character::do_fill, POS_RESTING, 0},
+  {"give", &Character::do_give, POS_RESTING, 0},
+  {"hold", &Character::do_wear, POS_RESTING, 0},
+  {"list", &Character::do_list, POS_RESTING, 0},
+  {"lock", &Character::do_lock, POS_RESTING, 0},
+  {"open", &Character::do_open, POS_RESTING, 0},
+  {"pick", &Character::do_pick, POS_RESTING, 0},
+  {"put", &Character::do_put, POS_RESTING, 0},
+  {"quaff", &Character::do_quaff, POS_RESTING, 0},
+  {"recite", &Character::do_recite, POS_RESTING, 0},
+  {"remove", &Character::do_remove, POS_RESTING, 0},
+  {"sell", &Character::do_sell, POS_RESTING, 0},
+  {"take", &Character::do_get, POS_RESTING, 0},
+  {"sacrifice", &Character::do_sacrifice, POS_RESTING, 0},
+  {"unlock", &Character::do_unlock, POS_RESTING, 0},
+  {"value", &Character::do_value, POS_RESTING, 0},
+  {"wear", &Character::do_wear, POS_RESTING, 0},
+  {"zap", &Character::do_zap, POS_RESTING, 0},
 
   /*
    * Combat commands.
    */
-  {"backstab", &Character::do_backstab, POS_STANDING, 0, LOG_NORMAL},
-  {"bs", &Character::do_backstab, POS_STANDING, 0, LOG_NORMAL},
-  {"disarm", &Character::do_disarm, POS_FIGHTING, 0, LOG_NORMAL},
-  {"flee", &Character::do_flee, POS_FIGHTING, 0, LOG_NORMAL},
-  {"kick", &Character::do_kick, POS_FIGHTING, 0, LOG_NORMAL},
-  {"murde", &Character::do_murde, POS_FIGHTING, 5, LOG_NORMAL},
-  {"murder", &Character::do_murder, POS_FIGHTING, 5, LOG_ALWAYS},
-  {"rescue", &Character::do_rescue, POS_FIGHTING, 0, LOG_NORMAL},
+  {"backstab", &Character::do_backstab, POS_STANDING, 0},
+  {"bs", &Character::do_backstab, POS_STANDING, 0},
+  {"disarm", &Character::do_disarm, POS_FIGHTING, 0},
+  {"flee", &Character::do_flee, POS_FIGHTING, 0},
+  {"kick", &Character::do_kick, POS_FIGHTING, 0},
+  {"murde", &Character::do_murde, POS_FIGHTING, 5},
+  {"murder", &Character::do_murder, POS_FIGHTING, 5},
+  {"rescue", &Character::do_rescue, POS_FIGHTING, 0},
 
   /*
    * Miscellaneous commands.
    */
-  {"follow", &Character::do_follow, POS_RESTING, 0, LOG_NORMAL},
-  {"group", &Character::do_group, POS_SLEEPING, 0, LOG_NORMAL},
-  {"hide", &Character::do_hide, POS_RESTING, 0, LOG_NORMAL},
-  {"practice", &Character::do_practice, POS_SLEEPING, 0, LOG_NORMAL},
-  {"qui", &Character::do_qui, POS_DEAD, 0, LOG_NORMAL},
-  {"quit", &Character::do_quit, POS_DEAD, 0, LOG_NORMAL},
-  {"recall", &Character::do_recall, POS_FIGHTING, 0, LOG_NORMAL},
-  {"/", &Character::do_recall, POS_FIGHTING, 0, LOG_NORMAL},
-  {"rent", &Character::do_rent, POS_DEAD, 0, LOG_NORMAL},
-  {"save", &Character::do_save, POS_DEAD, 0, LOG_NORMAL},
-  {"sleep", &Character::do_sleep, POS_SLEEPING, 0, LOG_NORMAL},
-  {"sneak", &Character::do_sneak, POS_STANDING, 0, LOG_NORMAL},
-  {"spells", &Character::do_spells, POS_SLEEPING, 0, LOG_NORMAL},
-  {"split", &Character::do_split, POS_RESTING, 0, LOG_NORMAL},
-  {"steal", &Character::do_steal, POS_STANDING, 0, LOG_NORMAL},
-  {"train", &Character::do_train, POS_RESTING, 0, LOG_NORMAL},
-  {"visible", &Character::do_visible, POS_SLEEPING, 0, LOG_NORMAL},
-  {"wake", &Character::do_wake, POS_SLEEPING, 0, LOG_NORMAL},
-  {"where", &Character::do_where, POS_RESTING, 0, LOG_NORMAL},
-
-
+  {"follow", &Character::do_follow, POS_RESTING, 0},
+  {"group", &Character::do_group, POS_SLEEPING, 0},
+  {"hide", &Character::do_hide, POS_RESTING, 0},
+  {"practice", &Character::do_practice, POS_SLEEPING, 0},
+  {"qui", &Character::do_qui, POS_DEAD, 0},
+  {"quit", &Character::do_quit, POS_DEAD, 0},
+  {"recall", &Character::do_recall, POS_FIGHTING, 0},
+  {"/", &Character::do_recall, POS_FIGHTING, 0},
+  {"rent", &Character::do_rent, POS_DEAD, 0},
+  {"save", &Character::do_save, POS_DEAD, 0},
+  {"sleep", &Character::do_sleep, POS_SLEEPING, 0},
+  {"sneak", &Character::do_sneak, POS_STANDING, 0},
+  {"spells", &Character::do_spells, POS_SLEEPING, 0},
+  {"split", &Character::do_split, POS_RESTING, 0},
+  {"steal", &Character::do_steal, POS_STANDING, 0},
+  {"train", &Character::do_train, POS_RESTING, 0},
+  {"visible", &Character::do_visible, POS_SLEEPING, 0},
+  {"wake", &Character::do_wake, POS_SLEEPING, 0},
+  {"where", &Character::do_where, POS_RESTING, 0},
 
   /*
    * Immortal commands.
    */
-  {"advance", &Character::do_advance, POS_DEAD, L_GOD, LOG_ALWAYS},
-  {"trust", &Character::do_trust, POS_DEAD, L_GOD, LOG_ALWAYS},
+  {"advance", &Character::do_advance, POS_DEAD, L_GOD},
+  {"trust", &Character::do_trust, POS_DEAD, L_GOD},
 
-  {"allow", &Character::do_allow, POS_DEAD, L_SUP, LOG_ALWAYS},
-  {"ban", &Character::do_ban, POS_DEAD, L_SUP, LOG_ALWAYS},
-  {"deny", &Character::do_deny, POS_DEAD, L_SUP, LOG_ALWAYS},
-  {"disconnect", &Character::do_disconnect, POS_DEAD, L_SUP, LOG_ALWAYS},
-  {"freeze", &Character::do_freeze, POS_DEAD, L_SUP, LOG_ALWAYS},
-  {"reboo", &Character::do_reboo, POS_DEAD, L_SUP, LOG_NORMAL},
-  {"reboot", &Character::do_reboot, POS_DEAD, L_SUP, LOG_ALWAYS},
-  {"shutdow", &Character::do_shutdow, POS_DEAD, L_SUP, LOG_NORMAL},
-  {"shutdown", &Character::do_shutdown, POS_DEAD, L_SUP, LOG_ALWAYS},
-  {"users", &Character::do_users, POS_DEAD, L_SUP, LOG_NORMAL},
-  {"wizify", &Character::do_wizify, POS_DEAD, L_SUP, LOG_ALWAYS},
-  {"wizlock", &Character::do_wizlock, POS_DEAD, L_SUP, LOG_ALWAYS},
+  {"allow", &Character::do_allow, POS_DEAD, L_SUP},
+  {"ban", &Character::do_ban, POS_DEAD, L_SUP},
+  {"deny", &Character::do_deny, POS_DEAD, L_SUP},
+  {"disconnect", &Character::do_disconnect, POS_DEAD, L_SUP},
+  {"freeze", &Character::do_freeze, POS_DEAD, L_SUP},
+  {"reboo", &Character::do_reboo, POS_DEAD, L_SUP},
+  {"reboot", &Character::do_reboot, POS_DEAD, L_SUP},
+  {"shutdow", &Character::do_shutdow, POS_DEAD, L_SUP},
+  {"shutdown", &Character::do_shutdown, POS_DEAD, L_SUP},
+  {"users", &Character::do_users, POS_DEAD, L_SUP},
+  {"wizify", &Character::do_wizify, POS_DEAD, L_SUP},
+  {"wizlock", &Character::do_wizlock, POS_DEAD, L_SUP},
 
-  {"force", &Character::do_force, POS_DEAD, L_DEI, LOG_ALWAYS},
-  {"log", &Character::do_log, POS_DEAD, L_DEI, LOG_ALWAYS},
-  {"mload", &Character::do_mload, POS_DEAD, L_DEI, LOG_ALWAYS},
-  {"mset", &Character::do_mset, POS_DEAD, L_DEI, LOG_ALWAYS},
-  {"noemote", &Character::do_noemote, POS_DEAD, L_DEI, LOG_NORMAL},
-  {"notell", &Character::do_notell, POS_DEAD, L_DEI, LOG_NORMAL},
-  {"oload", &Character::do_oload, POS_DEAD, L_DEI, LOG_ALWAYS},
-  {"oset", &Character::do_oset, POS_DEAD, L_DEI, LOG_ALWAYS},
-  {"owhere", &Character::do_owhere, POS_DEAD, L_DEI, LOG_NORMAL},
-  {"pardon", &Character::do_pardon, POS_DEAD, L_DEI, LOG_ALWAYS},
-  {"peace", &Character::do_peace, POS_DEAD, L_DEI, LOG_NORMAL},
-  {"purge", &Character::do_purge, POS_DEAD, L_DEI, LOG_NORMAL},
-  {"restore", &Character::do_restore, POS_DEAD, L_DEI, LOG_ALWAYS},
-  {"rset", &Character::do_rset, POS_DEAD, L_DEI, LOG_ALWAYS},
-  {"silence", &Character::do_silence, POS_DEAD, L_DEI, LOG_NORMAL},
-  {"sla", &Character::do_sla, POS_DEAD, L_DEI, LOG_NORMAL},
-  {"slay", &Character::do_slay, POS_DEAD, L_DEI, LOG_ALWAYS},
-  {"snoop", &Character::do_snoop, POS_DEAD, L_DEI, LOG_NORMAL},
-  {"sset", &Character::do_sset, POS_DEAD, L_DEI, LOG_ALWAYS},
-  {"transfer", &Character::do_transfer, POS_DEAD, L_DEI, LOG_ALWAYS},
-  {"mpstat", &Character::do_mpstat, POS_DEAD, L_DEI, LOG_NORMAL},
+  {"force", &Character::do_force, POS_DEAD, L_DEI},
+  {"mload", &Character::do_mload, POS_DEAD, L_DEI},
+  {"mset", &Character::do_mset, POS_DEAD, L_DEI},
+  {"noemote", &Character::do_noemote, POS_DEAD, L_DEI},
+  {"notell", &Character::do_notell, POS_DEAD, L_DEI},
+  {"oload", &Character::do_oload, POS_DEAD, L_DEI},
+  {"oset", &Character::do_oset, POS_DEAD, L_DEI},
+  {"owhere", &Character::do_owhere, POS_DEAD, L_DEI},
+  {"pardon", &Character::do_pardon, POS_DEAD, L_DEI},
+  {"peace", &Character::do_peace, POS_DEAD, L_DEI},
+  {"purge", &Character::do_purge, POS_DEAD, L_DEI},
+  {"restore", &Character::do_restore, POS_DEAD, L_DEI},
+  {"rset", &Character::do_rset, POS_DEAD, L_DEI},
+  {"silence", &Character::do_silence, POS_DEAD, L_DEI},
+  {"sla", &Character::do_sla, POS_DEAD, L_DEI},
+  {"slay", &Character::do_slay, POS_DEAD, L_DEI},
+  {"sset", &Character::do_sset, POS_DEAD, L_DEI},
+  {"transfer", &Character::do_transfer, POS_DEAD, L_DEI},
+  {"mpstat", &Character::do_mpstat, POS_DEAD, L_DEI},
 
-  {"at", &Character::do_at, POS_DEAD, L_ANG, LOG_NORMAL},
-  {"bamfin", &Character::do_bamfin, POS_DEAD, L_ANG, LOG_NORMAL},
-  {"bamfout", &Character::do_bamfout, POS_DEAD, L_ANG, LOG_NORMAL},
-  {"echo", &Character::do_echo, POS_DEAD, L_ANG, LOG_ALWAYS},
-  {"goto", &Character::do_goto, POS_DEAD, L_ANG, LOG_NORMAL},
-  {"holylight", &Character::do_holylight, POS_DEAD, L_ANG, LOG_NORMAL},
-  {"invis", &Character::do_invis, POS_DEAD, L_ANG, LOG_NORMAL},
-  {"memory", &Character::do_memory, POS_DEAD, L_ANG, LOG_NORMAL},
-  {"mfind", &Character::do_mfind, POS_DEAD, L_ANG, LOG_NORMAL},
-  {"mstat", &Character::do_mstat, POS_DEAD, L_ANG, LOG_NORMAL},
-  {"mwhere", &Character::do_mwhere, POS_DEAD, L_ANG, LOG_NORMAL},
-  {"ofind", &Character::do_ofind, POS_DEAD, L_ANG, LOG_NORMAL},
-  {"ostat", &Character::do_ostat, POS_DEAD, L_ANG, LOG_NORMAL},
-  {"recho", &Character::do_recho, POS_DEAD, L_ANG, LOG_ALWAYS},
-  {"return", &Character::do_return, POS_DEAD, L_ANG, LOG_NORMAL},
-  {"rstat", &Character::do_rstat, POS_DEAD, L_ANG, LOG_NORMAL},
-  {"slookup", &Character::do_slookup, POS_DEAD, L_ANG, LOG_NORMAL},
-  {"switch", &Character::do_switch, POS_DEAD, L_ANG, LOG_ALWAYS},
+  {"at", &Character::do_at, POS_DEAD, L_ANG},
+  {"bamfin", &Character::do_bamfin, POS_DEAD, L_ANG},
+  {"bamfout", &Character::do_bamfout, POS_DEAD, L_ANG},
+  {"echo", &Character::do_echo, POS_DEAD, L_ANG},
+  {"goto", &Character::do_goto, POS_DEAD, L_ANG},
+  {"holylight", &Character::do_holylight, POS_DEAD, L_ANG},
+  {"invis", &Character::do_invis, POS_DEAD, L_ANG},
+  {"memory", &Character::do_memory, POS_DEAD, L_ANG},
+  {"mfind", &Character::do_mfind, POS_DEAD, L_ANG},
+  {"mstat", &Character::do_mstat, POS_DEAD, L_ANG},
+  {"mwhere", &Character::do_mwhere, POS_DEAD, L_ANG},
+  {"ofind", &Character::do_ofind, POS_DEAD, L_ANG},
+  {"ostat", &Character::do_ostat, POS_DEAD, L_ANG},
+  {"recho", &Character::do_recho, POS_DEAD, L_ANG},
+  {"return", &Character::do_return, POS_DEAD, L_ANG},
+  {"rstat", &Character::do_rstat, POS_DEAD, L_ANG},
+  {"slookup", &Character::do_slookup, POS_DEAD, L_ANG},
+  {"switch", &Character::do_switch, POS_DEAD, L_ANG},
 
-  {"immtalk", &Character::do_immtalk, POS_DEAD, L_ANG, LOG_NORMAL},
-  {":", &Character::do_immtalk, POS_DEAD, L_ANG, LOG_NORMAL},
+  {"immtalk", &Character::do_immtalk, POS_DEAD, L_ANG},
+  {":", &Character::do_immtalk, POS_DEAD, L_ANG},
 
   /*
    * MOBprogram commands.
    */
-  {"mpasound", &Character::do_mpasound, POS_DEAD, 41, LOG_NORMAL},
-  {"mpjunk", &Character::do_mpjunk, POS_DEAD, 41, LOG_NORMAL},
-  {"mpecho", &Character::do_mpecho, POS_DEAD, 41, LOG_NORMAL},
-  {"mpechoat", &Character::do_mpechoat, POS_DEAD, 41, LOG_NORMAL},
-  {"mpechoaround", &Character::do_mpechoaround, POS_DEAD, 41, LOG_NORMAL},
-  {"mpkill", &Character::do_mpkill, POS_DEAD, 41, LOG_NORMAL},
-  {"mpmload", &Character::do_mpmload, POS_DEAD, 41, LOG_NORMAL},
-  {"mpoload", &Character::do_mpoload, POS_DEAD, 41, LOG_NORMAL},
-  {"mppurge", &Character::do_mppurge, POS_DEAD, 41, LOG_NORMAL},
-  {"mpgoto", &Character::do_mpgoto, POS_DEAD, 41, LOG_NORMAL},
-  {"mpat", &Character::do_mpat, POS_DEAD, 41, LOG_NORMAL},
-  {"mptransfer", &Character::do_mptransfer, POS_DEAD, 41, LOG_NORMAL},
-  {"mpforce", &Character::do_mpforce, POS_DEAD, 41, LOG_NORMAL},
+  {"mpasound", &Character::do_mpasound, POS_DEAD, 41},
+  {"mpjunk", &Character::do_mpjunk, POS_DEAD, 41},
+  {"mpecho", &Character::do_mpecho, POS_DEAD, 41},
+  {"mpechoat", &Character::do_mpechoat, POS_DEAD, 41},
+  {"mpechoaround", &Character::do_mpechoaround, POS_DEAD, 41},
+  {"mpkill", &Character::do_mpkill, POS_DEAD, 41},
+  {"mpmload", &Character::do_mpmload, POS_DEAD, 41},
+  {"mpoload", &Character::do_mpoload, POS_DEAD, 41},
+  {"mppurge", &Character::do_mppurge, POS_DEAD, 41},
+  {"mpgoto", &Character::do_mpgoto, POS_DEAD, 41},
+  {"mpat", &Character::do_mpat, POS_DEAD, 41},
+  {"mptransfer", &Character::do_mptransfer, POS_DEAD, 41},
+  {"mpforce", &Character::do_mpforce, POS_DEAD, 41},
 
   /*
    * End of list.
    */
-  {"", 0, POS_DEAD, 0, LOG_NORMAL}
+  {"", 0, POS_DEAD, 0}
 };
-
 
 /*
  * The skill and spell table.
@@ -3992,7 +3554,7 @@ typedef void (Character::*spellfun_T) (int sn, int lvl, void *vo);
 
 const struct skill_type {
   const char * name;                   /* Name of skill        */
-  sh_int skill_level[MAX_CLASS];        /* Level needed by class    */
+  sh_int skill_level[CLASS_MAX];        /* Level needed by class    */
   spellfun_T spell_fun;         /* Spell pointer (for spells)   */
   sh_int target;                /* Legal targets        */
   sh_int minimum_position;      /* Position for caster / user   */
@@ -4008,545 +3570,284 @@ const struct skill_type {
  * Magic spells.
  */
 
-  {
-      "reserved", {99, 99, 99, 99},
+  {   "reserved", {99, 99, 99, 99},
       NULL, TAR_IGNORE, POS_STANDING,
-      NULL, SLOT (0), 0, 0,
-    "", ""},
-
-  {
-      "acid blast", {20, 37, 37, 37},
+      NULL, 0, 0, 0, "", ""},
+  {   "acid blast", {20, 37, 37, 37},
       &Character::spell_acid_blast, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, SLOT (70), 20, 12,
-    "acid blast", "!Acid Blast!"},
-
-  {
-      "armor", {5, 1, 37, 37},
+      NULL, 70, 20, 12, "acid blast", "!Acid Blast!"},
+  {   "armor", {5, 1, 37, 37},
       &Character::spell_armor, TAR_CHAR_DEFENSIVE, POS_STANDING,
-      NULL, SLOT (1), 5, 12,
-    "", "You feel less protected."},
-
-  {
-      "bless", {37, 5, 37, 37},
+      NULL, 1, 5, 12, "", "You feel less protected."},
+  {   "bless", {37, 5, 37, 37},
       &Character::spell_bless, TAR_CHAR_DEFENSIVE, POS_STANDING,
-      NULL, SLOT (3), 5, 12,
-    "", "You feel less righteous."},
-
-  {
-      "blindness", {8, 5, 37, 37},
+      NULL, 3, 5, 12, "", "You feel less righteous."},
+  {   "blindness", {8, 5, 37, 37},
       &Character::spell_blindness, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      &gsn_blindness, SLOT (4), 5, 12,
-    "", "You can see again."},
-
-  {
-      "burning hands", {5, 37, 37, 37},
+      &gsn_blindness, 4, 5, 12, "", "You can see again."},
+  {   "burning hands", {5, 37, 37, 37},
       &Character::spell_burning_hands, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, SLOT (5), 15, 12,
-    "burning hands", "!Burning Hands!"},
-
-  {
-      "call lightning", {37, 12, 37, 37},
+      NULL, 5, 15, 12, "burning hands", "!Burning Hands!"},
+  {   "call lightning", {37, 12, 37, 37},
       &Character::spell_call_lightning, TAR_IGNORE, POS_FIGHTING,
-      NULL, SLOT (6), 15, 12,
-    "lightning bolt", "!Call Lightning!"},
-
-  {
-      "cause critical", {37, 9, 37, 37},
+      NULL, 6, 15, 12, "lightning bolt", "!Call Lightning!"},
+  {   "cause critical", {37, 9, 37, 37},
       &Character::spell_cause_critical, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, SLOT (63), 20, 12,
-    "spell", "!Cause Critical!"},
-
-  {
-      "cause light", {37, 1, 37, 37},
+      NULL, 63, 20, 12, "spell", "!Cause Critical!"},
+  {   "cause light", {37, 1, 37, 37},
       &Character::spell_cause_light, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, SLOT (62), 15, 12,
-    "spell", "!Cause Light!"},
-
-  {
-      "cause serious", {37, 5, 37, 37},
+      NULL, 62, 15, 12, "spell", "!Cause Light!"},
+  {   "cause serious", {37, 5, 37, 37},
       &Character::spell_cause_serious, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, SLOT (64), 17, 12,
-    "spell", "!Cause Serious!"},
-
-  {
-      "change sex", {37, 37, 37, 37},
+      NULL, 64, 17, 12, "spell", "!Cause Serious!"},
+  {   "change sex", {37, 37, 37, 37},
       &Character::spell_change_sex, TAR_CHAR_DEFENSIVE, POS_FIGHTING,
-      NULL, SLOT (82), 15, 12,
-    "", "Your body feels familiar again."},
-
-  {
-      "charm person", {14, 37, 37, 37},
+      NULL, 82, 15, 12, "", "Your body feels familiar again."},
+  {   "charm person", {14, 37, 37, 37},
       &Character::spell_charm_person, TAR_CHAR_OFFENSIVE, POS_STANDING,
-      &gsn_charm_person, SLOT (7), 5, 12,
-    "", "You feel more self-confident."},
-
-  {
-      "chill touch", {3, 37, 37, 37},
+      &gsn_charm_person, 7, 5, 12, "", "You feel more self-confident."},
+  {   "chill touch", {3, 37, 37, 37},
       &Character::spell_chill_touch, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, SLOT (8), 15, 12,
-    "chilling touch", "You feel less cold."},
-
-  {
-      "colour spray", {11, 37, 37, 37},
+      NULL, 8, 15, 12, "chilling touch", "You feel less cold."},
+  {   "colour spray", {11, 37, 37, 37},
       &Character::spell_colour_spray, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, SLOT (10), 15, 12,
-    "colour spray", "!Colour Spray!"},
-
-  {
-      "continual light", {4, 2, 37, 37},
+      NULL, 10, 15, 12, "colour spray", "!Colour Spray!"},
+  {   "continual light", {4, 2, 37, 37},
       &Character::spell_continual_light, TAR_IGNORE, POS_STANDING,
-      NULL, SLOT (57), 7, 12,
-    "", "!Continual Light!"},
-
-  {
-      "control weather", {10, 13, 37, 37},
+      NULL, 57, 7, 12, "", "!Continual Light!"},
+  {   "control weather", {10, 13, 37, 37},
       &Character::spell_control_weather, TAR_IGNORE, POS_STANDING,
-      NULL, SLOT (11), 25, 12,
-    "", "!Control Weather!"},
-
-  {
-      "create food", {37, 3, 37, 37},
+      NULL, 11, 25, 12, "", "!Control Weather!"},
+  {   "create food", {37, 3, 37, 37},
       &Character::spell_create_food, TAR_IGNORE, POS_STANDING,
-      NULL, SLOT (12), 5, 12,
-    "", "!Create Food!"},
-
-  {
-      "create spring", {10, 37, 37, 37},
+      NULL, 12, 5, 12, "", "!Create Food!"},
+  {   "create spring", {10, 37, 37, 37},
       &Character::spell_create_spring, TAR_IGNORE, POS_STANDING,
-      NULL, SLOT (80), 20, 12,
-    "", "!Create Spring!"},
-
-  {
-      "create water", {37, 2, 37, 37},
+      NULL, 80, 20, 12, "", "!Create Spring!"},
+  {   "create water", {37, 2, 37, 37},
       &Character::spell_create_water, TAR_OBJ_INV, POS_STANDING,
-      NULL, SLOT (13), 5, 12,
-    "", "!Create Water!"},
-
-  {
-      "cure blindness", {37, 4, 37, 37},
+      NULL, 13, 5, 12, "", "!Create Water!"},
+  {   "cure blindness", {37, 4, 37, 37},
       &Character::spell_cure_blindness, TAR_CHAR_DEFENSIVE, POS_FIGHTING,
-      NULL, SLOT (14), 5, 12,
-    "", "!Cure Blindness!"},
-
-  {
-      "cure critical", {37, 9, 37, 37},
+      NULL, 14, 5, 12, "", "!Cure Blindness!"},
+  {   "cure critical", {37, 9, 37, 37},
       &Character::spell_cure_critical, TAR_CHAR_DEFENSIVE, POS_FIGHTING,
-      NULL, SLOT (15), 20, 12,
-    "", "!Cure Critical!"},
-
-  {
-      "cure light", {37, 1, 37, 37},
+      NULL, 15, 20, 12, "", "!Cure Critical!"},
+  {   "cure light", {37, 1, 37, 37},
       &Character::spell_cure_light, TAR_CHAR_DEFENSIVE, POS_FIGHTING,
-      NULL, SLOT (16), 10, 12,
-    "", "!Cure Light!"},
-
-  {
-      "cure poison", {37, 9, 37, 37},
+      NULL, 16, 10, 12, "", "!Cure Light!"},
+  {   "cure poison", {37, 9, 37, 37},
       &Character::spell_cure_poison, TAR_CHAR_DEFENSIVE, POS_STANDING,
-      NULL, SLOT (43), 5, 12,
-    "", "!Cure Poison!"},
-
-  {
-      "cure serious", {37, 5, 37, 37},
+      NULL, 43, 5, 12, "", "!Cure Poison!"},
+  {   "cure serious", {37, 5, 37, 37},
       &Character::spell_cure_serious, TAR_CHAR_DEFENSIVE, POS_FIGHTING,
-      NULL, SLOT (61), 15, 12,
-    "", "!Cure Serious!"},
-
-  {
-      "curse", {12, 12, 37, 37},
+      NULL, 61, 15, 12, "", "!Cure Serious!"},
+  {   "curse", {12, 12, 37, 37},
       &Character::spell_curse, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      &gsn_curse, SLOT (17), 20, 12,
-    "curse", "The curse wears off."},
-
-  {
-      "detect evil", {37, 4, 37, 37},
+      &gsn_curse, 17, 20, 12, "curse", "The curse wears off."},
+  {   "detect evil", {37, 4, 37, 37},
       &Character::spell_detect_evil, TAR_CHAR_SELF, POS_STANDING,
-      NULL, SLOT (18), 5, 12,
-    "", "The red in your vision disappears."},
-
-  {
-      "detect hidden", {37, 7, 37, 37},
+      NULL, 18, 5, 12, "", "The red in your vision disappears."},
+  {   "detect hidden", {37, 7, 37, 37},
       &Character::spell_detect_hidden, TAR_CHAR_SELF, POS_STANDING,
-      NULL, SLOT (44), 5, 12,
-    "", "You feel less aware of your suroundings."},
-
-  {
-      "detect invis", {2, 5, 37, 37},
+      NULL, 44, 5, 12, "", "You feel less aware of your suroundings."},
+  {   "detect invis", {2, 5, 37, 37},
       &Character::spell_detect_invis, TAR_CHAR_SELF, POS_STANDING,
-      NULL, SLOT (19), 5, 12,
-    "", "You no longer see invisible objects."},
-
-  {
-      "detect magic", {2, 3, 37, 37},
+      NULL, 19, 5, 12, "", "You no longer see invisible objects."},
+  {   "detect magic", {2, 3, 37, 37},
       &Character::spell_detect_magic, TAR_CHAR_SELF, POS_STANDING,
-      NULL, SLOT (20), 5, 12,
-    "", "The detect magic wears off."},
-
-  {
-      "detect poison", {37, 5, 37, 37},
+      NULL, 20, 5, 12, "", "The detect magic wears off."},
+  {   "detect poison", {37, 5, 37, 37},
       &Character::spell_detect_poison, TAR_OBJ_INV, POS_STANDING,
-      NULL, SLOT (21), 5, 12,
-    "", "!Detect Poison!"},
-
-  {
-      "dispel evil", {37, 10, 37, 37},
+      NULL, 21, 5, 12, "", "!Detect Poison!"},
+  {   "dispel evil", {37, 10, 37, 37},
       &Character::spell_dispel_evil, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, SLOT (22), 15, 12,
-    "dispel evil", "!Dispel Evil!"},
-
-  {
-      "dispel magic", {26, 31, 37, 37},
+      NULL, 22, 15, 12, "dispel evil", "!Dispel Evil!"},
+  {   "dispel magic", {26, 31, 37, 37},
       &Character::spell_dispel_magic, TAR_CHAR_OFFENSIVE, POS_STANDING,
-      NULL, SLOT (59), 15, 12,
-    "", "!Dispel Magic!"},
-
-  {
-      "earthquake", {37, 7, 37, 37},
+      NULL, 59, 15, 12, "", "!Dispel Magic!"},
+  {   "earthquake", {37, 7, 37, 37},
       &Character::spell_earthquake, TAR_IGNORE, POS_FIGHTING,
-      NULL, SLOT (23), 15, 12,
-    "earthquake", "!Earthquake!"},
-
-  {
-      "enchant weapon", {12, 37, 37, 37},
+      NULL, 23, 15, 12, "earthquake", "!Earthquake!"},
+  {   "enchant weapon", {12, 37, 37, 37},
       &Character::spell_enchant_weapon, TAR_OBJ_INV, POS_STANDING,
-      NULL, SLOT (24), 100, 24,
-    "", "!Enchant Weapon!"},
-
-  {
-      "energy drain", {13, 37, 37, 37},
+      NULL, 24, 100, 24, "", "!Enchant Weapon!"},
+  {   "energy drain", {13, 37, 37, 37},
       &Character::spell_energy_drain, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, SLOT (25), 35, 12,
-    "energy drain", "!Energy Drain!"},
-
-  {
-      "faerie fire", {4, 2, 37, 37},
+      NULL, 25, 35, 12, "energy drain", "!Energy Drain!"},
+  {   "faerie fire", {4, 2, 37, 37},
       &Character::spell_faerie_fire, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, SLOT (72), 5, 12,
-    "faerie fire", "The pink aura around you fades away."},
-
-  {
-      "faerie fog", {10, 14, 37, 37},
+      NULL, 72, 5, 12, "faerie fire", "The pink aura around you fades away."},
+  {   "faerie fog", {10, 14, 37, 37},
       &Character::spell_faerie_fog, TAR_IGNORE, POS_STANDING,
-      NULL, SLOT (73), 12, 12,
-    "faerie fog", "!Faerie Fog!"},
-
-  {
-      "fireball", {15, 37, 37, 37},
+      NULL, 73, 12, 12, "faerie fog", "!Faerie Fog!"},
+  {   "fireball", {15, 37, 37, 37},
       &Character::spell_fireball, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, SLOT (26), 15, 12,
-    "fireball", "!Fireball!"},
-
-  {
-      "flamestrike", {37, 13, 37, 37},
+      NULL, 26, 15, 12, "fireball", "!Fireball!"},
+  {   "flamestrike", {37, 13, 37, 37},
       &Character::spell_flamestrike, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, SLOT (65), 20, 12,
-    "flamestrike", "!Flamestrike!"},
-
-  {
-      "fly", {7, 12, 37, 37},
+      NULL, 65, 20, 12, "flamestrike", "!Flamestrike!"},
+  {   "fly", {7, 12, 37, 37},
       &Character::spell_fly, TAR_CHAR_DEFENSIVE, POS_STANDING,
-      NULL, SLOT (56), 10, 18,
-    "", "You slowly float to the ground."},
-
-  {
-      "gate", {37, 37, 37, 37},
+      NULL, 56, 10, 18, "", "You slowly float to the ground."},
+  {   "gate", {37, 37, 37, 37},
       &Character::spell_gate, TAR_CHAR_DEFENSIVE, POS_FIGHTING,
-      NULL, SLOT (83), 50, 12,
-    "", "!Gate!"},
-
-  {
-      "giant strength", {7, 37, 37, 37},
+      NULL, 83, 50, 12, "", "!Gate!"},
+  {   "giant strength", {7, 37, 37, 37},
       &Character::spell_giant_strength, TAR_CHAR_DEFENSIVE, POS_STANDING,
-      NULL, SLOT (39), 20, 12,
-    "", "You feel weaker."},
-
-  {
-      "harm", {37, 15, 37, 37},
+      NULL, 39, 20, 12, "", "You feel weaker."},
+  {   "harm", {37, 15, 37, 37},
       &Character::spell_harm, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, SLOT (27), 35, 12,
-    "harm spell", "!Harm!"},
-
-  {
-      "heal", {37, 14, 37, 37},
+      NULL, 27, 35, 12, "harm spell", "!Harm!"},
+  {   "heal", {37, 14, 37, 37},
       &Character::spell_heal, TAR_CHAR_DEFENSIVE, POS_FIGHTING,
-      NULL, SLOT (28), 50, 12,
-    "", "!Heal!"},
-
-  {
-      "identify", {10, 10, 37, 37},
+      NULL, 28, 50, 12, "", "!Heal!"},
+  {   "identify", {10, 10, 37, 37},
       &Character::spell_identify, TAR_OBJ_INV, POS_STANDING,
-      NULL, SLOT (53), 12, 24,
-    "", "!Identify!"},
-
-  {
-      "infravision", {6, 9, 37, 37},
+      NULL, 53, 12, 24, "", "!Identify!"},
+  {   "infravision", {6, 9, 37, 37},
       &Character::spell_infravision, TAR_CHAR_DEFENSIVE, POS_STANDING,
-      NULL, SLOT (77), 5, 18,
-    "", "You no longer see in the dark."},
-
-  {
-      "invis", {4, 37, 37, 37},
+      NULL, 77, 5, 18, "", "You no longer see in the dark."},
+  {   "invis", {4, 37, 37, 37},
       &Character::spell_invis, TAR_CHAR_DEFENSIVE, POS_STANDING,
-      &gsn_invis, SLOT (29), 5, 12,
-    "", "You are no longer invisible."},
-
-  {
-      "know alignment", {8, 5, 37, 37},
+      &gsn_invis, 29, 5, 12, "", "You are no longer invisible."},
+  {   "know alignment", {8, 5, 37, 37},
       &Character::spell_know_alignment, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, SLOT (58), 9, 12,
-    "", "!Know Alignment!"},
-
-  {
-      "lightning bolt", {9, 37, 37, 37},
+      NULL, 58, 9, 12, "", "!Know Alignment!"},
+  {   "lightning bolt", {9, 37, 37, 37},
       &Character::spell_lightning_bolt, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, SLOT (30), 15, 12,
-    "lightning bolt", "!Lightning Bolt!"},
-
-  {
-      "locate object", {6, 10, 37, 37},
+      NULL, 30, 15, 12, "lightning bolt", "!Lightning Bolt!"},
+  {   "locate object", {6, 10, 37, 37},
       &Character::spell_locate_object, TAR_IGNORE, POS_STANDING,
-      NULL, SLOT (31), 20, 18,
-    "", "!Locate Object!"},
-
-  {
-      "magic missile", {1, 37, 37, 37},
+      NULL, 31, 20, 18, "", "!Locate Object!"},
+  {   "magic missile", {1, 37, 37, 37},
       &Character::spell_magic_missile, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, SLOT (32), 15, 12,
-    "magic missile", "!Magic Missile!"},
-
-  {
-      "mass invis", {15, 17, 37, 37},
+      NULL, 32, 15, 12, "magic missile", "!Magic Missile!"},
+  {   "mass invis", {15, 17, 37, 37},
       &Character::spell_mass_invis, TAR_IGNORE, POS_STANDING,
-      &gsn_mass_invis, SLOT (69), 20, 24,
-    "", "!Mass Invis!"},
-
-  {
-      "pass door", {18, 37, 37, 37},
+      &gsn_mass_invis, 69, 20, 24, "", "!Mass Invis!"},
+  {   "pass door", {18, 37, 37, 37},
       &Character::spell_pass_door, TAR_CHAR_SELF, POS_STANDING,
-      NULL, SLOT (74), 20, 12,
-    "", "You feel solid again."},
-
-  {
-      "poison", {37, 8, 37, 37},
+      NULL, 74, 20, 12, "", "You feel solid again."},
+  {   "poison", {37, 8, 37, 37},
       &Character::spell_poison, TAR_CHAR_OFFENSIVE, POS_STANDING,
-      &gsn_poison, SLOT (33), 10, 12,
-    "poison", "You feel less sick."},
-
-  {
-      "protection", {37, 6, 37, 37},
+      &gsn_poison, 33, 10, 12, "poison", "You feel less sick."},
+  {   "protection", {37, 6, 37, 37},
       &Character::spell_protection, TAR_CHAR_SELF, POS_STANDING,
-      NULL, SLOT (34), 5, 12,
-    "", "You feel less protected."},
-
-  {
-      "refresh", {5, 3, 37, 37},
+      NULL, 34, 5, 12, "", "You feel less protected."},
+  {   "refresh", {5, 3, 37, 37},
       &Character::spell_refresh, TAR_CHAR_DEFENSIVE, POS_STANDING,
-      NULL, SLOT (81), 12, 18,
-    "refresh", "!Refresh!"},
-
-  {
-      "remove curse", {37, 12, 37, 37},
+      NULL, 81, 12, 18, "refresh", "!Refresh!"},
+  {   "remove curse", {37, 12, 37, 37},
       &Character::spell_remove_curse, TAR_CHAR_DEFENSIVE, POS_STANDING,
-      NULL, SLOT (35), 5, 12,
-    "", "!Remove Curse!"},
-
-  {
-      "sanctuary", {37, 13, 37, 37},
+      NULL, 35, 5, 12, "", "!Remove Curse!"},
+  {   "sanctuary", {37, 13, 37, 37},
       &Character::spell_sanctuary, TAR_CHAR_DEFENSIVE, POS_STANDING,
-      NULL, SLOT (36), 75, 12,
-    "", "The white aura around your body fades."},
-
-  {
-      "shield", {13, 37, 37, 37},
+      NULL, 36, 75, 12, "", "The white aura around your body fades."},
+  {   "shield", {13, 37, 37, 37},
       &Character::spell_shield, TAR_CHAR_DEFENSIVE, POS_STANDING,
-      NULL, SLOT (67), 12, 18,
-    "", "Your force shield shimmers then fades away."},
-
-  {
-      "shocking grasp", {7, 37, 37, 37},
+      NULL, 67, 12, 18, "", "Your force shield shimmers then fades away."},
+  {   "shocking grasp", {7, 37, 37, 37},
       &Character::spell_shocking_grasp, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, SLOT (37), 15, 12,
-    "shocking grasp", "!Shocking Grasp!"},
-
-  {
-      "sleep", {14, 37, 37, 37},
+      NULL, 37, 15, 12, "shocking grasp", "!Shocking Grasp!"},
+  {   "sleep", {14, 37, 37, 37},
       &Character::spell_sleep, TAR_CHAR_OFFENSIVE, POS_STANDING,
-      &gsn_sleep, SLOT (38), 15, 12,
-    "", "You feel less tired."},
-
-  {
-      "stone skin", {17, 37, 37, 37},
+      &gsn_sleep, 38, 15, 12, "", "You feel less tired."},
+  {   "stone skin", {17, 37, 37, 37},
       &Character::spell_stone_skin, TAR_CHAR_SELF, POS_STANDING,
-      NULL, SLOT (66), 12, 18,
-    "", "Your skin feels soft again."},
-
-  {
-      "summon", {37, 8, 37, 37},
+      NULL, 66, 12, 18, "", "Your skin feels soft again."},
+  {   "summon", {37, 8, 37, 37},
       &Character::spell_summon, TAR_IGNORE, POS_STANDING,
-      NULL, SLOT (40), 50, 12,
-    "", "!Summon!"},
-
-  {
-      "teleport", {8, 37, 37, 37},
+      NULL, 40, 50, 12, "", "!Summon!"},
+  {   "teleport", {8, 37, 37, 37},
       &Character::spell_teleport, TAR_CHAR_SELF, POS_FIGHTING,
-      NULL, SLOT (2), 35, 12,
-    "", "!Teleport!"},
-
-  {
-      "ventriloquate", {1, 37, 37, 37},
+      NULL, 2, 35, 12, "", "!Teleport!"},
+  {   "ventriloquate", {1, 37, 37, 37},
       &Character::spell_ventriloquate, TAR_IGNORE, POS_STANDING,
-      NULL, SLOT (41), 5, 12,
-    "", "!Ventriloquate!"},
-
-  {
-      "weaken", {7, 37, 37, 37},
+      NULL, 41, 5, 12, "", "!Ventriloquate!"},
+  {   "weaken", {7, 37, 37, 37},
       &Character::spell_weaken, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, SLOT (68), 20, 12,
-    "spell", "You feel stronger."},
-
-  {
-      "word of recall", {37, 37, 37, 37},
+      NULL, 68, 20, 12, "spell", "You feel stronger."},
+  {   "word of recall", {37, 37, 37, 37},
       &Character::spell_word_of_recall, TAR_CHAR_SELF, POS_RESTING,
-      NULL, SLOT (42), 5, 12,
-    "", "!Word of Recall!"},
-
+      NULL, 42, 5, 12, "", "!Word of Recall!"},
 /*
  * Dragon breath
  */
-  {
-      "acid breath", {33, 37, 37, 37},
+  {   "acid breath", {33, 37, 37, 37},
       &Character::spell_acid_breath, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, SLOT (200), 0, 4,
-    "blast of acid", "!Acid Breath!"},
-
-  {
-      "fire breath", {34, 37, 37, 37},
+      NULL, 200, 0, 4, "blast of acid", "!Acid Breath!"},
+  {   "fire breath", {34, 37, 37, 37},
       &Character::spell_fire_breath, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, SLOT (201), 0, 4,
-    "blast of flame", "!Fire Breath!"},
-
-  {
-      "frost breath", {31, 37, 37, 37},
+      NULL, 201, 0, 4, "blast of flame", "!Fire Breath!"},
+  {   "frost breath", {31, 37, 37, 37},
       &Character::spell_frost_breath, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, SLOT (202), 0, 4,
-    "blast of frost", "!Frost Breath!"},
-
-  {
-      "gas breath", {35, 37, 37, 37},
+      NULL, 202, 0, 4, "blast of frost", "!Frost Breath!"},
+  {   "gas breath", {35, 37, 37, 37},
       &Character::spell_gas_breath, TAR_IGNORE, POS_FIGHTING,
-      NULL, SLOT (203), 0, 4,
-    "blast of gas", "!Gas Breath!"},
-
-  {
-      "lightning breath", {32, 37, 37, 37},
+      NULL, 203, 0, 4, "blast of gas", "!Gas Breath!"},
+  {   "lightning breath", {32, 37, 37, 37},
       &Character::spell_lightning_breath, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, SLOT (204), 0, 4,
-    "blast of lightning", "!Lightning Breath!"},
-
+      NULL, 204, 0, 4, "blast of lightning", "!Lightning Breath!"},
 /*
  * Fighter and thief skills.
  */
-  {
-      "backstab", {37, 37, 1, 37},
+  {   "backstab", {37, 37, 1, 37},
       &Character::spell_null, TAR_IGNORE, POS_STANDING,
-      &gsn_backstab, SLOT (0), 0, 24,
-    "backstab", "!Backstab!"},
-
-  {
-      "disarm", {37, 37, 10, 37},
+      &gsn_backstab, 0, 0, 24, "backstab", "!Backstab!"},
+  {   "disarm", {37, 37, 10, 37},
       &Character::spell_null, TAR_IGNORE, POS_FIGHTING,
-      &gsn_disarm, SLOT (0), 0, 24,
-    "", "!Disarm!"},
-
-  {
-      "dodge", {37, 37, 1, 37},
+      &gsn_disarm, 0, 0, 24, "", "!Disarm!"},
+  {   "dodge", {37, 37, 1, 37},
       &Character::spell_null, TAR_IGNORE, POS_FIGHTING,
-      &gsn_dodge, SLOT (0), 0, 0,
-    "", "!Dodge!"},
-
-  {
-      "enhanced damage", {37, 37, 37, 1},
+      &gsn_dodge, 0, 0, 0, "", "!Dodge!"},
+  {   "enhanced damage", {37, 37, 37, 1},
       &Character::spell_null, TAR_IGNORE, POS_FIGHTING,
-      &gsn_enhanced_damage, SLOT (0), 0, 0,
-    "", "!Enhanced Damage!"},
-
-  {
-      "hide", {37, 37, 1, 37},
+      &gsn_enhanced_damage, 0, 0, 0, "", "!Enhanced Damage!"},
+  {   "hide", {37, 37, 1, 37},
       &Character::spell_null, TAR_IGNORE, POS_RESTING,
-      &gsn_hide, SLOT (0), 0, 12,
-    "", "!Hide!"},
-
-  {
-      "kick", {37, 37, 37, 1},
+      &gsn_hide, 0, 0, 12, "", "!Hide!"},
+  {   "kick", {37, 37, 37, 1},
       &Character::spell_null, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      &gsn_kick, SLOT (0), 0, 8,
-    "kick", "!Kick!"},
-
-  {
-      "parry", {37, 37, 37, 1},
+      &gsn_kick, 0, 0, 8, "kick", "!Kick!"},
+  {   "parry", {37, 37, 37, 1},
       &Character::spell_null, TAR_IGNORE, POS_FIGHTING,
-      &gsn_parry, SLOT (0), 0, 0,
-    "", "!Parry!"},
-
-  {
-      "peek", {37, 37, 1, 37},
+      &gsn_parry, 0, 0, 0, "", "!Parry!"},
+  {   "peek", {37, 37, 1, 37},
       &Character::spell_null, TAR_IGNORE, POS_STANDING,
-      &gsn_peek, SLOT (0), 0, 0,
-    "", "!Peek!"},
-
-  {
-      "pick lock", {37, 37, 1, 37},
+      &gsn_peek, 0, 0, 0, "", "!Peek!"},
+  {   "pick lock", {37, 37, 1, 37},
       &Character::spell_null, TAR_IGNORE, POS_STANDING,
-      &gsn_pick_lock, SLOT (0), 0, 12,
-    "", "!Pick!"},
-
-  {
-      "rescue", {37, 37, 37, 1},
+      &gsn_pick_lock, 0, 0, 12, "", "!Pick!"},
+  {   "rescue", {37, 37, 37, 1},
       &Character::spell_null, TAR_IGNORE, POS_FIGHTING,
-      &gsn_rescue, SLOT (0), 0, 12,
-    "", "!Rescue!"},
-
-  {
-      "second attack", {37, 37, 1, 1},
+      &gsn_rescue, 0, 0, 12, "", "!Rescue!"},
+  {   "second attack", {37, 37, 1, 1},
       &Character::spell_null, TAR_IGNORE, POS_FIGHTING,
-      &gsn_second_attack, SLOT (0), 0, 0,
-    "", "!Second Attack!"},
-
-  {
-      "sneak", {37, 37, 1, 37},
+      &gsn_second_attack, 0, 0, 0, "", "!Second Attack!"},
+  {   "sneak", {37, 37, 1, 37},
       &Character::spell_null, TAR_IGNORE, POS_STANDING,
-      &gsn_sneak, SLOT (0), 0, 12,
-    "", NULL},
-
-  {
-      "steal", {37, 37, 1, 37},
+      &gsn_sneak, 0, 0, 12, "", NULL},
+  {   "steal", {37, 37, 1, 37},
       &Character::spell_null, TAR_IGNORE, POS_STANDING,
-      &gsn_steal, SLOT (0), 0, 24,
-    "", "!Steal!"},
-
-  {
-      "third attack", {37, 37, 37, 1},
+      &gsn_steal, 0, 0, 24, "", "!Steal!"},
+  {   "third attack", {37, 37, 37, 1},
       &Character::spell_null, TAR_IGNORE, POS_FIGHTING,
-      &gsn_third_attack, SLOT (0), 0, 0,
-    "", "!Third Attack!"},
-
+      &gsn_third_attack, 0, 0, 0, "", "!Third Attack!"},
 /*
  *  Spells for mega1.are from Glop/Erkenbrand.
 */
-  {
-      "general purpose", {37, 37, 37, 37},
+  {   "general purpose", {37, 37, 37, 37},
       &Character::spell_general_purpose, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, SLOT (205), 0, 12,
-    "general purpose ammo", "!General Purpose Ammo!"},
-
-  {
-      "high explosive", {37, 37, 37, 37},
+      NULL, 205, 0, 12, "general purpose ammo", "!General Purpose Ammo!"},
+  {   "high explosive", {37, 37, 37, 37},
       &Character::spell_high_explosive, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, SLOT (206), 0, 12,
-    "high explosive ammo", "!High Explosive Ammo!"}
-
+      NULL, 206, 0, 12, "high explosive ammo", "!High Explosive Ammo!"}
 };
 
+///////////////////
+// start of code //
+///////////////////
 
 /* The heart of the pager.  Thanks to N'Atas-Ha, ThePrincedom
    for porting this SillyMud code for MERC 2.0 and laying down the groundwork.
@@ -4609,8 +3910,8 @@ void Descriptor::show_string (const std::string & input) {
   lines = 0;
   toggle = 1;
   for (scan = buffer;; scan++, showstr_point++) {
-    if (((*scan = *showstr_point) == '\n' || *scan == '\r')
-      && (toggle = -toggle) < 0) {
+    *scan = *showstr_point;
+    if ((*scan == '\n' || *scan == '\r') && (toggle = -toggle) < 0) {
       lines++;
     } else if (!*scan || (character && !character->is_npc ()
         && lines >= character->pcdata->pagelen)) {
@@ -4632,15 +3933,10 @@ void Descriptor::show_string (const std::string & input) {
   }
 }
 
-
-
-/* start of code */
-
 int number_bits (int width)
 {
   return OS_RAND() % (1 << width);
 }
-
 
 /*
  * Generate a random number in an inclusive range.
@@ -4651,7 +3947,6 @@ int number_range (int from, int to)
     return from;
   return (from + (OS_RAND () % (1 + to - from)));
 }
-
 
 /*
  * Stick a little fuzz on a number.
@@ -4669,7 +3964,6 @@ int number_fuzzy (int number)
 
   return std::max (1, number);
 }
-
 
 /*
  * Roll some dice.
@@ -4692,7 +3986,6 @@ int dice (int number, int size)
   return sum;
 }
 
-
 /*
  * Generate a percentile roll.
  */
@@ -4700,7 +3993,6 @@ int number_percent (void)
 {
   return number_range (1, 100);
 }
-
 
 /*
  * Generate a random door.
@@ -4710,7 +4002,6 @@ int number_door (void)
   return number_range (0, 5);
 }
 
-
 /*
  * Simple linear interpolation.
  */
@@ -4718,7 +4009,6 @@ int interpolate (int level, int value_00, int value_32)
 {
   return value_00 + level * (value_32 - value_00) / 32;
 }
-
 
 /*
 print a series of warnings - do not exit
@@ -4786,7 +4076,6 @@ void bug_printf (const char * str, ...)
   return;
 }
 
-
 /*
  * Reports a bug.
  */
@@ -4804,7 +4093,6 @@ void fatal_printf (const char * str, ...)
   return;
 }
 
-
 // replaces all occurances of a s1 in str with s2
 void global_replace (std::string & str, const std::string & s1, const std::string & s2)
 {
@@ -4820,7 +4108,6 @@ void global_replace (std::string & str, const std::string & s1, const std::strin
   }
 }
 
-
 /*
  * Removes the tildes from a string.
  * Used for player-entered strings that go into disk files.
@@ -4829,7 +4116,6 @@ void smash_tilde (std::string & str)
 {
   global_replace(str, "~", "-");
 }
-
 
 // Case insensitive compare
 bool str_cmp(const std::string & s1, const std::string & s2)
@@ -4846,7 +4132,6 @@ bool str_cmp(const std::string & s1, const std::string & s2)
   }
   return false;
 }
-
 
 /*
  * Compare strings, case insensitive, for prefix matching.
@@ -4868,7 +4153,6 @@ bool str_prefix(const std::string & s1, const std::string & s2)
   return false;
 }
 
-
 /*
  * Compare strings, case insensitive, for match anywhere.
  * Returns true is astr not part of bstr.
@@ -4889,7 +4173,6 @@ bool str_infix (const std::string & astr, const std::string & bstr)
 
   return true;
 }
-
 
 /*
  * Compare strings, case insensitive, for suffix matching.
@@ -4922,7 +4205,6 @@ std::string capitalize (const std::string & str)
   return strcap;
 }
 
-
 int Character::mana_cost(int sn) {
   if (is_npc())
     return 0;
@@ -4949,7 +4231,6 @@ void tail_chain (void)
 {
   return;
 }
-
 
 /*
  * Read and allocate space for a string from a file.
@@ -5019,7 +4300,6 @@ char fread_letter (std::ifstream & fp)
   return c;
 }
 
-
 /*
  * Read a number from a file.
  */
@@ -5064,7 +4344,6 @@ int fread_number (std::ifstream & fp)
   return number;
 }
 
-
 /*
  * Read to end of line (for comments).
  */
@@ -5085,7 +4364,6 @@ void fread_to_eol (std::ifstream & fp)
   fp.unget();
   return;
 }
-
 
 /*
  * Read one word (into static buffer).
@@ -5166,7 +4444,6 @@ bool write_to_descriptor (SOCKET desc, const char *txt, int length)
   return true;
 }
 
-
 /*
  * Return true if an argument is completely numeric.
  */
@@ -5187,7 +4464,6 @@ bool is_number (const std::string & arg)
   return true;
 }
 
-
 /*
  * Given a string like 14.foo, return 14 and 'foo'
  */
@@ -5203,7 +4479,6 @@ int number_argument (const std::string & argument, std::string & arg)
   arg = argument;
   return 1;
 }
-
 
 /*
  * Pick off one argument from a string and return the rest.
@@ -5237,7 +4512,6 @@ std::string one_argument (const std::string & argument, std::string & arg_first)
   return std::string(argp, argument.end());
 }
 
-
 /*
  * See if a string is one of the names of an object.
  */
@@ -5256,7 +4530,6 @@ bool is_name (const std::string & str, std::string namelist)
       return true;
   }
 }
-
 
 /*
  * Parse a name for acceptability.
@@ -5303,7 +4576,6 @@ bool check_parse_name (const std::string & name)
   return true;
 }
 
-
 /*
  * Write to one char.
  */
@@ -5317,7 +4589,6 @@ void Character::send_to_char (const std::string & txt)
   desc->show_string ("");
 
 }
-
 
 /*
  * Append a string to a file.
@@ -5343,7 +4614,6 @@ void Character::append_file (char *file, const std::string & str)
   return;
 }
 
-
 /*
  * True if room is private.
  */
@@ -5358,7 +4628,6 @@ bool Room::is_private() {
 
   return false;
 }
-
 
 /*
  * True if room is dark.
@@ -5379,7 +4648,6 @@ bool Room::is_dark ()
 
   return false;
 }
-
 
 /*
  * Return ascii name of an item type.
@@ -5432,7 +4700,6 @@ std::string Object::item_type_name ()
   bug_printf ("Item_type_name: unknown type %d.", item_type);
   return "(unknown)";
 }
-
 
 /*
  * Return ascii name of an affect location.
@@ -5492,7 +4759,6 @@ std::string affect_loc_name (int location)
   return "(unknown)";
 }
 
-
 /*
  * Return ascii name of an affect bit vector.
  */
@@ -5512,8 +4778,6 @@ std::string affect_bit_name (int vector)
     buf.append(" detect_magic");
   if (vector & AFF_DETECT_HIDDEN)
     buf.append(" detect_hidden");
-  if (vector & AFF_HOLD)
-    buf.append(" hold");
   if (vector & AFF_SANCTUARY)
     buf.append(" sanctuary");
   if (vector & AFF_FAERIE_FIRE)
@@ -5522,14 +4786,10 @@ std::string affect_bit_name (int vector)
     buf.append(" infrared");
   if (vector & AFF_CURSE)
     buf.append(" curse");
-  if (vector & AFF_FLAMING)
-    buf.append(" flaming");
   if (vector & AFF_POISON)
     buf.append(" poison");
   if (vector & AFF_PROTECT)
     buf.append(" protect");
-  if (vector & AFF_PARALYSIS)
-    buf.append(" paralysis");
   if (vector & AFF_SLEEP)
     buf.append(" sleep");
   if (vector & AFF_SNEAK)
@@ -5548,7 +4808,6 @@ std::string affect_bit_name (int vector)
     buf.erase(0,1);
   return buf;
 }
-
 
 /*
  * Return ascii name of extra flags vector.
@@ -5592,7 +4851,6 @@ std::string extra_bit_name (int extra_flags)
   return buf;
 }
 
-
 /*
  * True if char can see victim.
  */
@@ -5628,7 +4886,6 @@ bool Character::can_see (Character * victim)
   return true;
 }
 
-
 /*
  * True if char can see obj.
  */
@@ -5656,7 +4913,6 @@ bool Character::can_see_obj (Object * obj)
   return true;
 }
 
-
 /*
  * True if char can drop obj.
  */
@@ -5670,7 +4926,6 @@ bool Character::can_drop_obj (Object * obj)
 
   return false;
 }
-
 
 /*
  * Lookup a skill by name.
@@ -5689,7 +4944,6 @@ int skill_lookup (const std::string & name)
 
   return -1;
 }
-
 
 /*
  * Lookup a skill by slot number.
@@ -5713,7 +4967,6 @@ int slot_lookup (int slot)
 
   return -1;
 }
-
 
 /*
  * The primary output interface for formatted output.
@@ -5851,7 +5104,6 @@ void Character::act (const std::string & format, const void *arg1, const void *a
   return;
 }
 
-
 bool Object::can_wear (sh_int part) {
   return wear_flags & part;
 }
@@ -5859,7 +5111,6 @@ bool Object::can_wear (sh_int part) {
 bool Object::is_obj_stat(sh_int stat) {
   return extra_flags & stat;
 }
-
 
 /*
  * Return # of objects which an object counts as.
@@ -5878,7 +5129,6 @@ int Object::get_obj_number ()
   return number;
 }
 
-
 /*
  * Return weight of an object, including weight of contents.
  */
@@ -5891,7 +5141,6 @@ int Object::get_obj_weight ()
 
   return wt;
 }
-
 
 /*
  * Count occurrences of an obj in a list.
@@ -5906,7 +5155,6 @@ int ObjectPrototype::count_obj_list (std::list<Object *> & list)
   }
   return nMatch;
 }
-
 
 /*
  * Move an obj out of a room.
@@ -5925,7 +5173,6 @@ void Object::obj_from_room ()
   return;
 }
 
-
 /*
  * Move an obj into a room.
  */
@@ -5937,7 +5184,6 @@ void Object::obj_to_room (Room * pRoomIndex)
   in_obj = NULL;
   return;
 }
-
 
 /*
  * Move an object into an object.
@@ -5958,7 +5204,6 @@ void Object::obj_to_obj (Object * obj_to)
 
   return;
 }
-
 
 /*
  * Move an object out of an object.
@@ -5985,7 +5230,6 @@ void Object::obj_from_obj ()
   return;
 }
 
-
 /*
  * Give an obj to a char.
  */
@@ -5998,7 +5242,6 @@ void Object::obj_to_char (Character * ch)
   ch->carry_number += get_obj_number();
   ch->carry_weight += get_obj_weight();
 }
-
 
 /*
  * Find the ac value of an obj, including position effect.
@@ -6045,7 +5288,6 @@ int Object::apply_ac (int iWear)
 
   return 0;
 }
-
 
 int Character::is_npc() {
   return actflags & ACT_IS_NPC;
@@ -6253,7 +5495,6 @@ bool Character::saves_spell (int lvl) {
   return number_percent () < save;
 }
 
-
 std::string Character::describe_to (Character* looker) {
   if (looker->can_see(this)) {
     if (is_npc())
@@ -6277,7 +5518,6 @@ Object * Character::get_eq_char (int iWear)
 
   return NULL;
 }
-
 
 /*
  * Apply or remove an affect to a character.
@@ -6393,7 +5633,6 @@ void Character::affect_modify (Affect * paf, bool fAdd)
   return;
 }
 
-
 /*
  * Unequip a char with an obj.
  */
@@ -6420,7 +5659,6 @@ void Character::unequip_char (Object * obj)
   return;
 }
 
-
 /*
  * Take an obj from its character.
  */
@@ -6443,7 +5681,6 @@ void Object::obj_from_char ()
   ch->carry_weight -= get_obj_weight();
   return;
 }
-
 
 /*
  * Extract an obj from the world.
@@ -6485,7 +5722,6 @@ void Object::extract_obj ()
   return;
 }
 
-
 /*
  * Give an affect to a char.
  */
@@ -6499,7 +5735,6 @@ void Character::affect_to_char (Affect * paf)
   affect_modify (paf_new, true);
   return;
 }
-
 
 /*
  * Remove an affect from a char.
@@ -6519,7 +5754,6 @@ void Character::affect_remove (Affect * paf)
   return;
 }
 
-
 /*
  * Strip all affects of a given sn.
  */
@@ -6538,7 +5772,6 @@ void Character::affect_strip (int sn)
   return;
 }
 
-
 /*
  * Return true if a char is affected by a spell.
  */
@@ -6552,7 +5785,6 @@ bool Character::has_affect (int sn)
 
   return false;
 }
-
 
 /*
  * Add or enhance an affect.
@@ -6572,7 +5804,6 @@ void Character::affect_join (Affect * paf)
   affect_to_char (paf);
   return;
 }
-
 
 /*
  * Find a char in the room.
@@ -6598,7 +5829,6 @@ Character * Character::get_char_room (const std::string & argument)
 
   return NULL;
 }
-
 
 /*
  * Find a char in the world.
@@ -6626,7 +5856,6 @@ Character * Character::get_char_world (const std::string & argument)
   return NULL;
 }
 
-
 /*
  * Find some object with a given index data.
  * Used by area-reset 'P' command.
@@ -6639,7 +5868,6 @@ Object * ObjectPrototype::get_obj_type ()
   }
   return NULL;
 }
-
 
 /*
  * Find an obj in a list.
@@ -6662,7 +5890,6 @@ Object * Character::get_obj_list (const std::string & argument, std::list<Object
 
   return NULL;
 }
-
 
 /*
  * Find an obj in player's inventory.
@@ -6687,7 +5914,6 @@ Object * Character::get_obj_carry (const std::string & argument)
   return NULL;
 }
 
-
 /*
  * Find an obj in player's equipment.
  */
@@ -6711,7 +5937,6 @@ Object * Character::get_obj_wear (const std::string & argument)
   return NULL;
 }
 
-
 /*
  * Find an obj in the room or in inventory.
  */
@@ -6732,8 +5957,6 @@ Object * Character::get_obj_here (const std::string & argument)
   return NULL;
 }
 
-
-
 /*
  * Find an obj in the world.
  */
@@ -6741,14 +5964,12 @@ Object * Character::get_obj_world (const std::string & argument)
 {
   std::string arg;
   Object *obj;
-  int number;
-  int count;
 
   if ((obj = get_obj_here (argument)) != NULL)
     return obj;
 
-  number = number_argument (argument, arg);
-  count = 0;
+  int number = number_argument (argument, arg);
+  int count = 0;
   for (ObjIter o = object_list.begin();
     o != object_list.end(); o++) {
     if (can_see_obj(*o) && is_name (arg, (*o)->name)) {
@@ -6759,7 +5980,6 @@ Object * Character::get_obj_world (const std::string & argument)
 
   return NULL;
 }
-
 
 /*
  * Translates mob virtual number to its mob index struct.
@@ -6781,7 +6001,6 @@ MobPrototype *get_mob_index (int vnum)
   return NULL;
 }
 
-
 /*
  * Translates mob virtual number to its obj index struct.
  * Hash table lookup.
@@ -6802,7 +6021,6 @@ ObjectPrototype *get_obj_index (int vnum)
   return NULL;
 }
 
-
 /*
  * Translates mob virtual number to its room index struct.
  * Hash table lookup.
@@ -6822,7 +6040,6 @@ Room *get_room_index (int vnum)
 
   return NULL;
 }
-
 
 /*
  * Write the char.
@@ -6858,8 +6075,10 @@ void Character::fwrite_char (std::ofstream & fp)
   fp << "Act          " << actflags << "\n";
   fp << "AffectedBy   " << affected_by << "\n";
   /* Bug fix from Alander */
-  fp << "Position     " <<
-    (position == POS_FIGHTING ? POS_STANDING : position) << "\n";
+  if (position == POS_FIGHTING)
+    fp << "Position     " <<  POS_STANDING<< "\n";
+  else
+    fp << "Position     " <<  position << "\n";
 
   fp << "Practice     " << practice << "\n";
   fp << "SavingThrow  " << saving_throw << "\n";
@@ -6907,8 +6126,6 @@ void Character::fwrite_char (std::ofstream & fp)
   fp << "End\n\n";
   return;
 }
-
-
 
 /*
  * Write an object and its contents.
@@ -6987,7 +6204,6 @@ void Object::fwrite_obj (Character * ch, std::ofstream & fp, int iNest)
   return;
 }
 
-
 /*
  * Save a character and inventory.
  * Would be cool to save NPC's too for quest purposes,
@@ -7023,7 +6239,6 @@ void Character::save_char_obj ()
   fp.close();
   return;
 }
-
 
 /*
  * Read in a char.
@@ -7233,7 +6448,6 @@ void Character::fread_char (std::ifstream & fp)
   }
 }
 
-
 bool Object::fread_obj (Character * ch, std::ifstream & fp)
 {
   std::string word;
@@ -7395,23 +6609,13 @@ bool Object::fread_obj (Character * ch, std::ifstream & fp)
   return false;
 }
 
-
 /*
  * Load a char and inventory into a new ch structure.
  */
 bool Descriptor::load_char_obj (const std::string & name)
 {
-  char strsave[MAX_INPUT_LENGTH];
-  char buf[MAX_STRING_LENGTH];
-  Character *ch;
-  Object *obj;
-  std::ifstream fp;
-  bool found;
-
-  ch = new Character();
-
+  Character* ch = new Character();
   ch->pcdata = new PCData();
-
   character = ch;
   ch->desc = this;
   ch->name = name;
@@ -7421,24 +6625,15 @@ bool Descriptor::load_char_obj (const std::string & name)
   ch->pcdata->condition[COND_THIRST] = 48;
   ch->pcdata->condition[COND_FULL] = 48;
 
-  found = false;
+  bool found = false;
 
-  /* parsed player file directories by Yaz of 4th Realm */
-  /* decompress if .gz file exists - Thx Alander */
-  snprintf (strsave, sizeof strsave, "%s%s%s", PLAYER_DIR, capitalize (name).c_str(), ".gz");
-  fp.open (strsave, std::ifstream::in | std::ifstream::binary);
-  if (fp.is_open()) {
-    fp.close();
-    snprintf (buf, sizeof buf, "gzip -dfq %s", strsave);
-    system (buf);
-  }
-  fp.clear();
+  char strsave[MAX_INPUT_LENGTH];
+  std::ifstream fp;
+
   snprintf (strsave, sizeof strsave, "%s%s", PLAYER_DIR, capitalize (name).c_str());
   fp.open (strsave, std::ifstream::in | std::ifstream::binary);
   if (fp.is_open()) {
-    int iNest;
-
-    for (iNest = 0; iNest < MAX_NEST; iNest++)
+    for (int iNest = 0; iNest < MAX_NEST; iNest++)
       rgObjNest[iNest] = NULL;
 
     found = true;
@@ -7461,7 +6656,7 @@ bool Descriptor::load_char_obj (const std::string & name)
       if (!str_cmp (word, "PLAYER"))
         ch->fread_char (fp);
       else if (!str_cmp (word, "OBJECT")) {
-        obj = new Object;
+        Object* obj = new Object;
         if (!obj->fread_obj (ch, fp)) {
           delete obj;
           bug_printf ("fread_obj: bad object.");
@@ -7478,7 +6673,6 @@ bool Descriptor::load_char_obj (const std::string & name)
 
   return found;
 }
-
 
 /*
  * Equip a char with an obj.
@@ -7520,7 +6714,6 @@ void Character::equip_char (Object * obj, int iWear)
   return;
 }
 
-
 /*
  * Move a char out of a room.
  */
@@ -7547,7 +6740,6 @@ void Character::char_from_room ()
   return;
 }
 
-
 /*
  * Move a char into a room.
  */
@@ -7573,7 +6765,6 @@ void Character::char_to_room (Room * pRoomIndex)
   return;
 }
 
-
 void Character::set_title (const std::string & title)
 {
   if (is_npc ()) {
@@ -7589,7 +6780,6 @@ void Character::set_title (const std::string & title)
 
   return;
 }
-
 
 bool Character::is_switched ()
 {
@@ -7612,7 +6802,6 @@ bool Character::mp_commands ()
   return false;
 
 }
-
 
 /*
  * Advancement stuff.
@@ -7657,7 +6846,6 @@ void Character::advance_level ()
   return;
 }
 
-
 void Character::gain_exp(int gain)
 {
   if (is_npc () || level >= LEVEL_HERO)
@@ -7672,7 +6860,6 @@ void Character::gain_exp(int gain)
 
   return;
 }
-
 
 /*
  * Regeneration stuff.
@@ -7709,7 +6896,6 @@ int Character::hit_gain ()
   return std::min (gain, max_hit - hit);
 }
 
-
 int Character::mana_gain ()
 {
   int gain;
@@ -7742,8 +6928,6 @@ int Character::mana_gain ()
   return std::min (gain, max_mana - mana);
 }
 
-
-
 int Character::move_gain ()
 {
   int gain;
@@ -7775,7 +6959,6 @@ int Character::move_gain ()
   return std::min (gain, max_move - move);
 }
 
-
 void Character::gain_condition (int iCond, int value)
 {
   if (value == 0 || is_npc () || level >= LEVEL_HERO)
@@ -7804,7 +6987,6 @@ void Character::gain_condition (int iCond, int value)
   return;
 }
 
-
 void Character::add_follower (Character * master)
 {
 
@@ -7823,7 +7005,6 @@ void Character::add_follower (Character * master)
 
   return;
 }
-
 
 void Character::stop_follower()
 {
@@ -7847,7 +7028,6 @@ void Character::stop_follower()
   return;
 }
 
-
 void Character::die_follower ()
 {
   if (master != NULL)
@@ -7864,7 +7044,6 @@ void Character::die_follower ()
 
   return;
 }
-
 
 /*
  * Set position of a victim.
@@ -7892,7 +7071,6 @@ void Character::update_pos ()
   return;
 }
 
-
 /*
  * Start fights.
  */
@@ -7912,7 +7090,6 @@ void Character::set_fighting (Character * victim)
   return;
 }
 
-
 /*
  * Stop fights.
  */
@@ -7930,7 +7107,6 @@ void Character::stop_fighting (bool fBoth)
   return;
 }
 
-
 bool Character::check_blind ()
 {
   if (!is_npc () && IS_SET (actflags, PLR_HOLYLIGHT))
@@ -7943,7 +7119,6 @@ bool Character::check_blind ()
 
   return true;
 }
-
 
 int Character::find_door (const std::string & arg)
 {
@@ -7986,7 +7161,6 @@ int Character::find_door (const std::string & arg)
   return door;
 }
 
-
 bool Character::has_key (int key)
 {
   ObjIter o;
@@ -7997,7 +7171,6 @@ bool Character::has_key (int key)
 
   return false;
 }
-
 
 void Character::get_obj (Object * obj, Object * container)
 {
@@ -8037,7 +7210,6 @@ void Character::get_obj (Object * obj, Object * container)
 
   return;
 }
-
 
 /*
  * Extract a char from the world.
@@ -8090,7 +7262,6 @@ void Character::extract_char (bool fPull)
   return;
 }
 
-
 /*
  * Get an extra description from a list.
  */
@@ -8103,7 +7274,6 @@ std::string get_extra_descr (const std::string & name, std::list<ExtraDescriptio
   }
   return "";
 }
-
 
 /*
  * Look for link-dead player to reconnect.
@@ -8144,7 +7314,6 @@ bool Descriptor::check_reconnect (const std::string & name, bool fConn)
   return false;
 }
 
-
 /*
  * Check if already playing.
  */
@@ -8172,7 +7341,6 @@ bool Descriptor::check_playing (const std::string & name)
   return false;
 }
 
-
 void Character::stop_idling ()
 {
   if (desc == NULL || desc->connected != CON_PLAYING
@@ -8186,7 +7354,6 @@ void Character::stop_idling ()
   act ("$n has returned from the void.", NULL, NULL, TO_ROOM);
   return;
 }
-
 
 /*
  * Given a name, return the appropriate spec fun.
@@ -8232,7 +7399,6 @@ SPEC_FUN *spec_lookup (const std::string & name)
   return 0;
 }
 
-
 /*
  * Snarf an 'area' header line.
  */
@@ -8248,7 +7414,6 @@ void load_area (std::ifstream & fp)
   area_last = pArea;
   return;
 }
-
 
 /*
  * Snarf a help section.
@@ -8273,7 +7438,6 @@ void load_helps (std::ifstream & fp)
 
   return;
 }
-
 
 /*
  * MOBprogram code block
@@ -8371,7 +7535,6 @@ MobProgram *mprog_file_read (const std::string & f, MobProgram *mprg, MobPrototy
   return mprg2;
 }
 
-
 /* This procedure is responsible for reading any in_file MOBprograms.
  */
 void mprog_read_programs (std::ifstream & fp, MobPrototype *pMobIndex)
@@ -8435,7 +7598,6 @@ void mprog_read_programs (std::ifstream & fp, MobPrototype *pMobIndex)
   }
 }
 
-
 /*
  * Snarf a mob section.
  */
@@ -8478,38 +7640,6 @@ void load_mobiles (std::ifstream & fp)
     pMobIndex->alignment = fread_number (fp);
     letter = fread_letter (fp);
     pMobIndex->level = number_fuzzy (fread_number (fp));
-
-    /*
-     * The unused stuff is for imps who want to use the old-style
-     * stats-in-files method.
-     */
-    pMobIndex->hitroll = fread_number (fp);     /* Unused */
-    pMobIndex->ac = fread_number (fp);  /* Unused */
-    pMobIndex->hitnodice = fread_number (fp);   /* Unused */
-                                        /* 'd'      */ fread_letter (fp);
-                                        /* Unused */
-    pMobIndex->hitsizedice = fread_number (fp); /* Unused */
-                                        /* '+'      */ fread_letter (fp);
-                                        /* Unused */
-    pMobIndex->hitplus = fread_number (fp);     /* Unused */
-    pMobIndex->damnodice = fread_number (fp);   /* Unused */
-                                        /* 'd'      */ fread_letter (fp);
-                                        /* Unused */
-    pMobIndex->damsizedice = fread_number (fp); /* Unused */
-                                        /* '+'      */ fread_letter (fp);
-                                        /* Unused */
-    pMobIndex->damplus = fread_number (fp);     /* Unused */
-    pMobIndex->gold = fread_number (fp);        /* Unused */
-                                                /* xp can't be used! */ fread_number (fp);
-                                                /* Unused */
-                                        /* position */ fread_number (fp);
-                                        /* Unused */
-                                                /* start pos    */ fread_number (fp);
-                                                /* Unused */
-
-    /*
-     * Back to meaningful values.
-     */
     pMobIndex->sex = fread_number (fp);
 
     if (letter != 'S') {
@@ -8528,8 +7658,6 @@ void load_mobiles (std::ifstream & fp)
 
   return;
 }
-
-
 
 /*
  * Snarf an obj section.
@@ -8587,35 +7715,25 @@ void load_objects (std::ifstream & fp)
       letter = fread_letter (fp);
 
       if (letter == 'A') {
-        Affect *paf;
-
-        paf = new Affect();
+        Affect* paf = new Affect();
         paf->type = -1;
         paf->duration = -1;
         paf->location = fread_number (fp);
         paf->modifier = fread_number (fp);
         paf->bitvector = 0;
         pObjIndex->affected.push_back(paf);
-      }
-
-      else if (letter == 'E') {
-        ExtraDescription *ed;
-
-        ed = new ExtraDescription();
+      } else if (letter == 'E') {
+        ExtraDescription* ed = new ExtraDescription();
         ed->keyword = fread_string (fp);
         ed->description = fread_string (fp);
         pObjIndex->extra_descr.push_back(ed);
-      }
-
-      else {
+      } else {
         fp.unget();
         break;
       }
     }
 
-    /*
-     * Translate spell "slot numbers" to internal "skill numbers."
-     */
+    // Translate spell "slot numbers" to internal "skill numbers."
     switch (pObjIndex->item_type) {
     case ITEM_PILL:
     case ITEM_POTION:
@@ -8636,8 +7754,6 @@ void load_objects (std::ifstream & fp)
 
   return;
 }
-
-
 
 /*
  * Snarf a reset section.
@@ -8733,7 +7849,6 @@ void load_resets (std::ifstream & fp)
   return;
 }
 
-
 /*
  * Snarf a room section.
  */
@@ -8828,7 +7943,6 @@ void load_rooms (std::ifstream & fp)
   return;
 }
 
-
 /*
  * Snarf a shop section.
  */
@@ -8859,7 +7973,6 @@ void load_shops (std::ifstream & fp)
 
   return;
 }
-
 
 /*
  * Snarf spec proc declarations.
@@ -8892,7 +8005,6 @@ void load_specials (std::ifstream & fp)
     fread_to_eol (fp);
   }
 }
-
 
 /*
  * Snarf notes file.
@@ -8953,7 +8065,6 @@ void load_notes (void)
   return;
 }
 
-
 /*
  * Translate all room exits from virtual to real.
  * Has to be done after all rooms are read in.
@@ -9002,7 +8113,6 @@ void fix_exits (void)
   return;
 }
 
-
 /*
  * Remove an object.
  */
@@ -9026,7 +8136,6 @@ bool Character::remove_obj (int iWear, bool fReplace)
   act ("You stop using $p.", obj, NULL, TO_CHAR);
   return true;
 }
-
 
 /*
  * Wear one object.
@@ -9243,7 +8352,6 @@ void Character::wear_obj (Object * obj, bool fReplace)
   return;
 }
 
-
 /*
  * Create an instance of a mobile.
  */
@@ -9285,7 +8393,6 @@ Character * MobPrototype::create_mobile ()
   count++;
   return mob;
 }
-
 
 /*
  * Create an instance of an object.
@@ -9377,7 +8484,6 @@ Object * ObjectPrototype::create_object (int lvl)
   return obj;
 }
 
-
 /*
  * Create a 'money' obj.
  */
@@ -9403,7 +8509,6 @@ Object *create_money (int amount)
   return obj;
 }
 
-
 /*
  * It is very important that this be an equivalence relation:
  * (1) A ~ A
@@ -9418,7 +8523,6 @@ bool is_same_group (Character * ach, Character * bch)
     bch = bch->leader;
   return ach == bch;
 }
-
 
 std::string Object::format_obj_to_char (Character * ch, bool fShort)
 {
@@ -9445,7 +8549,6 @@ std::string Object::format_obj_to_char (Character * ch, bool fShort)
 
   return buf;
 }
-
 
 /*
  * Show a list to a character.
@@ -9535,7 +8638,6 @@ void Character::show_list_to_char (std::list<Object *> & list, bool fShort,
   return;
 }
 
-
 void Character::show_char_to_char_0 (Character * victim)
 {
   std::string buf;
@@ -9610,7 +8712,6 @@ void Character::show_char_to_char_0 (Character * victim)
   send_to_char (buf);
   return;
 }
-
 
 void Character::show_char_to_char_1 (Character * victim)
 {
@@ -9687,7 +8788,6 @@ void Character::show_char_to_char_1 (Character * victim)
   return;
 }
 
-
 void Character::show_char_to_char (std::list<Character *> & list)
 {
   CharIter rch;
@@ -9711,7 +8811,6 @@ void Character::show_char_to_char (std::list<Character *> & list)
 
   return;
 }
-
 
 void Character::move_char (int door)
 {
@@ -9753,7 +8852,7 @@ void Character::move_char (int door)
     int iClass;
     int mv;
 
-    for (iClass = 0; iClass < MAX_CLASS; iClass++) {
+    for (iClass = 0; iClass < CLASS_MAX; iClass++) {
       if (iClass != klass && to_room->vnum == class_table[iClass].guild) {
         send_to_char ("You aren't allowed in there.\r\n");
         return;
@@ -9833,7 +8932,6 @@ void Character::move_char (int door)
   return;
 }
 
-
 bool is_note_to (Character * ch, Note * pnote)
 {
   if (!str_cmp (ch->name, pnote->sender))
@@ -9851,7 +8949,6 @@ bool is_note_to (Character * ch, Note * pnote)
   return false;
 }
 
-
 void note_attach (Character * ch)
 {
   Note *pnote;
@@ -9865,7 +8962,6 @@ void note_attach (Character * ch)
   ch->pnote = pnote;
   return;
 }
-
 
 void note_remove (Character * ch, Note * pnote)
 {
@@ -9920,7 +9016,6 @@ void note_remove (Character * ch, Note * pnote)
   }
   return;
 }
-
 
 bool Character::check_social (const std::string & command, const std::string & argument)
 {
@@ -10023,7 +9118,6 @@ bool Character::check_social (const std::string & command, const std::string & a
   return true;
 }
 
-
 /*
  * The main entry point for executing commands.
  * Can be recursively called from 'at', 'order', 'force'.
@@ -10031,7 +9125,6 @@ bool Character::check_social (const std::string & command, const std::string & a
 void Character::interpret (std::string argument)
 {
   std::string command;
-  std::string logline;
   int cmd;
   bool found;
 
@@ -10062,7 +9155,6 @@ void Character::interpret (std::string argument)
    * Special parsing so ' can be a command,
    *   also no spaces needed after punctuation.
    */
-  logline = argument;
   if (!isalpha (argument[0]) && !isdigit (argument[0])) {
     command.assign(argument, 0, 1);
     argument.erase(0, 1);
@@ -10083,23 +9175,6 @@ void Character::interpret (std::string argument)
       found = true;
       break;
     }
-  }
-
-  /*
-   * Log and snoop.
-   */
-  if (cmd_table[cmd].log == LOG_NEVER)
-    logline = "XXXXXXXX XXXXXXXX XXXXXXXX";
-
-  if ((!is_npc () && IS_SET (actflags, PLR_LOG))
-    || fLogAll || cmd_table[cmd].log == LOG_ALWAYS) {
-    log_printf ("Log %s: %s", name.c_str(), logline.c_str());
-  }
-
-  if (desc != NULL && desc->snoop_by != NULL) {
-    desc->snoop_by->write_to_buffer ("% ");
-    desc->snoop_by->write_to_buffer (logline);
-    desc->snoop_by->write_to_buffer ("\r\n");
   }
 
   if (!found) {
@@ -10154,7 +9229,6 @@ void Character::interpret (std::string argument)
   tail_chain ();
   return;
 }
-
 
 /* This routine handles the variables for command expansion.
  * If you want to add any go right ahead, it should be fairly
@@ -10450,7 +9524,6 @@ void mprog_process_cmnd (const std::string & cmnd, Character * mob,
 
 }
 
-
 /* Used to get sequential lines of a multi line string (separated by "\r\n")
  * Thus its like one_argument(), but a trifle different. It is destructive
  * to the multi line string argument, and thus clist must not be shared.
@@ -10466,7 +9539,6 @@ std::string mprog_next_command (std::string & clist, std::string & cmd)
     pointer++;
   return std::string(pointer, clist.end());
 }
-
 
 /* These two functions do the basic evaluation of ifcheck operators.
  *  It is important to note that the string operations are not what
@@ -10492,7 +9564,6 @@ bool mprog_seval (const std::string & lhs, const std::string & opr, const std::s
 
 }
 
-
 bool mprog_veval (int lhs, const std::string & opr, int rhs)
 {
 
@@ -10517,7 +9588,6 @@ bool mprog_veval (int lhs, const std::string & opr, int rhs)
   return 0;
 
 }
-
 
 /* This function performs the evaluation of the if checks.  It is
  * here that you can add any ifchecks which you so desire. Hopefully
@@ -11267,7 +10337,6 @@ bool mprog_do_ifchck (const std::string & ifchck, Character * mob,
 
 }
 
-
 /* Quite a long and arduous function, this guy handles the control
  * flow part of MOBprograms.  Basicially once the driver sees an
  * 'if' attention shifts to here.  While many syntax errors are
@@ -11407,7 +10476,6 @@ std::string mprog_process_if (const std::string & ifchck, std::string & com_list
   }
 }
 
-
 /* The main focus of the MOBprograms.  This routine is called
  *  whenever a trigger is successful.  It is responsible for parsing
  *  the command list and figuring out what to do. However, like all
@@ -11507,7 +10575,6 @@ void mprog_wordlist_check (const std::string & arg, Character * mob,
 
   return;
 }
-
 
 /*
  * Reset one area.
@@ -11732,7 +10799,6 @@ void reset_area (Area * pArea)
   return;
 }
 
-
 /*
  * Repopulate areas periodically.
  */
@@ -11778,7 +10844,6 @@ void area_update (void)
 
   return;
 }
-
 
 /*
  * Mob autonomous action.
@@ -11887,7 +10952,6 @@ try {
 }
   return;
 }
-
 
 /*
  * Update the weather.
@@ -12011,7 +11075,6 @@ void weather_update (void)
 
   return;
 }
-
 
 /*
  * Update all chars, including mobs.
@@ -12150,7 +11213,6 @@ try {
   return;
 }
 
-
 /*
  * Update all objs.
  * This function is performance sensitive.
@@ -12203,7 +11265,6 @@ try {
 
   return;
 }
-
 
 /*
  * Aggress.
@@ -12299,7 +11360,6 @@ try {
 
   return;
 }
-
 
 /*
  * Control the fights going on.
@@ -12401,7 +11461,6 @@ try {
   return;
 }
 
-
 /*
  * Handle all kinds of updates.
  * Called once per pulse from game loop.
@@ -12444,7 +11503,6 @@ try {
 }
   return;
 }
-
 
 /*
  * Shopping commands.
@@ -12507,7 +11565,6 @@ Character *find_keeper (Character * ch)
   return *keeper;
 }
 
-
 int get_cost (Character * keeper, Object * obj, bool fBuy)
 {
   Shop *pShop;
@@ -12541,7 +11598,6 @@ int get_cost (Character * keeper, Object * obj, bool fBuy)
 
   return cost;
 }
-
 
 /*
  * Generic channel function.
@@ -12608,7 +11664,6 @@ void talk_channel (Character * ch, const std::string & argument, int channel,
   return;
 }
 
-
 Room *find_location (Character * ch, const std::string & arg)
 {
   Character *victim;
@@ -12625,7 +11680,6 @@ Room *find_location (Character * ch, const std::string & arg)
 
   return NULL;
 }
-
 
 bool is_safe (Character * ch, Character * victim)
 {
@@ -12647,7 +11701,6 @@ bool is_safe (Character * ch, Character * victim)
 
   return false;
 }
-
 
 /*
  * See if an attack justifies a KILLER flag.
@@ -12705,7 +11758,6 @@ void check_killer (Character * ch, Character * victim)
   return;
 }
 
-
 /*
  * Check for parry.
  */
@@ -12733,7 +11785,6 @@ bool check_parry (Character * ch, Character * victim)
   return true;
 }
 
-
 /*
  * Check for dodge.
  */
@@ -12757,7 +11808,6 @@ bool check_dodge (Character * ch, Character * victim)
   ch->act ("$N dodges your attack.", NULL, victim, TO_CHAR);
   return true;
 }
-
 
 /*
  * Make a corpse out of a character.
@@ -12803,7 +11853,6 @@ void make_corpse (Character * ch)
   corpse->obj_to_room (ch->in_room);
   return;
 }
-
 
 /*
  * Improved Death_cry contributed by Diavolo.
@@ -12888,7 +11937,6 @@ void death_cry (Character * ch)
   return;
 }
 
-
 void raw_kill (Character * victim)
 {
   victim->stop_fighting(true);
@@ -12915,7 +11963,6 @@ void raw_kill (Character * victim)
   victim->save_char_obj();
   return;
 }
-
 
 /*
  * Compute xp for a kill.
@@ -12958,7 +12005,6 @@ int xp_compute (Character * gch, Character * victim)
 
   return xp;
 }
-
 
 void group_gain (Character * ch, Character * victim)
 {
@@ -13030,7 +12076,6 @@ void group_gain (Character * ch, Character * victim)
 
   return;
 }
-
 
 void dam_message (Character * ch, Character * victim, int dam, int dt)
 {
@@ -13127,7 +12172,6 @@ void dam_message (Character * ch, Character * victim, int dam, int dt)
   return;
 }
 
-
 /*
  * Disarm a creature.
  * Caller must check for successful attack.
@@ -13155,7 +12199,6 @@ void disarm (Character * ch, Character * victim)
   return;
 }
 
-
 /*
  * Trip a creature.
  * Caller must check for successful attack.
@@ -13174,7 +12217,6 @@ void trip (Character * ch, Character * victim)
 
   return;
 }
-
 
 /*
  * Inflict damage from a hit.
@@ -13385,7 +12427,6 @@ void damage (Character * ch, Character * victim, int dam, int dt)
   return;
 }
 
-
 /*
  * Hit one guy once.
  */
@@ -13477,7 +12518,6 @@ void one_hit (Character * ch, Character * victim, int dt)
   return;
 }
 
-
 /*
  * Do one group of attacks.
  */
@@ -13511,7 +12551,6 @@ void multi_hit (Character * ch, Character * victim, int dt)
 
   return;
 }
-
 
 /*
  * Utter mystical words for an sn.
@@ -13589,7 +12628,6 @@ void say_spell (Character * ch, int sn)
   return;
 }
 
-
 /*
  * Cast spells at targets using a magical object.
  */
@@ -13664,7 +12702,6 @@ void obj_cast_spell (int sn, int level, Character * ch, Character * victim,
   return;
 }
 
-
 /* Snarf a MOBprogram section from the area file.
  */
 void load_mobprogs (std::ifstream & fp)
@@ -13724,7 +12761,6 @@ void mprog_percent_check (Character * mob, Character * actor, Object * obj,
   return;
 
 }
-
 
 /* The triggers.. These are really basic, and since most appear only
  * once in the code (hmm. i think they all do) it would be more efficient
@@ -13952,7 +12988,6 @@ void Character::do_areas (std::string argument)
   return;
 }
 
-
 void Character::do_memory (std::string argument)
 {
   char buf[MAX_STRING_LENGTH];
@@ -13979,7 +13014,6 @@ void Character::do_memory (std::string argument)
   send_to_char (buf);
   return;
 }
-
 
 /*
  * Core procedure for dragons.
@@ -14009,7 +13043,6 @@ bool dragon (Character * ch, char *spell_name)
   return true;
 }
 
-
 /*
  * Special procedures for mobiles.
  */
@@ -14037,24 +13070,20 @@ bool spec_breath_any (Character * ch)
   return false;
 }
 
-
 bool spec_breath_acid (Character * ch)
 {
   return dragon (ch, "acid breath");
 }
-
 
 bool spec_breath_fire (Character * ch)
 {
   return dragon (ch, "fire breath");
 }
 
-
 bool spec_breath_frost (Character * ch)
 {
   return dragon (ch, "frost breath");
 }
-
 
 bool spec_breath_gas (Character * ch)
 {
@@ -14069,12 +13098,10 @@ bool spec_breath_gas (Character * ch)
   return true;
 }
 
-
 bool spec_breath_lightning (Character * ch)
 {
   return dragon (ch, "lightning breath");
 }
-
 
 bool spec_cast_adept (Character * ch)
 {
@@ -14130,7 +13157,6 @@ bool spec_cast_adept (Character * ch)
 
   return false;
 }
-
 
 bool spec_cast_cleric (Character * ch)
 {
@@ -14210,7 +13236,6 @@ bool spec_cast_cleric (Character * ch)
   return true;
 }
 
-
 bool spec_cast_judge (Character * ch)
 {
   Character *victim = NULL;
@@ -14237,7 +13262,6 @@ bool spec_cast_judge (Character * ch)
   (ch->*(skill_table[sn].spell_fun)) (sn, ch->level, victim);
   return true;
 }
-
 
 bool spec_cast_mage (Character * ch)
 {
@@ -14313,7 +13337,6 @@ bool spec_cast_mage (Character * ch)
   return true;
 }
 
-
 bool spec_cast_undead (Character * ch)
 {
   Character *victim = NULL;
@@ -14386,17 +13409,13 @@ bool spec_cast_undead (Character * ch)
   return true;
 }
 
-
 bool spec_executioner (Character * ch)
 {
-  char buf[MAX_STRING_LENGTH];
-  Character *victim = NULL;
-  char *crime;
-
   if (!ch->is_awake () || ch->fighting != NULL)
     return false;
 
-  crime = "";
+  Character *victim = NULL;
+  char *crime = "";
   CharIter rch;
   for (rch = ch->in_room->people.begin(); rch != ch->in_room->people.end(); rch++) {
 
@@ -14416,6 +13435,7 @@ bool spec_executioner (Character * ch)
   if (victim == NULL)
     return false;
 
+  char buf[MAX_STRING_LENGTH];
   snprintf (buf, sizeof buf, "%s is a %s!  PROTECT THE INNOCENT!  MORE BLOOOOD!!!",
     victim->name.c_str(), crime);
   ch->do_shout (buf);
@@ -14425,15 +13445,13 @@ bool spec_executioner (Character * ch)
   return true;
 }
 
-
 bool spec_fido (Character * ch)
 {
-  Object *corpse;
-  Object *obj;
-
   if (!ch->is_awake ())
     return false;
 
+  Object *corpse;
+  Object *obj;
   ObjIter c, cnext;
   for (c = ch->in_room->contents.begin(); c != ch->in_room->contents.end(); c = cnext) {
     corpse = *c;
@@ -14456,22 +13474,15 @@ bool spec_fido (Character * ch)
   return false;
 }
 
-
 bool spec_guard (Character * ch)
 {
-  char buf[MAX_STRING_LENGTH];
-  Character *victim = NULL;
-  Character *ech;
-  char *crime;
-  int max_evil;
-
   if (!ch->is_awake () || ch->fighting != NULL)
     return false;
 
-  max_evil = 300;
-  ech = NULL;
-  crime = "";
-
+  Character *victim = NULL;
+  int max_evil = 300;
+  Character* ech = NULL;
+  char* crime = "";
   CharIter rch;
   for (rch = ch->in_room->people.begin(); rch != ch->in_room->people.end(); rch++) {
 
@@ -14495,6 +13506,7 @@ bool spec_guard (Character * ch)
   }
 
   if (victim != NULL) {
+    char buf[MAX_STRING_LENGTH];
     snprintf (buf, sizeof buf, "%s is a %s!  PROTECT THE INNOCENT!!  BANZAI!!",
       victim->name.c_str(), crime);
     ch->do_shout (buf);
@@ -14511,7 +13523,6 @@ bool spec_guard (Character * ch)
 
   return false;
 }
-
 
 bool spec_janitor (Character * ch)
 {
@@ -14537,7 +13548,6 @@ bool spec_janitor (Character * ch)
 
   return false;
 }
-
 
 bool spec_mayor (Character * ch)
 {
@@ -14635,7 +13645,6 @@ bool spec_mayor (Character * ch)
   return false;
 }
 
-
 bool spec_poison (Character * ch)
 {
   Character *victim;
@@ -14651,18 +13660,14 @@ bool spec_poison (Character * ch)
   return true;
 }
 
-
 bool spec_thief (Character * ch)
 {
-  Character *victim = NULL;
-  int gold;
-
   if (ch->position != POS_STANDING)
     return false;
 
   CharIter rch;
   for (rch = ch->in_room->people.begin(); rch != ch->in_room->people.end(); rch++) {
-    victim = *rch;
+    Character* victim = *rch;
 
     if (victim->is_npc ()
       || victim->level >= LEVEL_IMMORTAL || number_bits (2) != 0 || !ch->can_see(victim))      /* Thx Glop */
@@ -14675,7 +13680,7 @@ bool spec_thief (Character * ch)
         NULL, victim, TO_NOTVICT);
       return true;
     } else {
-      gold = victim->gold * number_range (1, 20) / 100;
+      int gold = victim->gold * number_range (1, 20) / 100;
       ch->gold += 7 * gold / 8;
       victim->gold -= gold;
       return true;
@@ -14685,11 +13690,9 @@ bool spec_thief (Character * ch)
   return false;
 }
 
-
 void Character::do_kill (std::string argument)
 {
   std::string arg;
-  Character *victim;
 
   one_argument (argument, arg);
 
@@ -14698,6 +13701,7 @@ void Character::do_kill (std::string argument)
     return;
   }
 
+  Character *victim;
   if ((victim = get_char_room (arg)) == NULL) {
     send_to_char ("They aren't here.\r\n");
     return;
@@ -14741,18 +13745,15 @@ void Character::do_kill (std::string argument)
   return;
 }
 
-
 void Character::do_murde (std::string argument)
 {
   send_to_char ("If you want to MURDER, spell it out.\r\n");
   return;
 }
 
-
 void Character::do_murder (std::string argument)
 {
   std::string arg, buf;
-  Character *victim;
 
   one_argument (argument, arg);
 
@@ -14761,6 +13762,7 @@ void Character::do_murder (std::string argument)
     return;
   }
 
+  Character *victim;
   if ((victim = get_char_room (arg)) == NULL) {
     send_to_char ("They aren't here.\r\n");
     return;
@@ -14792,12 +13794,9 @@ void Character::do_murder (std::string argument)
   return;
 }
 
-
 void Character::do_backstab (std::string argument)
 {
   std::string arg;
-  Character *victim;
-  Object *obj;
 
   if (!is_npc ()
     && level < skill_table[gsn_backstab].skill_level[klass]) {
@@ -14812,6 +13811,7 @@ void Character::do_backstab (std::string argument)
     return;
   }
 
+  Character *victim;
   if ((victim = get_char_room (arg)) == NULL) {
     send_to_char ("They aren't here.\r\n");
     return;
@@ -14825,6 +13825,7 @@ void Character::do_backstab (std::string argument)
   if (is_safe (this, victim))
     return;
 
+  Object *obj;
   if ((obj = get_eq_char (WEAR_WIELD)) == NULL || obj->value[3] != 11) {
     send_to_char ("You need to wield a piercing weapon.\r\n");
     return;
@@ -14853,23 +13854,18 @@ void Character::do_backstab (std::string argument)
   return;
 }
 
-
 void Character::do_flee (std::string argument)
 {
-  Room *was_in;
-  Room *now_in;
-  Character *victim;
-  int attempt;
-
-  if ((victim = fighting) == NULL) {
+  if (fighting == NULL) {
     if (position == POS_FIGHTING)
       position = POS_STANDING;
     send_to_char ("You aren't fighting anyone.\r\n");
     return;
   }
 
-  was_in = in_room;
-  for (attempt = 0; attempt < 6; attempt++) {
+  Room *now_in;
+  Room* was_in = in_room;
+  for (int attempt = 0; attempt < 6; attempt++) {
     Exit *pexit;
     int door;
 
@@ -14904,18 +13900,15 @@ void Character::do_flee (std::string argument)
   return;
 }
 
-
 void Character::do_rescue (std::string argument)
 {
-  std::string arg;
-  Character *victim;
-  Character *fch;
-
   if (!is_npc ()
     && level < skill_table[gsn_rescue].skill_level[klass]) {
     send_to_char ("You better leave the heroic acts to warriors.\r\n");
     return;
   }
+
+  std::string arg;
 
   one_argument (argument, arg);
 
@@ -14924,6 +13917,7 @@ void Character::do_rescue (std::string argument)
     return;
   }
 
+  Character *victim;
   if ((victim = get_char_room (arg)) == NULL) {
     send_to_char ("They aren't here.\r\n");
     return;
@@ -14944,6 +13938,7 @@ void Character::do_rescue (std::string argument)
     return;
   }
 
+  Character *fch;
   if ((fch = victim->fighting) == NULL) {
     send_to_char ("That person is not fighting right now.\r\n");
     return;
@@ -14968,16 +13963,15 @@ void Character::do_rescue (std::string argument)
   return;
 }
 
-
 void Character::do_kick (std::string argument)
 {
-  Character *victim;
-
   if (!is_npc ()
     && level < skill_table[gsn_kick].skill_level[klass]) {
     send_to_char ("You better leave the martial arts to fighters.\r\n");
     return;
   }
+
+  Character *victim;
 
   if ((victim = fighting) == NULL) {
     send_to_char ("You aren't fighting anyone.\r\n");
@@ -14993,13 +13987,8 @@ void Character::do_kick (std::string argument)
   return;
 }
 
-
 void Character::do_disarm (std::string argument)
 {
-  Character *victim;
-  Object *obj;
-  int percent;
-
   if (!is_npc ()
     && level < skill_table[gsn_disarm].skill_level[klass]) {
     send_to_char ("You don't know how to disarm opponents.\r\n");
@@ -15011,18 +14000,20 @@ void Character::do_disarm (std::string argument)
     return;
   }
 
+  Character *victim;
+
   if ((victim = fighting) == NULL) {
     send_to_char ("You aren't fighting anyone.\r\n");
     return;
   }
 
-  if ((obj = victim->get_eq_char (WEAR_WIELD)) == NULL) {
+  if (victim->get_eq_char (WEAR_WIELD) == NULL) {
     send_to_char ("Your opponent is not wielding a weapon.\r\n");
     return;
   }
 
   wait_state (skill_table[gsn_disarm].beats);
-  percent = number_percent () + victim->level - level;
+  int percent = number_percent () + victim->level - level;
   if (is_npc () || percent < pcdata->learned[gsn_disarm] * 2 / 3)
     disarm (this, victim);
   else
@@ -15030,17 +14021,14 @@ void Character::do_disarm (std::string argument)
   return;
 }
 
-
 void Character::do_sla (std::string argument)
 {
   send_to_char ("If you want to SLAY, spell it out.\r\n");
   return;
 }
 
-
 void Character::do_slay (std::string argument)
 {
-  Character *victim;
   std::string arg;
 
   one_argument (argument, arg);
@@ -15049,6 +14037,7 @@ void Character::do_slay (std::string argument)
     return;
   }
 
+  Character *victim;
   if ((victim = get_char_room (arg)) == NULL) {
     send_to_char ("They aren't here.\r\n");
     return;
@@ -15071,16 +14060,8 @@ void Character::do_slay (std::string argument)
   return;
 }
 
-
 void Character::do_cast (std::string argument)
 {
-  std::string arg1, arg2;
-  Character *victim;
-  Object *obj;
-  void *vo;
-  int mn;
-  int sn;
-
   /*
    * Only MOBprogrammed mobs not charmed can cast spells
    * like PC's
@@ -15088,6 +14069,8 @@ void Character::do_cast (std::string argument)
   if (is_npc ()
     && (!pIndexData->progtypes || is_affected (AFF_CHARM)))
     return;
+
+  std::string arg1, arg2;
 
   target_name = one_argument (argument, arg1);
   one_argument (target_name, arg2);
@@ -15097,6 +14080,7 @@ void Character::do_cast (std::string argument)
     return;
   }
 
+  int sn;
   if ((sn = skill_lookup (arg1)) < 0
     || (!is_npc () && level < skill_table[sn].skill_level[klass])) {
     send_to_char ("You can't do that.\r\n");
@@ -15108,14 +14092,13 @@ void Character::do_cast (std::string argument)
     return;
   }
 
-  mn = mana_cost (sn);
-
+  int mn = mana_cost (sn);
   /*
    * Locate targets.
    */
-  victim = NULL;
-  obj = NULL;
-  vo = NULL;
+  Character *victim = NULL;
+  Object *obj = NULL;
+  void *vo = NULL;
 
   switch (skill_table[sn].target) {
   default:
@@ -15213,7 +14196,6 @@ void Character::do_cast (std::string argument)
   return;
 }
 
-
 /*
  * Spell functions.
  */
@@ -15228,7 +14210,6 @@ void Character::spell_acid_blast (int sn, int lvl, void *vo)
   damage (this, victim, dam, sn);
   return;
 }
-
 
 void Character::spell_armor (int sn, int lvl, void *vo)
 {
@@ -15248,7 +14229,6 @@ void Character::spell_armor (int sn, int lvl, void *vo)
     send_to_char ("Ok.\r\n");
   return;
 }
-
 
 void Character::spell_bless (int sn, int lvl, void *vo)
 {
@@ -15273,7 +14253,6 @@ void Character::spell_bless (int sn, int lvl, void *vo)
   return;
 }
 
-
 void Character::spell_blindness (int sn, int lvl, void *vo)
 {
   Character *victim = (Character *) vo;
@@ -15294,7 +14273,6 @@ void Character::spell_blindness (int sn, int lvl, void *vo)
   return;
 }
 
-
 void Character::spell_burning_hands (int sn, int lvl, void *vo)
 {
   Character *victim = (Character *) vo;
@@ -15306,22 +14284,19 @@ void Character::spell_burning_hands (int sn, int lvl, void *vo)
     39, 39, 40, 40, 41, 41, 42, 42, 43, 43,
     44, 44, 45, 45, 46, 46, 47, 47, 48, 48
   };
-  int dam;
 
   lvl = std::min (lvl, (int) (sizeof (dam_each) / sizeof (dam_each[0]) - 1));
   lvl = std::max (0, lvl);
-  dam = number_range (dam_each[lvl] / 2, dam_each[lvl] * 2);
+  int dam = number_range (dam_each[lvl] / 2, dam_each[lvl] * 2);
   if (victim->saves_spell (lvl))
     dam /= 2;
   damage (this, victim, dam, sn);
   return;
 }
 
-
 void Character::spell_call_lightning (int sn, int lvl, void *vo)
 {
   Character *vch;
-  int dam;
 
   if (!is_outside()) {
     send_to_char ("You must be out of doors.\r\n");
@@ -15333,7 +14308,7 @@ void Character::spell_call_lightning (int sn, int lvl, void *vo)
     return;
   }
 
-  dam = dice (lvl / 2, 8);
+  int dam = dice (lvl / 2, 8);
 
   send_to_char ("God's lightning strikes your foes!\r\n");
   act ("$n calls God's lightning to strike $s foes!",
@@ -15359,13 +14334,11 @@ void Character::spell_call_lightning (int sn, int lvl, void *vo)
   return;
 }
 
-
 void Character::spell_cause_light (int sn, int lvl, void *vo)
 {
   damage (this, (Character *) vo, dice (1, 8) + lvl / 3, sn);
   return;
 }
-
 
 void Character::spell_cause_critical (int sn, int lvl, void *vo)
 {
@@ -15373,13 +14346,11 @@ void Character::spell_cause_critical (int sn, int lvl, void *vo)
   return;
 }
 
-
 void Character::spell_cause_serious (int sn, int lvl, void *vo)
 {
   damage (this, (Character *) vo, dice (2, 8) + lvl / 2, sn);
   return;
 }
-
 
 void Character::spell_change_sex (int sn, int lvl, void *vo)
 {
@@ -15402,7 +14373,6 @@ void Character::spell_change_sex (int sn, int lvl, void *vo)
     send_to_char ("Ok.\r\n");
   return;
 }
-
 
 void Character::spell_charm_person (int sn, int lvl, void *vo)
 {
@@ -15434,7 +14404,6 @@ void Character::spell_charm_person (int sn, int lvl, void *vo)
   return;
 }
 
-
 void Character::spell_chill_touch (int sn, int lvl, void *vo)
 {
   Character *victim = (Character *) vo;
@@ -15447,11 +14416,10 @@ void Character::spell_chill_touch (int sn, int lvl, void *vo)
     24, 24, 24, 25, 25, 25, 26, 26, 26, 27
   };
   Affect af;
-  int dam;
 
   lvl = std::min (lvl, (int) (sizeof (dam_each) / sizeof (dam_each[0]) - 1));
   lvl = std::max (0, lvl);
-  dam = number_range (dam_each[lvl] / 2, dam_each[lvl] * 2);
+  int dam = number_range (dam_each[lvl] / 2, dam_each[lvl] * 2);
   if (!victim->saves_spell (lvl)) {
     af.type = sn;
     af.duration = 6;
@@ -15467,7 +14435,6 @@ void Character::spell_chill_touch (int sn, int lvl, void *vo)
   return;
 }
 
-
 void Character::spell_colour_spray (int sn, int lvl, void *vo)
 {
   Character *victim = (Character *) vo;
@@ -15479,18 +14446,16 @@ void Character::spell_colour_spray (int sn, int lvl, void *vo)
     65, 66, 67, 67, 68, 69, 70, 70, 71, 72,
     73, 73, 74, 75, 76, 76, 77, 78, 79, 79
   };
-  int dam;
 
   lvl = std::min (lvl, (int) (sizeof (dam_each) / sizeof (dam_each[0]) - 1));
   lvl = std::max (0, lvl);
-  dam = number_range (dam_each[lvl] / 2, dam_each[lvl] * 2);
+  int dam = number_range (dam_each[lvl] / 2, dam_each[lvl] * 2);
   if (victim->saves_spell (lvl))
     dam /= 2;
 
   damage (this, victim, dam, sn);
   return;
 }
-
 
 void Character::spell_continual_light (int sn, int lvl, void *vo)
 {
@@ -15502,7 +14467,6 @@ void Character::spell_continual_light (int sn, int lvl, void *vo)
   act ("You twiddle your thumbs and $p appears.", light, NULL, TO_CHAR);
   return;
 }
-
 
 void Character::spell_control_weather (int sn, int lvl, void *vo)
 {
@@ -15517,12 +14481,9 @@ void Character::spell_control_weather (int sn, int lvl, void *vo)
   return;
 }
 
-
 void Character::spell_create_food (int sn, int lvl, void *vo)
 {
-  Object *mushroom;
-
-  mushroom = get_obj_index(OBJ_VNUM_MUSHROOM)->create_object(0);
+  Object* mushroom = get_obj_index(OBJ_VNUM_MUSHROOM)->create_object(0);
   mushroom->value[0] = 5 + lvl;
   mushroom->obj_to_room (in_room);
   act ("$p suddenly appears.", mushroom, NULL, TO_ROOM);
@@ -15530,12 +14491,9 @@ void Character::spell_create_food (int sn, int lvl, void *vo)
   return;
 }
 
-
 void Character::spell_create_spring (int sn, int lvl, void *vo)
 {
-  Object *spring;
-
-  spring = get_obj_index(OBJ_VNUM_SPRING)->create_object(0);
+  Object* spring = get_obj_index(OBJ_VNUM_SPRING)->create_object(0);
   spring->timer = lvl;
   spring->obj_to_room (in_room);
   act ("$p flows from the ground.", spring, NULL, TO_ROOM);
@@ -15543,11 +14501,9 @@ void Character::spell_create_spring (int sn, int lvl, void *vo)
   return;
 }
 
-
 void Character::spell_create_water (int sn, int lvl, void *vo)
 {
   Object *obj = (Object *) vo;
-  int water;
 
   if (obj->item_type != ITEM_DRINK_CON) {
     send_to_char ("It is unable to hold water.\r\n");
@@ -15559,7 +14515,7 @@ void Character::spell_create_water (int sn, int lvl, void *vo)
     return;
   }
 
-  water = std::min (lvl * (weather_info.sky >= SKY_RAINING ? 4 : 2),
+  int water = std::min (lvl * (weather_info.sky >= SKY_RAINING ? 4 : 2),
     obj->value[0] - obj->value[1]
     );
 
@@ -15567,17 +14523,13 @@ void Character::spell_create_water (int sn, int lvl, void *vo)
     obj->value[2] = LIQ_WATER;
     obj->value[1] += water;
     if (!is_name ("water", obj->name)) {
-      char buf[MAX_STRING_LENGTH];
-
-      snprintf (buf, sizeof buf, "%s water", obj->name.c_str());
-      obj->name = buf;
+      obj->name = obj->name + " water";
     }
     act ("$p is filled.", obj, NULL, TO_CHAR);
   }
 
   return;
 }
-
 
 void Character::spell_cure_blindness (int sn, int lvl, void *vo)
 {
@@ -15591,13 +14543,11 @@ void Character::spell_cure_blindness (int sn, int lvl, void *vo)
   return;
 }
 
-
 void Character::spell_cure_critical (int sn, int lvl, void *vo)
 {
   Character *victim = (Character *) vo;
-  int heal;
 
-  heal = dice (3, 8) + lvl - 6;
+  int heal = dice (3, 8) + lvl - 6;
   victim->hit = std::min (victim->hit + heal, victim->max_hit);
   victim->update_pos();
   victim->send_to_char ("You feel better!\r\n");
@@ -15605,14 +14555,12 @@ void Character::spell_cure_critical (int sn, int lvl, void *vo)
     send_to_char ("Ok.\r\n");
   return;
 }
-
 
 void Character::spell_cure_light (int sn, int lvl, void *vo)
 {
   Character *victim = (Character *) vo;
-  int heal;
 
-  heal = dice (1, 8) + lvl / 3;
+  int heal = dice (1, 8) + lvl / 3;
   victim->hit = std::min (victim->hit + heal, victim->max_hit);
   victim->update_pos();
   victim->send_to_char ("You feel better!\r\n");
@@ -15620,7 +14568,6 @@ void Character::spell_cure_light (int sn, int lvl, void *vo)
     send_to_char ("Ok.\r\n");
   return;
 }
-
 
 void Character::spell_cure_poison (int sn, int lvl, void *vo)
 {
@@ -15634,13 +14581,11 @@ void Character::spell_cure_poison (int sn, int lvl, void *vo)
   return;
 }
 
-
 void Character::spell_cure_serious (int sn, int lvl, void *vo)
 {
   Character *victim = (Character *) vo;
-  int heal;
 
-  heal = dice (2, 8) + lvl / 2;
+  int heal = dice (2, 8) + lvl / 2;
   victim->hit = std::min (victim->hit + heal, victim->max_hit);
   victim->update_pos();
   victim->send_to_char ("You feel better!\r\n");
@@ -15648,7 +14593,6 @@ void Character::spell_cure_serious (int sn, int lvl, void *vo)
     send_to_char ("Ok.\r\n");
   return;
 }
-
 
 void Character::spell_curse (int sn, int lvl, void *vo)
 {
@@ -15674,7 +14618,6 @@ void Character::spell_curse (int sn, int lvl, void *vo)
   return;
 }
 
-
 void Character::spell_detect_evil (int sn, int lvl, void *vo)
 {
   Character *victim = (Character *) vo;
@@ -15693,7 +14636,6 @@ void Character::spell_detect_evil (int sn, int lvl, void *vo)
     send_to_char ("Ok.\r\n");
   return;
 }
-
 
 void Character::spell_detect_hidden (int sn, int lvl, void *vo)
 {
@@ -15714,7 +14656,6 @@ void Character::spell_detect_hidden (int sn, int lvl, void *vo)
   return;
 }
 
-
 void Character::spell_detect_invis (int sn, int lvl, void *vo)
 {
   Character *victim = (Character *) vo;
@@ -15733,7 +14674,6 @@ void Character::spell_detect_invis (int sn, int lvl, void *vo)
     send_to_char ("Ok.\r\n");
   return;
 }
-
 
 void Character::spell_detect_magic (int sn, int lvl, void *vo)
 {
@@ -15754,7 +14694,6 @@ void Character::spell_detect_magic (int sn, int lvl, void *vo)
   return;
 }
 
-
 void Character::spell_detect_poison (int sn, int lvl, void *vo)
 {
   Object *obj = (Object *) vo;
@@ -15771,20 +14710,15 @@ void Character::spell_detect_poison (int sn, int lvl, void *vo)
   return;
 }
 
-
 void Character::spell_dispel_magic (int sn, int lvl, void *vo)
 {
-
   send_to_char ("Sorry but this spell has been disabled.\r\n");
   return;
-
 }
-
 
 void Character::spell_dispel_evil (int sn, int lvl, void *vo)
 {
   Character *victim = (Character *) vo;
-  int dam;
 
   if (!is_npc () && is_evil ())
     victim = this;
@@ -15799,24 +14733,21 @@ void Character::spell_dispel_evil (int sn, int lvl, void *vo)
     return;
   }
 
-  dam = dice (lvl, 4);
+  int dam = dice (lvl, 4);
   if (victim->saves_spell (lvl))
     dam /= 2;
   damage (this, victim, dam, sn);
   return;
 }
 
-
 void Character::spell_earthquake (int sn, int lvl, void *vo)
 {
-  Character *vch;
-
   send_to_char ("The earth trembles beneath your feet!\r\n");
   act ("$n makes the earth tremble and shiver.", NULL, NULL, TO_ROOM);
 
   CharIter c, next;
   for (c = char_list.begin(); c != char_list.end(); c = next) {
-    vch = *c;
+    Character* vch = *c;
     next = ++c;
     if (vch->in_room == NULL)
       continue;
@@ -15832,7 +14763,6 @@ void Character::spell_earthquake (int sn, int lvl, void *vo)
 
   return;
 }
-
 
 void Character::spell_enchant_weapon (int sn, int lvl, void *vo)
 {
@@ -15878,7 +14808,6 @@ void Character::spell_enchant_weapon (int sn, int lvl, void *vo)
   return;
 }
 
-
 /*
  * Drain XP, MANA, HP.
  * Caster gains HP.
@@ -15907,7 +14836,6 @@ void Character::spell_energy_drain (int sn, int lvl, void *vo)
   return;
 }
 
-
 void Character::spell_fireball (int sn, int lvl, void *vo)
 {
   Character *victim = (Character *) vo;
@@ -15919,30 +14847,26 @@ void Character::spell_fireball (int sn, int lvl, void *vo)
     92, 94, 96, 98, 100, 102, 104, 106, 108, 110,
     112, 114, 116, 118, 120, 122, 124, 126, 128, 130
   };
-  int dam;
 
   lvl = std::min (lvl, (int) (sizeof (dam_each) / sizeof (dam_each[0]) - 1));
   lvl = std::max (0, lvl);
-  dam = number_range (dam_each[lvl] / 2, dam_each[lvl] * 2);
+  int dam = number_range (dam_each[lvl] / 2, dam_each[lvl] * 2);
   if (victim->saves_spell (lvl))
     dam /= 2;
   damage (this, victim, dam, sn);
   return;
 }
-
 
 void Character::spell_flamestrike (int sn, int lvl, void *vo)
 {
   Character *victim = (Character *) vo;
-  int dam;
 
-  dam = dice (6, lvl);
+  int dam = dice (6, lvl);
   if (victim->saves_spell (lvl))
     dam /= 2;
   damage (this, victim, dam, sn);
   return;
 }
-
 
 void Character::spell_faerie_fire (int sn, int lvl, void *vo)
 {
@@ -15961,7 +14885,6 @@ void Character::spell_faerie_fire (int sn, int lvl, void *vo)
   victim->act ("$n is surrounded by a pink outline.", NULL, NULL, TO_ROOM);
   return;
 }
-
 
 void Character::spell_faerie_fog (int sn, int lvl, void *vo)
 {
@@ -15989,7 +14912,6 @@ void Character::spell_faerie_fog (int sn, int lvl, void *vo)
   return;
 }
 
-
 void Character::spell_fly (int sn, int lvl, void *vo)
 {
   Character *victim = (Character *) vo;
@@ -16008,13 +14930,11 @@ void Character::spell_fly (int sn, int lvl, void *vo)
   return;
 }
 
-
 void Character::spell_gate (int sn, int lvl, void *vo)
 {
   get_mob_index(MOB_VNUM_VAMPIRE)->create_mobile()->char_to_room(in_room);
   return;
 }
-
 
 /*
  * Spell for mega1.are from Glop/Erkenbrand.
@@ -16022,15 +14942,13 @@ void Character::spell_gate (int sn, int lvl, void *vo)
 void Character::spell_general_purpose (int sn, int lvl, void *vo)
 {
   Character *victim = (Character *) vo;
-  int dam;
 
-  dam = number_range (25, 100);
+  int dam = number_range (25, 100);
   if (victim->saves_spell (lvl))
     dam /= 2;
   damage (this, victim, dam, sn);
   return;
 }
-
 
 void Character::spell_giant_strength (int sn, int lvl, void *vo)
 {
@@ -16051,7 +14969,6 @@ void Character::spell_giant_strength (int sn, int lvl, void *vo)
   return;
 }
 
-
 void Character::spell_harm (int sn, int lvl, void *vo)
 {
   Character *victim = (Character *) vo;
@@ -16065,7 +14982,6 @@ void Character::spell_harm (int sn, int lvl, void *vo)
   return;
 }
 
-
 void Character::spell_heal (int sn, int lvl, void *vo)
 {
   Character *victim = (Character *) vo;
@@ -16077,22 +14993,19 @@ void Character::spell_heal (int sn, int lvl, void *vo)
   return;
 }
 
-
 /*
  * Spell for mega1.are from Glop/Erkenbrand.
  */
 void Character::spell_high_explosive (int sn, int lvl, void *vo)
 {
   Character *victim = (Character *) vo;
-  int dam;
 
-  dam = number_range (30, 120);
+  int dam = number_range (30, 120);
   if (victim->saves_spell (lvl))
     dam /= 2;
   damage (this, victim, dam, sn);
   return;
 }
-
 
 void Character::spell_identify (int sn, int lvl, void *vo)
 {
@@ -16180,7 +15093,6 @@ void Character::spell_identify (int sn, int lvl, void *vo)
   return;
 }
 
-
 void Character::spell_infravision (int sn, int lvl, void *vo)
 {
   Character *victim = (Character *) vo;
@@ -16200,7 +15112,6 @@ void Character::spell_infravision (int sn, int lvl, void *vo)
     send_to_char ("Ok.\r\n");
   return;
 }
-
 
 void Character::spell_invis (int sn, int lvl, void *vo)
 {
@@ -16223,14 +15134,12 @@ void Character::spell_invis (int sn, int lvl, void *vo)
   return;
 }
 
-
 void Character::spell_know_alignment (int sn, int lvl, void *vo)
 {
   Character *victim = (Character *) vo;
   char *msg;
-  int ap;
 
-  ap = victim->alignment;
+  int ap = victim->alignment;
 
   if (ap > 700)
     msg = "$N has an aura as white as the driven snow.";
@@ -16251,7 +15160,6 @@ void Character::spell_know_alignment (int sn, int lvl, void *vo)
   return;
 }
 
-
 void Character::spell_lightning_bolt (int sn, int lvl, void *vo)
 {
   Character *victim = (Character *) vo;
@@ -16263,27 +15171,24 @@ void Character::spell_lightning_bolt (int sn, int lvl, void *vo)
     51, 52, 52, 53, 54, 54, 55, 56, 56, 57,
     58, 58, 59, 60, 60, 61, 62, 62, 63, 64
   };
-  int dam;
 
   lvl = std::min (lvl, (int) (sizeof (dam_each) / sizeof (dam_each[0]) - 1));
   lvl = std::max (0, lvl);
-  dam = number_range (dam_each[lvl] / 2, dam_each[lvl] * 2);
+  int dam = number_range (dam_each[lvl] / 2, dam_each[lvl] * 2);
   if (victim->saves_spell (lvl))
     dam /= 2;
   damage (this, victim, dam, sn);
   return;
 }
 
-
 void Character::spell_locate_object (int sn, int lvl, void *vo)
 {
   std::string buf;
-  Object *in_obj;
-  bool found;
-
-  found = false;
+  bool found = false;
   ObjIter o;
   for (o = object_list.begin(); o != object_list.end(); o++) {
+    Object *in_obj;
+
     if (!can_see_obj(*o) || !is_name (target_name, (*o)->name))
       continue;
 
@@ -16309,7 +15214,6 @@ void Character::spell_locate_object (int sn, int lvl, void *vo)
   return;
 }
 
-
 void Character::spell_magic_missile (int sn, int lvl, void *vo)
 {
   Character *victim = (Character *) vo;
@@ -16321,17 +15225,15 @@ void Character::spell_magic_missile (int sn, int lvl, void *vo)
     11, 11, 11, 11, 11, 12, 12, 12, 12, 12,
     13, 13, 13, 13, 13, 14, 14, 14, 14, 14
   };
-  int dam;
 
   lvl = std::min (lvl, (int) (sizeof (dam_each) / sizeof (dam_each[0]) - 1));
   lvl = std::max (0, lvl);
-  dam = number_range (dam_each[lvl] / 2, dam_each[lvl] * 2);
+  int dam = number_range (dam_each[lvl] / 2, dam_each[lvl] * 2);
   if (victim->saves_spell (lvl))
     dam /= 2;
   damage (this, victim, dam, sn);
   return;
 }
-
 
 void Character::spell_mass_invis (int sn, int lvl, void *vo)
 {
@@ -16355,13 +15257,11 @@ void Character::spell_mass_invis (int sn, int lvl, void *vo)
   return;
 }
 
-
 void Character::spell_null (int sn, int lvl, void *vo)
 {
   send_to_char ("That's not a spell!\r\n");
   return;
 }
-
 
 void Character::spell_pass_door (int sn, int lvl, void *vo)
 {
@@ -16380,7 +15280,6 @@ void Character::spell_pass_door (int sn, int lvl, void *vo)
   victim->send_to_char ("You turn translucent.\r\n");
   return;
 }
-
 
 void Character::spell_poison (int sn, int lvl, void *vo)
 {
@@ -16401,7 +15300,6 @@ void Character::spell_poison (int sn, int lvl, void *vo)
   return;
 }
 
-
 void Character::spell_protection (int sn, int lvl, void *vo)
 {
   Character *victim = (Character *) vo;
@@ -16421,7 +15319,6 @@ void Character::spell_protection (int sn, int lvl, void *vo)
   return;
 }
 
-
 void Character::spell_refresh (int sn, int lvl, void *vo)
 {
   Character *victim = (Character *) vo;
@@ -16431,7 +15328,6 @@ void Character::spell_refresh (int sn, int lvl, void *vo)
     send_to_char ("Ok.\r\n");
   return;
 }
-
 
 void Character::spell_remove_curse (int sn, int lvl, void *vo)
 {
@@ -16445,7 +15341,6 @@ void Character::spell_remove_curse (int sn, int lvl, void *vo)
 
   return;
 }
-
 
 void Character::spell_sanctuary (int sn, int lvl, void *vo)
 {
@@ -16465,7 +15360,6 @@ void Character::spell_sanctuary (int sn, int lvl, void *vo)
   return;
 }
 
-
 void Character::spell_shield (int sn, int lvl, void *vo)
 {
   Character *victim = (Character *) vo;
@@ -16484,7 +15378,6 @@ void Character::spell_shield (int sn, int lvl, void *vo)
   return;
 }
 
-
 void Character::spell_shocking_grasp (int sn, int lvl, void *vo)
 {
   Character *victim = (Character *) vo;
@@ -16496,17 +15389,15 @@ void Character::spell_shocking_grasp (int sn, int lvl, void *vo)
     48, 48, 49, 49, 50, 50, 51, 51, 52, 52,
     53, 53, 54, 54, 55, 55, 56, 56, 57, 57
   };
-  int dam;
 
   lvl = std::min (lvl, (int) (sizeof (dam_each) / sizeof (dam_each[0]) - 1));
   lvl = std::max (0, lvl);
-  dam = number_range (dam_each[lvl] / 2, dam_each[lvl] * 2);
+  int dam = number_range (dam_each[lvl] / 2, dam_each[lvl] * 2);
   if (victim->saves_spell (lvl))
     dam /= 2;
   damage (this, victim, dam, sn);
   return;
 }
-
 
 void Character::spell_sleep (int sn, int lvl, void *vo)
 {
@@ -16533,7 +15424,6 @@ void Character::spell_sleep (int sn, int lvl, void *vo)
   return;
 }
 
-
 void Character::spell_stone_skin (int sn, int lvl, void *vo)
 {
   Character *victim = (Character *) vo;
@@ -16551,7 +15441,6 @@ void Character::spell_stone_skin (int sn, int lvl, void *vo)
   victim->send_to_char ("Your skin turns to stone.\r\n");
   return;
 }
-
 
 void Character::spell_summon (int sn, int lvl, void *vo)
 {
@@ -16581,11 +15470,9 @@ void Character::spell_summon (int sn, int lvl, void *vo)
   return;
 }
 
-
 void Character::spell_teleport (int sn, int lvl, void *vo)
 {
   Character *victim = (Character *) vo;
-  Room *pRoomIndex;
 
   if (victim->in_room == NULL
     || IS_SET (victim->in_room->room_flags, ROOM_NO_RECALL)
@@ -16596,6 +15483,7 @@ void Character::spell_teleport (int sn, int lvl, void *vo)
     return;
   }
 
+  Room *pRoomIndex;
   for (;;) {
     pRoomIndex = get_room_index (number_range (0, 65535));
     if (pRoomIndex != NULL)
@@ -16612,15 +15500,14 @@ void Character::spell_teleport (int sn, int lvl, void *vo)
   return;
 }
 
-
 void Character::spell_ventriloquate (int sn, int lvl, void *vo)
 {
-  char buf1[MAX_STRING_LENGTH];
-  char buf2[MAX_STRING_LENGTH];
   std::string speaker;
 
   target_name = one_argument (target_name, speaker);
 
+  char buf1[MAX_STRING_LENGTH];
+  char buf2[MAX_STRING_LENGTH];
   snprintf (buf1, sizeof buf1, "%s says '%s'.\r\n", speaker.c_str(), target_name.c_str());
   snprintf (buf2, sizeof buf2, "Someone makes %s say '%s'.\r\n", speaker.c_str(), target_name.c_str());
   buf1[0] = toupper (buf1[0]);
@@ -16633,7 +15520,6 @@ void Character::spell_ventriloquate (int sn, int lvl, void *vo)
 
   return;
 }
-
 
 void Character::spell_weaken (int sn, int lvl, void *vo)
 {
@@ -16654,7 +15540,6 @@ void Character::spell_weaken (int sn, int lvl, void *vo)
   return;
 }
 
-
 /*
  * This is for muds that _want_ scrolls of recall.
  * Ick.
@@ -16665,18 +15550,15 @@ void Character::spell_word_of_recall (int sn, int lvl, void *vo)
   return;
 }
 
-
 /*
  * NPC spells.
  */
 void Character::spell_acid_breath (int sn, int lvl, void *vo)
 {
   Character *victim = (Character *) vo;
-  Object *obj_lose;
-  int dam;
-  int hpch;
 
   if (number_percent () < 2 * lvl && !victim->saves_spell (lvl)) {
+    Object *obj_lose;
     ObjIter o, onext;
     for (o = victim->carrying.begin(); o != victim->carrying.end(); o = onext) {
       obj_lose = *o;
@@ -16707,23 +15589,20 @@ void Character::spell_acid_breath (int sn, int lvl, void *vo)
     }
   }
 
-  hpch = std::max (10, hit);
-  dam = number_range (hpch / 16 + 1, hpch / 8);
+  int hpch = std::max (10, hit);
+  int dam = number_range (hpch / 16 + 1, hpch / 8);
   if (victim->saves_spell (lvl))
     dam /= 2;
   damage (this, victim, dam, sn);
   return;
 }
 
-
 void Character::spell_fire_breath (int sn, int lvl, void *vo)
 {
   Character *victim = (Character *) vo;
-  Object *obj_lose;
-  int dam;
-  int hpch;
 
   if (number_percent () < 2 * lvl && !victim->saves_spell (lvl)) {
+    Object *obj_lose;
     ObjIter o, onext;
     for (o = victim->carrying.begin(); o != victim->carrying.end(); o = onext) {
       obj_lose = *o;
@@ -16764,23 +15643,20 @@ void Character::spell_fire_breath (int sn, int lvl, void *vo)
     }
   }
 
-  hpch = std::max (10, hit);
-  dam = number_range (hpch / 16 + 1, hpch / 8);
+  int hpch = std::max (10, hit);
+  int dam = number_range (hpch / 16 + 1, hpch / 8);
   if (victim->saves_spell (lvl))
     dam /= 2;
   damage (this, victim, dam, sn);
   return;
 }
 
-
 void Character::spell_frost_breath (int sn, int lvl, void *vo)
 {
   Character *victim = (Character *) vo;
-  Object *obj_lose;
-  int dam;
-  int hpch;
 
   if (number_percent () < 2 * lvl && !victim->saves_spell (lvl)) {
+    Object *obj_lose;
     ObjIter o, onext;
     for (o = victim->carrying.begin(); o != victim->carrying.end(); o = onext) {
       obj_lose = *o;
@@ -16805,28 +15681,25 @@ void Character::spell_frost_breath (int sn, int lvl, void *vo)
     }
   }
 
-  hpch = std::max (10, hit);
-  dam = number_range (hpch / 16 + 1, hpch / 8);
+  int hpch = std::max (10, hit);
+  int dam = number_range (hpch / 16 + 1, hpch / 8);
   if (victim->saves_spell (lvl))
     dam /= 2;
   damage (this, victim, dam, sn);
   return;
 }
 
-
 void Character::spell_gas_breath (int sn, int lvl, void *vo)
 {
   Character *vch;
-  int dam;
-  int hpch;
 
   CharIter rch, next;
   for (rch = in_room->people.begin(); rch != in_room->people.end(); rch = next) {
     vch = *rch;
     next = ++rch;
     if (is_npc () ? !vch->is_npc () : vch->is_npc ()) {
-      hpch = std::max (10, hit);
-      dam = number_range (hpch / 16 + 1, hpch / 8);
+      int hpch = std::max (10, hit);
+      int dam = number_range (hpch / 16 + 1, hpch / 8);
       if (vch->saves_spell (lvl))
         dam /= 2;
       damage (this, vch, dam, sn);
@@ -16835,32 +15708,25 @@ void Character::spell_gas_breath (int sn, int lvl, void *vo)
   return;
 }
 
-
 void Character::spell_lightning_breath (int sn, int lvl, void *vo)
 {
   Character *victim = (Character *) vo;
-  int dam;
-  int hpch;
 
-  hpch = std::max (10, hit);
-  dam = number_range (hpch / 16 + 1, hpch / 8);
+  int hpch = std::max (10, hit);
+  int dam = number_range (hpch / 16 + 1, hpch / 8);
   if (victim->saves_spell (lvl))
     dam /= 2;
   damage (this, victim, dam, sn);
   return;
 }
 
-
 /* Date stamp idea comes from Alander of ROM */
 void Character::do_note (std::string argument)
 {
-  char buf[MAX_STRING_LENGTH];
-  std::string arg, buf1;
-  int vnum;
-  int anum;
-
   if (is_npc ())
     return;
+
+  std::string arg, buf1;
 
   argument = one_argument (argument, arg);
   smash_tilde (argument);
@@ -16870,6 +15736,9 @@ void Character::do_note (std::string argument)
     return;
   }
 
+  char buf[MAX_STRING_LENGTH];
+  int vnum;
+  int anum;
   if (!str_cmp (arg, "list")) {
     vnum = 0;
     for (std::list<Note*>::iterator p = note_list.begin();
@@ -17070,20 +15939,17 @@ void Character::do_note (std::string argument)
   return;
 }
 
-
 void Character::do_auction (std::string argument)
 {
   talk_channel (this, argument, CHANNEL_AUCTION, "auction");
   return;
 }
 
-
 void Character::do_chat (std::string argument)
 {
   talk_channel (this, argument, CHANNEL_CHAT, "chat");
   return;
 }
-
 
 /*
  * Alander's new channels.
@@ -17094,20 +15960,17 @@ void Character::do_music (std::string argument)
   return;
 }
 
-
 void Character::do_question (std::string argument)
 {
   talk_channel (this, argument, CHANNEL_QUESTION, "question");
   return;
 }
 
-
 void Character::do_answer (std::string argument)
 {
   talk_channel (this, argument, CHANNEL_QUESTION, "answer");
   return;
 }
-
 
 void Character::do_shout (std::string argument)
 {
@@ -17116,20 +15979,17 @@ void Character::do_shout (std::string argument)
   return;
 }
 
-
 void Character::do_yell (std::string argument)
 {
   talk_channel (this, argument, CHANNEL_YELL, "yell");
   return;
 }
 
-
 void Character::do_immtalk (std::string argument)
 {
   talk_channel (this, argument, CHANNEL_IMMTALK, "immtalk");
   return;
 }
-
 
 void Character::do_say (std::string argument)
 {
@@ -17144,17 +16004,14 @@ void Character::do_say (std::string argument)
   return;
 }
 
-
 void Character::do_tell (std::string argument)
 {
-  std::string arg;
-  Character *victim;
-
   if (!is_npc () && IS_SET (actflags, PLR_SILENCE)) {
     send_to_char ("Your message didn't get through.\r\n");
     return;
   }
 
+  std::string arg;
   argument = one_argument (argument, arg);
 
   if (arg.empty() || argument.empty()) {
@@ -17166,6 +16023,7 @@ void Character::do_tell (std::string argument)
    * Can tell to PC's anywhere, but NPC's only in same room.
    * -- Furey
    */
+  Character *victim;
   if ((victim = get_char_world (arg)) == NULL
     || (victim->is_npc () && victim->in_room != in_room)) {
     send_to_char ("They aren't here.\r\n");
@@ -17187,15 +16045,14 @@ void Character::do_tell (std::string argument)
   return;
 }
 
-
 void Character::do_reply (std::string argument)
 {
-  Character *victim;
-
   if (!is_npc () && IS_SET (actflags, PLR_SILENCE)) {
     send_to_char ("Your message didn't get through.\r\n");
     return;
   }
+
+  Character *victim;
 
   if ((victim = reply) == NULL) {
     send_to_char ("They aren't here.\r\n");
@@ -17217,7 +16074,6 @@ void Character::do_reply (std::string argument)
   return;
 }
 
-
 void Character::do_emote (std::string argument)
 {
   if (!is_npc () && IS_SET (actflags, PLR_NO_EMOTE)) {
@@ -17238,29 +16094,12 @@ void Character::do_emote (std::string argument)
   return;
 }
 
-
-void Character::do_pose (std::string argument)
-{
-  if (is_npc ())
-    return;
-
-  int lvl = std::min (level, (int) (sizeof (pose_table) / sizeof (pose_table[0]) - 1));
-  int pose = number_range (0, lvl);
-
-  act (pose_table[pose].message[2 * klass + 0], NULL, NULL, TO_CHAR);
-  act (pose_table[pose].message[2 * klass + 1], NULL, NULL, TO_ROOM);
-
-  return;
-}
-
-
 void Character::do_bug (std::string argument)
 {
   append_file (BUG_FILE, argument);
   send_to_char ("Ok.  Thanks.\r\n");
   return;
 }
-
 
 void Character::do_idea (std::string argument)
 {
@@ -17269,7 +16108,6 @@ void Character::do_idea (std::string argument)
   return;
 }
 
-
 void Character::do_typo (std::string argument)
 {
   append_file (TYPO_FILE, argument);
@@ -17277,13 +16115,11 @@ void Character::do_typo (std::string argument)
   return;
 }
 
-
 void Character::do_rent (std::string argument)
 {
   send_to_char ("There is no rent here.  Just save and quit.\r\n");
   return;
 }
-
 
 void Character::do_qui (std::string argument)
 {
@@ -17291,11 +16127,8 @@ void Character::do_qui (std::string argument)
   return;
 }
 
-
 void Character::do_quit (std::string argument)
 {
-  Descriptor *d;
-
   if (is_npc ())
     return;
 
@@ -17318,14 +16151,13 @@ void Character::do_quit (std::string argument)
    * After extract_char the this is no longer valid!
    */
   save_char_obj();
-  d = desc;
+  Descriptor *d = desc;
   extract_char (true);
   if (d != NULL)
     d->close_socket();
 
   return;
 }
-
 
 void Character::do_save (std::string argument)
 {
@@ -17342,11 +16174,9 @@ void Character::do_save (std::string argument)
   return;
 }
 
-
 void Character::do_follow (std::string argument)
 {
   std::string arg;
-  Character *victim;
 
   one_argument (argument, arg);
 
@@ -17355,6 +16185,7 @@ void Character::do_follow (std::string argument)
     return;
   }
 
+  Character *victim;
   if ((victim = get_char_room (arg)) == NULL) {
     send_to_char ("They aren't here.\r\n");
     return;
@@ -17387,14 +16218,9 @@ void Character::do_follow (std::string argument)
   return;
 }
 
-
 void Character::do_order (std::string argument)
 {
   std::string arg;
-  Character *victim;
-  Character *och;
-  bool found;
-  bool fAll;
 
   argument = one_argument (argument, arg);
 
@@ -17408,6 +16234,8 @@ void Character::do_order (std::string argument)
     return;
   }
 
+  Character *victim;
+  bool fAll;
   if (!str_cmp (arg, "all")) {
     fAll = true;
     victim = NULL;
@@ -17429,7 +16257,8 @@ void Character::do_order (std::string argument)
     }
   }
 
-  found = false;
+  Character *och;
+  bool found = false;
   CharIter rch, next;
   for (rch = in_room->people.begin(); rch != in_room->people.end(); rch = next) {
     och = *rch;
@@ -17450,12 +16279,10 @@ void Character::do_order (std::string argument)
   return;
 }
 
-
 void Character::do_group (std::string argument)
 {
   char buf[MAX_STRING_LENGTH];
   std::string arg;
-  Character *victim;
 
   one_argument (argument, arg);
 
@@ -17480,6 +16307,7 @@ void Character::do_group (std::string argument)
     return;
   }
 
+  Character *victim;
   if ((victim = get_char_room (arg)) == NULL) {
     send_to_char ("They aren't here.\r\n");
     return;
@@ -17517,18 +16345,12 @@ void Character::do_group (std::string argument)
   return;
 }
 
-
 /*
  * 'Split' originally by Gnort, God of Chaos.
  */
 void Character::do_split (std::string argument)
 {
-  char buf[MAX_STRING_LENGTH];
   std::string arg;
-  int members;
-  int amount;
-  int share;
-  int extra;
 
   one_argument (argument, arg);
 
@@ -17537,7 +16359,7 @@ void Character::do_split (std::string argument)
     return;
   }
 
-  amount = atoi (arg.c_str());
+  int amount = atoi (arg.c_str());
 
   if (amount < 0) {
     send_to_char ("Your group wouldn't like that.\r\n");
@@ -17554,7 +16376,7 @@ void Character::do_split (std::string argument)
     return;
   }
 
-  members = 0;
+  int members = 0;
   CharIter gch;
   for (gch = in_room->people.begin(); gch != in_room->people.end(); gch++) {
     if (is_same_group (*gch, this))
@@ -17566,8 +16388,8 @@ void Character::do_split (std::string argument)
     return;
   }
 
-  share = amount / members;
-  extra = amount % members;
+  int share = amount / members;
+  int extra = amount % members;
 
   if (share == 0) {
     send_to_char ("Don't even bother, cheapskate.\r\n");
@@ -17577,6 +16399,7 @@ void Character::do_split (std::string argument)
   gold -= amount;
   gold += share + extra;
 
+  char buf[MAX_STRING_LENGTH];
   snprintf (buf, sizeof buf,
     "You split %d gold coins.  Your share is %d gold coins.\r\n",
     amount, share + extra);
@@ -17594,7 +16417,6 @@ void Character::do_split (std::string argument)
 
   return;
 }
-
 
 void Character::do_gtell (std::string argument)
 {
@@ -17622,18 +16444,8 @@ void Character::do_gtell (std::string argument)
   return;
 }
 
-
 void Character::do_look (std::string argument)
 {
-  char buf[MAX_STRING_LENGTH];
-  std::string arg1;
-  std::string arg2;
-  Exit *pexit;
-  Character *victim;
-  Object *obj;
-  std::string pdesc;
-  int door;
-
   if (!is_npc () && desc == NULL)
     return;
 
@@ -17658,6 +16470,8 @@ void Character::do_look (std::string argument)
     return;
   }
 
+  std::string arg1, arg2;
+
   argument = one_argument (argument, arg1);
   argument = one_argument (argument, arg2);
 
@@ -17676,6 +16490,10 @@ void Character::do_look (std::string argument)
     show_char_to_char (in_room->people);
     return;
   }
+
+  char buf[MAX_STRING_LENGTH];
+  Object *obj;
+  std::string pdesc;
 
   if (!str_cmp (arg1, "i") || !str_cmp (arg1, "in")) {
     /* 'look in' */
@@ -17724,6 +16542,7 @@ void Character::do_look (std::string argument)
     return;
   }
 
+  Character *victim;
   if ((victim = get_char_room (arg1)) != NULL) {
     show_char_to_char_1 (victim);
     return;
@@ -17778,6 +16597,7 @@ void Character::do_look (std::string argument)
     return;
   }
 
+  int door;
   if (!str_cmp (arg1, "n") || !str_cmp (arg1, "north"))
     door = 0;
   else if (!str_cmp (arg1, "e") || !str_cmp (arg1, "east"))
@@ -17796,6 +16616,7 @@ void Character::do_look (std::string argument)
   }
 
   /* 'look direction' */
+  Exit *pexit;
   if ((pexit = in_room->exit[door]) == NULL) {
     send_to_char ("Nothing special there.\r\n");
     return;
@@ -17817,12 +16638,9 @@ void Character::do_look (std::string argument)
   return;
 }
 
-
 void Character::do_examine (std::string argument)
 {
-  std::string buf;
   std::string arg;
-  Object *obj;
 
   one_argument (argument, arg);
 
@@ -17833,6 +16651,7 @@ void Character::do_examine (std::string argument)
 
   do_look (arg);
 
+  Object *obj;
   if ((obj = get_obj_here (arg)) != NULL) {
     switch (obj->item_type) {
     default:
@@ -17843,7 +16662,7 @@ void Character::do_examine (std::string argument)
     case ITEM_CORPSE_NPC:
     case ITEM_CORPSE_PC:
       send_to_char ("When you look inside, you see:\r\n");
-      buf = "in " + arg;
+      std::string buf = "in " + arg;
       do_look (buf);
     }
   }
@@ -17851,28 +16670,22 @@ void Character::do_examine (std::string argument)
   return;
 }
 
-
 /*
  * Thanks to Zrin for auto-exit part.
  */
 void Character::do_exits (std::string argument)
 {
-  char buf[MAX_STRING_LENGTH];
-  Exit *pexit;
-  bool found;
-  bool fAuto;
-  int door;
-
-  buf[0] = '\0';
-  fAuto = !str_cmp (argument, "auto");
-
   if (!check_blind())
     return;
 
+  char buf[MAX_STRING_LENGTH];
+  buf[0] = '\0';
+  bool fAuto = !str_cmp (argument, "auto");
   strncpy (buf, fAuto ? "[Exits:" : "Obvious exits:\r\n", sizeof buf);
 
-  found = false;
-  for (door = 0; door <= 5; door++) {
+  bool found = false;
+  for (int door = 0; door <= 5; door++) {
+    Exit *pexit;
     if ((pexit = in_room->exit[door]) != NULL
       && pexit->to_room != NULL && !IS_SET (pexit->exit_info, EX_CLOSED)) {
       found = true;
@@ -17896,7 +16709,6 @@ void Character::do_exits (std::string argument)
   send_to_char (buf);
   return;
 }
-
 
 void Character::do_score (std::string argument)
 {
@@ -18068,14 +16880,11 @@ void Character::do_score (std::string argument)
   return;
 }
 
-
 void Character::do_time (std::string argument)
 {
-  char buf[MAX_STRING_LENGTH];
   char *suf;
-  int day;
 
-  day = time_info.day + 1;
+  int day = time_info.day + 1;
 
   if (day > 4 && day < 20)
     suf = "th";
@@ -18088,6 +16897,7 @@ void Character::do_time (std::string argument)
   else
     suf = "th";
 
+  char buf[MAX_STRING_LENGTH];
   snprintf (buf, sizeof buf,
     "It is %d o'clock %s, Day of %s, %d%s the Month of %s.\r\nMerc started up at %s\rThe system time is %s\r",
     (time_info.hour % 12 == 0) ? 12 : time_info.hour % 12,
@@ -18101,11 +16911,8 @@ void Character::do_time (std::string argument)
   return;
 }
 
-
 void Character::do_weather (std::string argument)
 {
-  std::string buf;
-
   static char *const sky_look[4] = {
     "cloudless",
     "cloudy",
@@ -18118,6 +16925,8 @@ void Character::do_weather (std::string argument)
     return;
   }
 
+  std::string buf;
+
   buf.append("The sky is ");
   buf.append(sky_look[weather_info.sky]);
   buf.append(" and ");
@@ -18127,7 +16936,6 @@ void Character::do_weather (std::string argument)
   send_to_char (buf);
   return;
 }
-
 
 void Character::do_help (std::string argument)
 {
@@ -18161,37 +16969,29 @@ void Character::do_help (std::string argument)
   return;
 }
 
-
 /*
  * New 'who' command originally by Alander of Rivers of Mud.
  */
 void Character::do_who (std::string argument)
 {
-  char buf[MAX_STRING_LENGTH];
-  char buf2[MAX_STRING_LENGTH];
   int iClass;
-  int iLevelLower;
-  int iLevelUpper;
-  int nNumber;
-  int nMatch;
-  bool rgfClass[MAX_CLASS];
-  bool fClassRestrict;
-  bool fImmortalOnly;
+  bool rgfClass[CLASS_MAX];
 
   /*
    * Set default arguments.
    */
-  iLevelLower = 0;
-  iLevelUpper = MAX_LEVEL;
-  fClassRestrict = false;
-  fImmortalOnly = false;
-  for (iClass = 0; iClass < MAX_CLASS; iClass++)
+  int iLevelLower = 0;
+  int iLevelUpper = MAX_LEVEL;
+  bool fClassRestrict = false;
+  bool fImmortalOnly = false;
+
+  for (iClass = 0; iClass < CLASS_MAX; iClass++)
     rgfClass[iClass] = false;
 
   /*
    * Parse arguments.
    */
-  nNumber = 0;
+  int nNumber = 0;
   for (;;) {
     std::string arg;
 
@@ -18212,8 +17012,6 @@ void Character::do_who (std::string argument)
         return;
       }
     } else {
-      int iClass;
-
       if (arg.size() < 3) {
         send_to_char ("Classes must be longer than that.\r\n");
         return;
@@ -18222,19 +17020,21 @@ void Character::do_who (std::string argument)
       /*
        * Look for classes to turn on.
        */
+      int iClass;
+
       arg.erase(3);
       if (!str_cmp (arg, "imm")) {
         fImmortalOnly = true;
       } else {
         fClassRestrict = true;
-        for (iClass = 0; iClass < MAX_CLASS; iClass++) {
+        for (iClass = 0; iClass < CLASS_MAX; iClass++) {
           if (!str_cmp (arg, class_table[iClass].who_name)) {
             rgfClass[iClass] = true;
             break;
           }
         }
 
-        if (iClass == MAX_CLASS) {
+        if (iClass == CLASS_MAX) {
           send_to_char ("That's not a class.\r\n");
           return;
         }
@@ -18245,7 +17045,8 @@ void Character::do_who (std::string argument)
   /*
    * Now show matching chars.
    */
-  nMatch = 0;
+  int nMatch = 0;
+  char buf[MAX_STRING_LENGTH];
   buf[0] = '\0';
   for (DescIter d = descriptor_list.begin();
     d != descriptor_list.end(); d++) {
@@ -18300,13 +17101,13 @@ void Character::do_who (std::string argument)
       wch->name.c_str(), wch->pcdata->title.c_str());
   }
 
+  char buf2[MAX_STRING_LENGTH];
   snprintf (buf2, sizeof buf2, "You see %d player%s in the game.\r\n",
     nMatch, nMatch == 1 ? "" : "s");
   strncat (buf, buf2, sizeof(buf) - sizeof(buf2));
   send_to_char (buf);
   return;
 }
-
 
 void Character::do_inventory (std::string argument)
 {
@@ -18315,16 +17116,13 @@ void Character::do_inventory (std::string argument)
   return;
 }
 
-
 void Character::do_equipment (std::string argument)
 {
-  Object *obj;
-  int iWear;
-  bool found;
 
   send_to_char ("You are using:\r\n");
-  found = false;
-  for (iWear = 0; iWear < MAX_WEAR; iWear++) {
+  bool found = false;
+  for (int iWear = 0; iWear < MAX_WEAR; iWear++) {
+    Object *obj;
     if ((obj = get_eq_char (iWear)) == NULL)
       continue;
 
@@ -18344,16 +17142,9 @@ void Character::do_equipment (std::string argument)
   return;
 }
 
-
 void Character::do_compare (std::string argument)
 {
-  std::string arg1;
-  std::string arg2;
-  Object *obj1;
-  Object *obj2 = NULL;
-  int value1;
-  int value2;
-  char *msg;
+  std::string arg1, arg2;
 
   argument = one_argument (argument, arg1);
   argument = one_argument (argument, arg2);
@@ -18362,11 +17153,13 @@ void Character::do_compare (std::string argument)
     return;
   }
 
+  Object *obj1;
   if ((obj1 = get_obj_carry (arg1)) == NULL) {
     send_to_char ("You do not have that item.\r\n");
     return;
   }
 
+  Object *obj2 = NULL;
   if (arg2.empty()) {
     ObjIter o;
     for (o = carrying.begin(); o != carrying.end(); o++) {
@@ -18388,9 +17181,9 @@ void Character::do_compare (std::string argument)
     }
   }
 
-  msg = NULL;
-  value1 = 0;
-  value2 = 0;
+  char* msg = NULL;
+  int value1 = 0;
+  int value2 = 0;
 
   if (obj1 == obj2) {
     msg = "You compare $p to itself.  It looks about the same.";
@@ -18427,26 +17220,23 @@ void Character::do_compare (std::string argument)
   return;
 }
 
-
 void Character::do_credits (std::string argument)
 {
   do_help ("diku");
   return;
 }
 
-
 void Character::do_where (std::string argument)
 {
-  char buf[MAX_STRING_LENGTH];
   std::string arg;
+  char buf[MAX_STRING_LENGTH];
   Character *victim;
-  bool found;
+  bool found = false;
 
   one_argument (argument, arg);
 
   if (arg.empty()) {
     send_to_char ("Players near you:\r\n");
-    found = false;
     for (DescIter d = descriptor_list.begin();
       d != descriptor_list.end(); d++) {
       if ((*d)->connected == CON_PLAYING
@@ -18462,9 +17252,7 @@ void Character::do_where (std::string argument)
     if (!found)
       send_to_char ("None\r\n");
   } else {
-    found = false;
-    CharIter c;
-    for (c = char_list.begin(); c != char_list.end(); c++) {
+    for (CharIter c = char_list.begin(); c != char_list.end(); c++) {
       victim = *c;
       if (victim->in_room != NULL
         && victim->in_room->area == in_room->area
@@ -18486,13 +17274,9 @@ void Character::do_where (std::string argument)
   return;
 }
 
-
 void Character::do_consider (std::string argument)
 {
   std::string arg, msg, buf;
-  Character *victim;
-  int diff;
-  int hpdiff;
 
   one_argument (argument, arg);
 
@@ -18501,6 +17285,7 @@ void Character::do_consider (std::string argument)
     return;
   }
 
+  Character *victim;
   if ((victim = get_char_room (arg)) == NULL) {
     send_to_char ("They're not here.\r\n");
     return;
@@ -18511,7 +17296,7 @@ void Character::do_consider (std::string argument)
     return;
   }
 
-  diff = victim->level - level;
+  int diff = victim->level - level;
 
   if (diff <= -10)
     msg = "You can kill $N naked and weaponless.";
@@ -18531,7 +17316,7 @@ void Character::do_consider (std::string argument)
   act (msg, NULL, victim, TO_CHAR);
 
   /* additions by king@tinuviel.cs.wcu.edu */
-  hpdiff = (hit - victim->hit);
+  int hpdiff = (hit - victim->hit);
 
   if (((diff >= 0) && (hpdiff <= 0))
     || ((diff <= 0) && (hpdiff >= 0))) {
@@ -18561,7 +17346,6 @@ void Character::do_consider (std::string argument)
   return;
 }
 
-
 void Character::do_title (std::string argument)
 {
   if (is_npc ())
@@ -18579,7 +17363,6 @@ void Character::do_title (std::string argument)
   set_title(argument);
   send_to_char ("Ok.\r\n");
 }
-
 
 void Character::do_description (std::string argument)
 {
@@ -18608,7 +17391,6 @@ void Character::do_description (std::string argument)
   return;
 }
 
-
 void Character::do_report (std::string argument)
 {
   char buf[MAX_INPUT_LENGTH];
@@ -18629,13 +17411,8 @@ void Character::do_report (std::string argument)
   return;
 }
 
-
 void Character::do_practice (std::string argument)
 {
-  char buf[MAX_STRING_LENGTH];
-  std::string buf1;
-  int sn;
-
   if (is_npc ())
     return;
 
@@ -18644,6 +17421,10 @@ void Character::do_practice (std::string argument)
       ("You must be third level to practice.  Go train instead!\r\n");
     return;
   }
+
+  char buf[MAX_STRING_LENGTH];
+  std::string buf1;
+  int sn;
 
   if (argument.empty()) {
     int col;
@@ -18722,13 +17503,11 @@ void Character::do_practice (std::string argument)
   return;
 }
 
-
 /*
  * 'Wimpy' originally by Dionysos.
  */
 void Character::do_wimpy (std::string argument)
 {
-  char buf[MAX_STRING_LENGTH];
   std::string arg;
   int wpy;
 
@@ -18750,22 +17529,22 @@ void Character::do_wimpy (std::string argument)
   }
 
   wimpy = wpy;
+  char buf[MAX_STRING_LENGTH];
   snprintf (buf, sizeof buf, "Wimpy set to %d hit points.\r\n", wimpy);
   send_to_char (buf);
   return;
 }
 
-
 void Character::do_password (std::string argument)
 {
+  if (is_npc ())
+    return;
+
   std::string arg1;
   std::string arg2;
   char *pwdnew;
   char *p;
   char cEnd;
-
-  if (is_npc ())
-    return;
 
   /*
    * Can't use one_argument here because it smashes case.
@@ -18845,15 +17624,12 @@ void Character::do_password (std::string argument)
   return;
 }
 
-
 void Character::do_socials (std::string argument)
 {
   char buf[MAX_STRING_LENGTH];
-  int iSocial;
-  int col;
 
-  col = 0;
-  for (iSocial = 0; social_table[iSocial].name[0] != '\0'; iSocial++) {
+  int col = 0;
+  for (int iSocial = 0; social_table[iSocial].name[0] != '\0'; iSocial++) {
     snprintf (buf, sizeof buf, "%-12s", social_table[iSocial].name);
     send_to_char (buf);
     if (++col % 6 == 0)
@@ -18864,7 +17640,6 @@ void Character::do_socials (std::string argument)
     send_to_char ("\r\n");
   return;
 }
-
 
 /*
  * Contributed by Alander.
@@ -18893,7 +17668,6 @@ void Character::do_commands (std::string argument)
   send_to_char (buf1);
   return;
 }
-
 
 void Character::do_channels (std::string argument)
 {
@@ -18976,16 +17750,15 @@ void Character::do_channels (std::string argument)
   return;
 }
 
-
 /*
  * Contributed by Grodyn.
  */
 void Character::do_config (std::string argument)
 {
-  std::string arg;
-
   if (is_npc ())
     return;
+
+  std::string arg;
 
   one_argument (argument, arg);
 
@@ -19079,18 +17852,14 @@ void Character::do_config (std::string argument)
 
 void Character::do_wizlist (std::string argument)
 {
-
   do_help ("wizlist");
   return;
-
 }
 
 void Character::do_spells (std::string argument)
 {
   char buf[MAX_STRING_LENGTH];
   std::string buf1;
-  int sn;
-  int col;
 
   if ((!is_npc () && !class_table[klass].fMana)
     || is_npc ()) {
@@ -19098,8 +17867,8 @@ void Character::do_spells (std::string argument)
     return;
   }
 
-  col = 0;
-  for (sn = 0; sn < MAX_SKILL; sn++) {
+  int col = 0;
+  for (int sn = 0; sn < MAX_SKILL; sn++) {
     if (skill_table[sn].name == NULL)
       break;
     if ((level < skill_table[sn].skill_level[klass])
@@ -19122,27 +17891,21 @@ void Character::do_spells (std::string argument)
 
 void Character::do_slist (std::string argument)
 {
-  char buf[MAX_STRING_LENGTH];
-  std::string buf1;
-  int sn;
-  int col;
-  bool pSpell;
-
-  if ((!is_npc () && !class_table[klass].fMana)
-    || is_npc ()) {
+  if ((!is_npc () && !class_table[klass].fMana) || is_npc ()) {
     send_to_char ("You do not need any stinking spells!\r\n");
     return;
   }
 
+  std::string buf1;
   buf1.append("ALL Spells available for your class.\r\n\r\n");
   buf1.append("Lv          Spells\r\n\r\n");
 
   for (int lvl = 1; lvl < LEVEL_IMMORTAL; lvl++) {
+    int col = 0;
+    bool pSpell = true;
+    char buf[MAX_STRING_LENGTH];
 
-    col = 0;
-    pSpell = true;
-
-    for (sn = 0; sn < MAX_SKILL; sn++) {
+    for (int sn = 0; sn < MAX_SKILL; sn++) {
       if (skill_table[sn].name == NULL)
         break;
       if (skill_table[sn].skill_level[klass] != lvl)
@@ -19167,68 +17930,52 @@ void Character::do_slist (std::string argument)
 
     if (col % 4 != 0)
       buf1.append("\r\n");
-
   }
-
   send_to_char (buf1);
   return;
-
 }
 
 /* by passing the conf command - Kahn */
-
 void Character::do_autoexit (std::string argument)
 {
-
   (IS_SET (actflags, PLR_AUTOEXIT)
     ? do_config ("-autoexit")
     : do_config ("+autoexit"));
-
 }
 
 void Character::do_autoloot (std::string argument)
 {
-
   (IS_SET (actflags, PLR_AUTOLOOT)
     ? do_config ("-autoloot")
     : do_config ("+autoloot"));
-
 }
 
 void Character::do_autosac (std::string argument)
 {
-
   (IS_SET (actflags, PLR_AUTOSAC)
     ? do_config ("-autosac")
     : do_config ("+autosac"));
-
 }
 
 void Character::do_blank (std::string argument)
 {
-
   (IS_SET (actflags, PLR_BLANK)
     ? do_config ("-blank")
     : do_config ("+blank"));
-
 }
 
 void Character::do_brief (std::string argument)
 {
-
   (IS_SET (actflags, PLR_BRIEF)
     ? do_config ("-brief")
     : do_config ("+brief"));
-
 }
 
 void Character::do_combine (std::string argument)
 {
-
   (IS_SET (actflags, PLR_COMBINE)
     ? do_config ("-combine")
     : do_config ("+combine"));
-
 }
 
 void Character::do_pagelen (std::string argument)
@@ -19259,14 +18006,14 @@ void Character::do_pagelen (std::string argument)
 /* Do_prompt from Morgenes from Aldara Mud */
 void Character::do_prompt (std::string argument)
 {
-  std::string buf;
-
   if (argument.empty()) {
     (IS_SET (actflags, PLR_PROMPT)
       ? do_config ("-prompt")
       : do_config ("+prompt"));
     return;
   }
+
+  std::string buf;
 
   if (!strcmp (argument.c_str(), "all"))
     buf = "<%hhp %mm %vmv> ";
@@ -19284,12 +18031,9 @@ void Character::do_prompt (std::string argument)
 
 void Character::do_auto (std::string argument)
 {
-
   do_config ("");
   return;
-
 }
-
 
 void Character::do_north (std::string argument)
 {
@@ -19297,13 +18041,11 @@ void Character::do_north (std::string argument)
   return;
 }
 
-
 void Character::do_east (std::string argument)
 {
   move_char (DIR_EAST);
   return;
 }
-
 
 void Character::do_south (std::string argument)
 {
@@ -19311,13 +18053,11 @@ void Character::do_south (std::string argument)
   return;
 }
 
-
 void Character::do_west (std::string argument)
 {
   move_char (DIR_WEST);
   return;
 }
-
 
 void Character::do_up (std::string argument)
 {
@@ -19325,19 +18065,15 @@ void Character::do_up (std::string argument)
   return;
 }
 
-
 void Character::do_down (std::string argument)
 {
   move_char (DIR_DOWN);
   return;
 }
 
-
 void Character::do_open (std::string argument)
 {
   std::string arg;
-  Object *obj;
-  int door;
 
   one_argument (argument, arg);
 
@@ -19346,6 +18082,7 @@ void Character::do_open (std::string argument)
     return;
   }
 
+  Object *obj;
   if ((obj = get_obj_here (arg)) != NULL) {
     /* 'open object' */
     if (obj->item_type != ITEM_CONTAINER) {
@@ -19371,6 +18108,7 @@ void Character::do_open (std::string argument)
     return;
   }
 
+  int door;
   if ((door = find_door (arg)) >= 0) {
     /* 'open door' */
     Room *to_room;
@@ -19406,12 +18144,9 @@ void Character::do_open (std::string argument)
   return;
 }
 
-
 void Character::do_close (std::string argument)
 {
   std::string arg;
-  Object *obj;
-  int door;
 
   one_argument (argument, arg);
 
@@ -19420,6 +18155,7 @@ void Character::do_close (std::string argument)
     return;
   }
 
+  Object *obj;
   if ((obj = get_obj_here (arg)) != NULL) {
     /* 'close object' */
     if (obj->item_type != ITEM_CONTAINER) {
@@ -19441,6 +18177,7 @@ void Character::do_close (std::string argument)
     return;
   }
 
+  int door;
   if ((door = find_door (arg)) >= 0) {
     /* 'close door' */
     Room *to_room;
@@ -19472,12 +18209,9 @@ void Character::do_close (std::string argument)
   return;
 }
 
-
 void Character::do_lock (std::string argument)
 {
   std::string arg;
-  Object *obj;
-  int door;
 
   one_argument (argument, arg);
 
@@ -19486,6 +18220,7 @@ void Character::do_lock (std::string argument)
     return;
   }
 
+  Object *obj;
   if ((obj = get_obj_here (arg)) != NULL) {
     /* 'lock object' */
     if (obj->item_type != ITEM_CONTAINER) {
@@ -19515,6 +18250,7 @@ void Character::do_lock (std::string argument)
     return;
   }
 
+  int door;
   if ((door = find_door (arg)) >= 0) {
     /* 'lock door' */
     Room *to_room;
@@ -19554,12 +18290,9 @@ void Character::do_lock (std::string argument)
   return;
 }
 
-
 void Character::do_unlock (std::string argument)
 {
   std::string arg;
-  Object *obj;
-  int door;
 
   one_argument (argument, arg);
 
@@ -19568,6 +18301,7 @@ void Character::do_unlock (std::string argument)
     return;
   }
 
+  Object *obj;
   if ((obj = get_obj_here (arg)) != NULL) {
     /* 'unlock object' */
     if (obj->item_type != ITEM_CONTAINER) {
@@ -19597,6 +18331,7 @@ void Character::do_unlock (std::string argument)
     return;
   }
 
+  int door;
   if ((door = find_door (arg)) >= 0) {
     /* 'unlock door' */
     Room *to_room;
@@ -19636,12 +18371,9 @@ void Character::do_unlock (std::string argument)
   return;
 }
 
-
 void Character::do_pick (std::string argument)
 {
   std::string arg;
-  Object *obj;
-  int door;
 
   one_argument (argument, arg);
 
@@ -19666,6 +18398,7 @@ void Character::do_pick (std::string argument)
     return;
   }
 
+  Object *obj;
   if ((obj = get_obj_here (arg)) != NULL) {
     /* 'pick object' */
     if (obj->item_type != ITEM_CONTAINER) {
@@ -19695,6 +18428,7 @@ void Character::do_pick (std::string argument)
     return;
   }
 
+  int door;
   if ((door = find_door (arg)) >= 0) {
     /* 'pick door' */
     Room *to_room;
@@ -19734,7 +18468,6 @@ void Character::do_pick (std::string argument)
   return;
 }
 
-
 void Character::do_stand (std::string argument)
 {
   switch (position) {
@@ -19767,7 +18500,6 @@ void Character::do_stand (std::string argument)
   return;
 }
 
-
 void Character::do_rest (std::string argument)
 {
   switch (position) {
@@ -19793,7 +18525,6 @@ void Character::do_rest (std::string argument)
   return;
 }
 
-
 void Character::do_sleep (std::string argument)
 {
   switch (position) {
@@ -19816,11 +18547,9 @@ void Character::do_sleep (std::string argument)
   return;
 }
 
-
 void Character::do_wake (std::string argument)
 {
   std::string arg;
-  Character *victim;
 
   one_argument (argument, arg);
   if (arg.empty()) {
@@ -19833,6 +18562,7 @@ void Character::do_wake (std::string argument)
     return;
   }
 
+  Character *victim;
   if ((victim = get_char_room (arg)) == NULL) {
     send_to_char ("They aren't here.\r\n");
     return;
@@ -19854,7 +18584,6 @@ void Character::do_wake (std::string argument)
   return;
 }
 
-
 void Character::do_sneak (std::string argument)
 {
   Affect af;
@@ -19874,7 +18603,6 @@ void Character::do_sneak (std::string argument)
   return;
 }
 
-
 void Character::do_hide (std::string argument)
 {
   send_to_char ("You attempt to hide.\r\n");
@@ -19887,7 +18615,6 @@ void Character::do_hide (std::string argument)
 
   return;
 }
-
 
 /*
  * Contributed by Alander.
@@ -19904,11 +18631,9 @@ void Character::do_visible (std::string argument)
   return;
 }
 
-
 void Character::do_recall (std::string argument)
 {
   char buf[MAX_STRING_LENGTH];
-  Character *victim;
   Room *location;
 
   act ("$n prays for transportation!", 0, 0, TO_ROOM);
@@ -19927,7 +18652,7 @@ void Character::do_recall (std::string argument)
     return;
   }
 
-  if ((victim = fighting) != NULL) {
+  if (fighting != NULL) {
     int lose;
 
     if (number_bits (1) == 0) {
@@ -19956,16 +18681,14 @@ void Character::do_recall (std::string argument)
   return;
 }
 
-
 void Character::do_train (std::string argument)
 {
+  if (is_npc ())
+    return;
+
   std::string buf;
   sh_int *pAbility;
   char *pOutput;
-  int cost;
-
-  if (is_npc ())
-    return;
 
   /*
    * Check for trainer.
@@ -19987,44 +18710,34 @@ void Character::do_train (std::string argument)
     argument = "foo";
   }
 
-  cost = 5;
+  int cost = 5;
 
   if (!str_cmp (argument, "str")) {
     if (class_table[klass].attr_prime == APPLY_STR)
       cost = 3;
     pAbility = &pcdata->perm_str;
     pOutput = "strength";
-  }
-
-  else if (!str_cmp (argument, "int")) {
+  } else if (!str_cmp (argument, "int")) {
     if (class_table[klass].attr_prime == APPLY_INT)
       cost = 3;
     pAbility = &pcdata->perm_int;
     pOutput = "intelligence";
-  }
-
-  else if (!str_cmp (argument, "wis")) {
+  } else if (!str_cmp (argument, "wis")) {
     if (class_table[klass].attr_prime == APPLY_WIS)
       cost = 3;
     pAbility = &pcdata->perm_wis;
     pOutput = "wisdom";
-  }
-
-  else if (!str_cmp (argument, "dex")) {
+  } else if (!str_cmp (argument, "dex")) {
     if (class_table[klass].attr_prime == APPLY_DEX)
       cost = 3;
     pAbility = &pcdata->perm_dex;
     pOutput = "dexterity";
-  }
-
-  else if (!str_cmp (argument, "con")) {
+  } else if (!str_cmp (argument, "con")) {
     if (class_table[klass].attr_prime == APPLY_CON)
       cost = 3;
     pAbility = &pcdata->perm_con;
     pOutput = "constitution";
-  }
-
-  else {
+  } else {
     buf = "You can train:";
     if (pcdata->perm_str < 18)
       buf.append(" str");
@@ -20070,14 +18783,10 @@ void Character::do_train (std::string argument)
   return;
 }
 
-
 void Character::do_get (std::string argument)
 {
   std::string arg1;
   std::string arg2;
-  Object *obj;
-  Object *container;
-  bool found;
 
   argument = one_argument (argument, arg1);
   argument = one_argument (argument, arg2);
@@ -20088,6 +18797,9 @@ void Character::do_get (std::string argument)
     return;
   }
 
+  Object *obj;
+  Object *container;
+  bool found;
   if (arg2.empty()) {
     if (str_cmp (arg1, "all") && str_prefix ("all.", arg1)) {
       /* 'get obj' */
@@ -20216,13 +18928,10 @@ void Character::do_get (std::string argument)
   return;
 }
 
-
 void Character::do_put (std::string argument)
 {
   std::string arg1;
   std::string arg2;
-  Object *container;
-  Object *obj;
 
   argument = one_argument (argument, arg1);
   argument = one_argument (argument, arg2);
@@ -20237,6 +18946,7 @@ void Character::do_put (std::string argument)
     return;
   }
 
+  Object *container;
   if ((container = get_obj_here (arg2)) == NULL) {
     act ("I see no $T here.", NULL, arg2.c_str(), TO_CHAR);
     return;
@@ -20252,6 +18962,7 @@ void Character::do_put (std::string argument)
     return;
   }
 
+  Object *obj;
   if (str_cmp (arg1, "all") && str_prefix ("all.", arg1)) {
     /* 'put obj container' */
     if ((obj = get_obj_carry (arg1)) == NULL) {
@@ -20303,12 +19014,9 @@ void Character::do_put (std::string argument)
   return;
 }
 
-
 void Character::do_drop (std::string argument)
 {
   std::string arg;
-  Object *obj;
-  bool found;
 
   argument = one_argument (argument, arg);
 
@@ -20317,6 +19025,8 @@ void Character::do_drop (std::string argument)
     return;
   }
 
+  Object *obj;
+  bool found;
   if (is_number (arg)) {
     /* 'drop NNNN coins' */
     int amount;
@@ -20405,13 +19115,10 @@ void Character::do_drop (std::string argument)
   return;
 }
 
-
 void Character::do_give (std::string argument)
 {
   std::string arg1;
   std::string arg2;
-  Character *victim;
-  Object *obj;
 
   argument = one_argument (argument, arg1);
   argument = one_argument (argument, arg2);
@@ -20421,6 +19128,8 @@ void Character::do_give (std::string argument)
     return;
   }
 
+  Character *victim;
+  Object *obj;
   if (is_number (arg1)) {
     /* 'give NNNN coins victim' */
     int amount;
@@ -20502,12 +19211,9 @@ void Character::do_give (std::string argument)
   return;
 }
 
-
 void Character::do_fill (std::string argument)
 {
   std::string arg;
-  Object *obj;
-  bool found;
 
   one_argument (argument, arg);
 
@@ -20516,12 +19222,13 @@ void Character::do_fill (std::string argument)
     return;
   }
 
+  Object *obj;
   if ((obj = get_obj_carry (arg)) == NULL) {
     send_to_char ("You do not have that item.\r\n");
     return;
   }
 
-  found = false;
+  bool found = false;
   ObjIter o;
   for (o = in_room->contents.begin(); o != in_room->contents.end(); o++) {
     if ((*o)->item_type == ITEM_FOUNTAIN) {
@@ -20555,7 +19262,6 @@ void Character::do_fill (std::string argument)
   obj->value[1] = obj->value[0];
   return;
 }
-
 
 void Character::do_drink (std::string argument)
 {
@@ -20657,11 +19363,9 @@ void Character::do_drink (std::string argument)
   return;
 }
 
-
 void Character::do_eat (std::string argument)
 {
   std::string arg;
-  Object *obj;
 
   one_argument (argument, arg);
   if (arg.empty()) {
@@ -20669,6 +19373,7 @@ void Character::do_eat (std::string argument)
     return;
   }
 
+  Object *obj;
   if ((obj = get_obj_carry (arg)) == NULL) {
     send_to_char ("You do not have that item.\r\n");
     return;
@@ -20730,11 +19435,9 @@ void Character::do_eat (std::string argument)
   return;
 }
 
-
 void Character::do_wear (std::string argument)
 {
   std::string arg;
-  Object *obj;
 
   one_argument (argument, arg);
 
@@ -20743,6 +19446,7 @@ void Character::do_wear (std::string argument)
     return;
   }
 
+  Object *obj;
   if (!str_cmp (arg, "all")) {
     ObjIter o, onext;
     for (o = carrying.begin(); o != carrying.end(); o = onext) {
@@ -20763,7 +19467,6 @@ void Character::do_wear (std::string argument)
 
   return;
 }
-
 
 void Character::do_remove (std::string argument)
 {
@@ -20786,11 +19489,9 @@ void Character::do_remove (std::string argument)
   return;
 }
 
-
 void Character::do_sacrifice (std::string argument)
 {
   std::string arg;
-  Object *obj;
 
   one_argument (argument, arg);
 
@@ -20801,7 +19502,7 @@ void Character::do_sacrifice (std::string argument)
     return;
   }
 
-  obj = get_obj_list (arg, in_room->contents);
+  Object* obj = get_obj_list (arg, in_room->contents);
   if (obj == NULL) {
     send_to_char ("You can't find it.\r\n");
     return;
@@ -20820,11 +19521,9 @@ void Character::do_sacrifice (std::string argument)
   return;
 }
 
-
 void Character::do_quaff (std::string argument)
 {
   std::string arg;
-  Object *obj;
 
   one_argument (argument, arg);
 
@@ -20833,6 +19532,7 @@ void Character::do_quaff (std::string argument)
     return;
   }
 
+  Object *obj;
   if ((obj = get_obj_carry (arg)) == NULL) {
     send_to_char ("You do not have that potion.\r\n");
     return;
@@ -20854,18 +19554,15 @@ void Character::do_quaff (std::string argument)
   return;
 }
 
-
 void Character::do_recite (std::string argument)
 {
   std::string arg1;
   std::string arg2;
-  Character *victim;
-  Object *scroll;
-  Object *obj;
 
   argument = one_argument (argument, arg1);
   argument = one_argument (argument, arg2);
 
+  Object *scroll;
   if ((scroll = get_obj_carry (arg1)) == NULL) {
     send_to_char ("You do not have that scroll.\r\n");
     return;
@@ -20876,7 +19573,8 @@ void Character::do_recite (std::string argument)
     return;
   }
 
-  obj = NULL;
+  Character *victim;
+  Object *obj = NULL;
   if (arg2.empty()) {
     victim = this;
   } else {
@@ -20898,12 +19596,10 @@ void Character::do_recite (std::string argument)
   return;
 }
 
-
 void Character::do_brandish (std::string argument)
 {
   Character *vch;
   Object *staff;
-  int sn;
 
   if ((staff = get_eq_char (WEAR_HOLD)) == NULL) {
     send_to_char ("You hold nothing in your hand.\r\n");
@@ -20915,6 +19611,7 @@ void Character::do_brandish (std::string argument)
     return;
   }
 
+  int sn;
   if ((sn = staff->value[3]) < 0
     || sn >= MAX_SKILL || skill_table[sn].spell_fun == NULL) {
     bug_printf ("Do_brandish: bad sn %d.", sn);
@@ -20970,13 +19667,9 @@ void Character::do_brandish (std::string argument)
   return;
 }
 
-
 void Character::do_zap (std::string argument)
 {
   std::string arg;
-  Character *victim;
-  Object *wand;
-  Object *obj;
 
   one_argument (argument, arg);
   if (arg.empty() && fighting == NULL) {
@@ -20984,6 +19677,7 @@ void Character::do_zap (std::string argument)
     return;
   }
 
+  Object *wand;
   if ((wand = get_eq_char (WEAR_HOLD)) == NULL) {
     send_to_char ("You hold nothing in your hand.\r\n");
     return;
@@ -20994,7 +19688,8 @@ void Character::do_zap (std::string argument)
     return;
   }
 
-  obj = NULL;
+  Character *victim;
+  Object *obj = NULL;
   if (arg.empty()) {
     if (fighting != NULL) {
       victim = fighting;
@@ -21032,7 +19727,6 @@ void Character::do_zap (std::string argument)
 
   return;
 }
-
 
 void Character::do_steal (std::string argument)
 {
@@ -21134,7 +19828,6 @@ void Character::do_steal (std::string argument)
   send_to_char ("Ok.\r\n");
   return;
 }
-
 
 void Character::do_buy (std::string argument)
 {
@@ -21264,7 +19957,6 @@ void Character::do_buy (std::string argument)
   }
 }
 
-
 void Character::do_list (std::string argument)
 {
   char buf[MAX_STRING_LENGTH];
@@ -21342,14 +20034,9 @@ void Character::do_list (std::string argument)
   }
 }
 
-
 void Character::do_sell (std::string argument)
 {
-  char buf[MAX_STRING_LENGTH];
   std::string arg;
-  Character *keeper;
-  Object *obj;
-  int cost;
 
   one_argument (argument, arg);
 
@@ -21358,9 +20045,11 @@ void Character::do_sell (std::string argument)
     return;
   }
 
+  Character *keeper;
   if ((keeper = find_keeper (this)) == NULL)
     return;
 
+  Object *obj;
   if ((obj = get_obj_carry (arg)) == NULL) {
     keeper->act ("$n tells you 'You don't have that item'.",
       NULL, this, TO_VICT);
@@ -21373,11 +20062,13 @@ void Character::do_sell (std::string argument)
     return;
   }
 
+  int cost;
   if ((cost = get_cost (keeper, obj, false)) <= 0) {
     keeper->act ("$n looks uninterested in $p.", obj, this, TO_VICT);
     return;
   }
 
+  char buf[MAX_STRING_LENGTH];
   act ("$n sells $p.", obj, NULL, TO_ROOM);
   snprintf (buf, sizeof buf, "You sell $p for %d gold piece%s.",
     cost, cost == 1 ? "" : "s");
@@ -21397,14 +20088,9 @@ void Character::do_sell (std::string argument)
   return;
 }
 
-
 void Character::do_value (std::string argument)
 {
-  char buf[MAX_STRING_LENGTH];
   std::string arg;
-  Character *keeper;
-  Object *obj;
-  int cost;
 
   one_argument (argument, arg);
 
@@ -21413,9 +20099,11 @@ void Character::do_value (std::string argument)
     return;
   }
 
+  Character *keeper;
   if ((keeper = find_keeper (this)) == NULL)
     return;
 
+  Object *obj;
   if ((obj = get_obj_carry (arg)) == NULL) {
     keeper->act ("$n tells you 'You don't have that item'.",
       NULL, this, TO_VICT);
@@ -21428,11 +20116,13 @@ void Character::do_value (std::string argument)
     return;
   }
 
+  int cost;
   if ((cost = get_cost (keeper, obj, false)) <= 0) {
     keeper->act ("$n looks uninterested in $p.", obj, this, TO_VICT);
     return;
   }
 
+  char buf[MAX_STRING_LENGTH];
   snprintf (buf, sizeof buf, "$n tells you 'I'll give you %d gold coins for $p'.", cost);
   keeper->act (buf, obj, this, TO_VICT);
   reply = keeper;
@@ -21444,11 +20134,9 @@ void Character::do_wizhelp (std::string argument)
 {
   char buf[MAX_STRING_LENGTH];
   std::string buf1;
-  int cmd;
-  int col;
 
-  col = 0;
-  for (cmd = 0; cmd_table[cmd].name[0] != '\0'; cmd++) {
+  int col = 0;
+  for (int cmd = 0; cmd_table[cmd].name[0] != '\0'; cmd++) {
     if (cmd_table[cmd].level >= LEVEL_HERO
       && cmd_table[cmd].level <= get_trust ()) {
       snprintf (buf, sizeof buf, "%-12s", cmd_table[cmd].name);
@@ -21464,7 +20152,6 @@ void Character::do_wizhelp (std::string argument)
   return;
 }
 
-
 void Character::do_bamfin (std::string argument)
 {
   if (!is_npc ()) {
@@ -21474,7 +20161,6 @@ void Character::do_bamfin (std::string argument)
   }
   return;
 }
-
 
 void Character::do_bamfout (std::string argument)
 {
@@ -21486,11 +20172,9 @@ void Character::do_bamfout (std::string argument)
   return;
 }
 
-
 void Character::do_deny (std::string argument)
 {
   std::string arg;
-  Character *victim;
 
   one_argument (argument, arg);
   if (arg.empty()) {
@@ -21498,6 +20182,7 @@ void Character::do_deny (std::string argument)
     return;
   }
 
+  Character *victim;
   if ((victim = get_char_world (arg)) == NULL) {
     send_to_char ("They aren't here.\r\n");
     return;
@@ -21521,7 +20206,6 @@ void Character::do_deny (std::string argument)
   return;
 }
 
-
 void Character::do_disconnect (std::string argument)
 {
   // :WARNING: There is a bug in this routine!  The mud will crash if you
@@ -21531,7 +20215,6 @@ void Character::do_disconnect (std::string argument)
   // FIXED by adding deepdenext iterator
 
   std::string arg;
-  Character *victim;
 
   one_argument (argument, arg);
   if (arg.empty()) {
@@ -21539,6 +20222,7 @@ void Character::do_disconnect (std::string argument)
     return;
   }
 
+  Character *victim;
   if ((victim = get_char_world (arg)) == NULL) {
     send_to_char ("They aren't here.\r\n");
     return;
@@ -21561,11 +20245,9 @@ void Character::do_disconnect (std::string argument)
   return;
 }
 
-
 void Character::do_pardon (std::string argument)
 {
   std::string arg1, arg2;
-  Character *victim;
 
   argument = one_argument (argument, arg1);
   argument = one_argument (argument, arg2);
@@ -21575,6 +20257,7 @@ void Character::do_pardon (std::string argument)
     return;
   }
 
+  Character *victim;
   if ((victim = get_char_world (arg1)) == NULL) {
     send_to_char ("They aren't here.\r\n");
     return;
@@ -21607,7 +20290,6 @@ void Character::do_pardon (std::string argument)
   return;
 }
 
-
 void Character::do_echo (std::string argument)
 {
   if (argument.empty()) {
@@ -21624,8 +20306,6 @@ void Character::do_echo (std::string argument)
 
   return;
 }
-
-
 
 void Character::do_recho (std::string argument)
 {
@@ -21644,12 +20324,9 @@ void Character::do_recho (std::string argument)
   return;
 }
 
-
 void Character::do_transfer (std::string argument)
 {
   std::string arg1, arg2;
-  Room *location;
-  Character *victim;
 
   argument = one_argument (argument, arg1);
   argument = one_argument (argument, arg2);
@@ -21676,6 +20353,7 @@ void Character::do_transfer (std::string argument)
   /*
    * Thanks to Grodyn for the optional location parameter.
    */
+  Room *location;
   if (arg2.empty()) {
     location = in_room;
   } else {
@@ -21690,6 +20368,7 @@ void Character::do_transfer (std::string argument)
     }
   }
 
+  Character *victim;
   if ((victim = get_char_world (arg1)) == NULL) {
     send_to_char ("They aren't here.\r\n");
     return;
@@ -21712,12 +20391,9 @@ void Character::do_transfer (std::string argument)
   send_to_char ("Ok.\r\n");
 }
 
-
 void Character::do_at (std::string argument)
 {
   std::string arg;
-  Room *location;
-  Room *original;
 
   argument = one_argument (argument, arg);
 
@@ -21726,6 +20402,7 @@ void Character::do_at (std::string argument)
     return;
   }
 
+  Room *location;
   if ((location = find_location (this, arg)) == NULL) {
     send_to_char ("No such location.\r\n");
     return;
@@ -21736,7 +20413,7 @@ void Character::do_at (std::string argument)
     return;
   }
 
-  original = in_room;
+  Room* original = in_room;
   char_from_room();
   char_to_room(location);
   interpret (argument);
@@ -21757,11 +20434,9 @@ void Character::do_at (std::string argument)
   return;
 }
 
-
 void Character::do_goto (std::string argument)
 {
   std::string arg;
-  Room *location;
 
   one_argument (argument, arg);
   if (arg.empty()) {
@@ -21769,6 +20444,7 @@ void Character::do_goto (std::string argument)
     return;
   }
 
+  Room *location;
   if ((location = find_location (this, arg)) == NULL) {
     send_to_char ("No such location.\r\n");
     return;
@@ -21800,16 +20476,13 @@ void Character::do_goto (std::string argument)
   return;
 }
 
-
 void Character::do_rstat (std::string argument)
 {
-  char buf[MAX_STRING_LENGTH];
   std::string arg, buf1;
-  Room *location;
-  int door;
 
   one_argument (argument, arg);
-  location = arg.empty() ? in_room : find_location (this, arg);
+
+  Room* location = arg.empty() ? in_room : find_location (this, arg);
   if (location == NULL) {
     send_to_char ("No such location.\r\n");
     return;
@@ -21820,6 +20493,7 @@ void Character::do_rstat (std::string argument)
     return;
   }
 
+  char buf[MAX_STRING_LENGTH];
   snprintf (buf, sizeof buf, "Name: '%s.'\r\nArea: '%s'.\r\n",
     location->name.c_str(), location->area->name.c_str());
   buf1.append(buf);
@@ -21864,7 +20538,7 @@ void Character::do_rstat (std::string argument)
   }
   buf1.append(".\r\n");
 
-  for (door = 0; door <= 5; door++) {
+  for (int door = 0; door <= 5; door++) {
     Exit *pexit;
 
     if ((pexit = location->exit[door]) != NULL) {
@@ -21884,12 +20558,9 @@ void Character::do_rstat (std::string argument)
   return;
 }
 
-
 void Character::do_ostat (std::string argument)
 {
-  char buf[MAX_STRING_LENGTH];
   std::string arg, buf1;
-  Object *obj;
 
   one_argument (argument, arg);
 
@@ -21898,11 +20569,13 @@ void Character::do_ostat (std::string argument)
     return;
   }
 
+  Object *obj;
   if ((obj = get_obj_world (arg)) == NULL) {
     send_to_char ("Nothing like that in hell, earth, or heaven.\r\n");
     return;
   }
 
+  char buf[MAX_STRING_LENGTH];
   snprintf (buf, sizeof buf, "Name: %s.\r\n", obj->name.c_str());
   buf1.append(buf);
 
@@ -21972,12 +20645,9 @@ void Character::do_ostat (std::string argument)
   return;
 }
 
-
 void Character::do_mstat (std::string argument)
 {
-  char buf[MAX_STRING_LENGTH];
   std::string arg, buf1;
-  Character *victim;
 
   one_argument (argument, arg);
 
@@ -21986,11 +20656,13 @@ void Character::do_mstat (std::string argument)
     return;
   }
 
+  Character *victim;
   if ((victim = get_char_world (arg)) == NULL) {
     send_to_char ("They aren't here.\r\n");
     return;
   }
 
+  char buf[MAX_STRING_LENGTH];
   snprintf (buf, sizeof buf, "Name: %s.\r\n", victim->name.c_str());
   buf1.append(buf);
 
@@ -22079,15 +20751,9 @@ void Character::do_mstat (std::string argument)
   return;
 }
 
-
 void Character::do_mfind (std::string argument)
 {
-  char buf[MAX_STRING_LENGTH];
   std::string arg, buf1;
-  MobPrototype *pMobIndex;
-  int nMatch;
-  bool fAll;
-  bool found;
 
   one_argument (argument, arg);
   if (arg.empty()) {
@@ -22095,9 +20761,11 @@ void Character::do_mfind (std::string argument)
     return;
   }
 
-  fAll = !str_cmp (arg, "all");
-  found = false;
-  nMatch = 0;
+  bool fAll = !str_cmp (arg, "all");
+  bool found = false;
+  int nMatch = 0;
+  MobPrototype *pMobIndex;
+  char buf[MAX_STRING_LENGTH];
 
   /*
    * Yeah, so iterating over all vnum's takes 10,000 loops.
@@ -22126,15 +20794,9 @@ void Character::do_mfind (std::string argument)
   return;
 }
 
-
 void Character::do_ofind (std::string argument)
 {
-  char buf[MAX_STRING_LENGTH];
   std::string arg, buf1;
-  ObjectPrototype *pObjIndex;
-  int nMatch;
-  bool fAll;
-  bool found;
 
   one_argument (argument, arg);
   if (arg.empty()) {
@@ -22142,9 +20804,11 @@ void Character::do_ofind (std::string argument)
     return;
   }
 
-  fAll = !str_cmp (arg, "all");
-  found = false;
-  nMatch = 0;
+  bool fAll = !str_cmp (arg, "all");
+  bool found = false;
+  int nMatch = 0;
+  char buf[MAX_STRING_LENGTH];
+  ObjectPrototype *pObjIndex;
 
   /*
    * Yeah, so iterating over all vnum's takes 10,000 loops.
@@ -22173,12 +20837,9 @@ void Character::do_ofind (std::string argument)
   return;
 }
 
-
 void Character::do_mwhere (std::string argument)
 {
-  char buf[MAX_STRING_LENGTH];
   std::string arg;
-  bool found;
 
   one_argument (argument, arg);
   if (arg.empty()) {
@@ -22186,9 +20847,9 @@ void Character::do_mwhere (std::string argument)
     return;
   }
 
-  found = false;
-  CharIter c;
-  for (c = char_list.begin(); c != char_list.end(); c++) {
+  char buf[MAX_STRING_LENGTH];
+  bool found = false;
+  for (CharIter c = char_list.begin(); c != char_list.end(); c++) {
     if ((*c)->is_npc ()
       && (*c)->in_room != NULL && is_name (arg, (*c)->name)) {
       found = true;
@@ -22207,13 +20868,11 @@ void Character::do_mwhere (std::string argument)
   return;
 }
 
-
 void Character::do_reboo (std::string argument)
 {
   send_to_char ("If you want to REBOOT, spell it out.\r\n");
   return;
 }
-
 
 void Character::do_reboot (std::string argument)
 {
@@ -22226,13 +20885,11 @@ void Character::do_reboot (std::string argument)
   return;
 }
 
-
 void Character::do_shutdow (std::string argument)
 {
   send_to_char ("If you want to SHUTDOWN, spell it out.\r\n");
   return;
 }
-
 
 void Character::do_shutdown (std::string argument)
 {
@@ -22247,68 +20904,9 @@ void Character::do_shutdown (std::string argument)
   return;
 }
 
-
-void Character::do_snoop (std::string argument)
-{
-  std::string arg;
-  Character *victim;
-
-  one_argument (argument, arg);
-
-  if (arg.empty()) {
-    send_to_char ("Snoop whom?\r\n");
-    return;
-  }
-
-  if ((victim = get_char_world (arg)) == NULL) {
-    send_to_char ("They aren't here.\r\n");
-    return;
-  }
-
-  if (victim->desc == NULL) {
-    send_to_char ("No descriptor to snoop.\r\n");
-    return;
-  }
-
-  if (victim == this) {
-    send_to_char ("Cancelling all snoops.\r\n");
-    for (DescIter d = descriptor_list.begin();
-      d != descriptor_list.end(); d++) {
-      if ((*d)->snoop_by == desc)
-        (*d)->snoop_by = NULL;
-    }
-    return;
-  }
-
-  if (victim->desc->snoop_by != NULL) {
-    send_to_char ("Busy already.\r\n");
-    return;
-  }
-
-  if (victim->get_trust () >= get_trust ()) {
-    send_to_char ("You failed.\r\n");
-    return;
-  }
-
-  if (desc != NULL) {
-    for (Descriptor *d = desc->snoop_by; d != NULL; d = d->snoop_by) {
-      if (d->character == victim || d->original == victim) {
-        send_to_char ("No snoop loops.\r\n");
-        return;
-      }
-    }
-  }
-
-  victim->desc->snoop_by = desc;
-  send_to_char ("Ok.\r\n");
-  return;
-}
-
-
 void Character::do_switch (std::string argument)
 {
   std::string arg;
-  Character *victim;
 
   one_argument (argument, arg);
 
@@ -22325,6 +20923,7 @@ void Character::do_switch (std::string argument)
     return;
   }
 
+  Character *victim;
   if ((victim = get_char_world (arg)) == NULL) {
     send_to_char ("They aren't here.\r\n");
     return;
@@ -22356,7 +20955,6 @@ void Character::do_switch (std::string argument)
   return;
 }
 
-
 void Character::do_return (std::string argument)
 {
   if (desc == NULL)
@@ -22374,7 +20972,6 @@ void Character::do_return (std::string argument)
   desc = NULL;
   return;
 }
-
 
 void Character::do_mload (std::string argument)
 {
@@ -22401,13 +20998,9 @@ void Character::do_mload (std::string argument)
   return;
 }
 
-
 void Character::do_oload (std::string argument)
 {
   std::string arg1, arg2;
-  ObjectPrototype *pObjIndex;
-  Object *obj;
-  int lvl;
 
   argument = one_argument (argument, arg1);
   argument = one_argument (argument, arg2);
@@ -22417,6 +21010,7 @@ void Character::do_oload (std::string argument)
     return;
   }
 
+  int lvl;
   if (arg2.empty()) {
     lvl = get_trust ();
   } else {
@@ -22434,12 +21028,13 @@ void Character::do_oload (std::string argument)
     }
   }
 
+  ObjectPrototype *pObjIndex;
   if ((pObjIndex = get_obj_index (atoi (arg1.c_str()))) == NULL) {
     send_to_char ("No object has that vnum.\r\n");
     return;
   }
 
-  obj = pObjIndex->create_object(lvl);
+  Object *obj = pObjIndex->create_object(lvl);
   if (obj->can_wear(ITEM_TAKE)) {
     obj->obj_to_char (this);
   } else {
@@ -22449,7 +21044,6 @@ void Character::do_oload (std::string argument)
   send_to_char ("Ok.\r\n");
   return;
 }
-
 
 void Character::do_purge (std::string argument)
 {
@@ -22496,7 +21090,6 @@ void Character::do_purge (std::string argument)
   victim->extract_char (true);
   return;
 }
-
 
 void Character::do_advance (std::string argument)
 {
@@ -22571,7 +21164,6 @@ void Character::do_advance (std::string argument)
   return;
 }
 
-
 void Character::do_trust (std::string argument)
 {
   std::string arg1, arg2;
@@ -22605,7 +21197,6 @@ void Character::do_trust (std::string argument)
   return;
 }
 
-
 void Character::do_restore (std::string argument)
 {
   std::string arg;
@@ -22630,7 +21221,6 @@ void Character::do_restore (std::string argument)
   send_to_char ("Ok.\r\n");
   return;
 }
-
 
 void Character::do_freeze (std::string argument)
 {
@@ -22674,55 +21264,6 @@ void Character::do_freeze (std::string argument)
   return;
 }
 
-
-void Character::do_log (std::string argument)
-{
-  std::string arg;
-  Character *victim;
-
-  one_argument (argument, arg);
-
-  if (arg.empty()) {
-    send_to_char ("Log whom?\r\n");
-    return;
-  }
-
-  if (!str_cmp (arg, "all")) {
-    if (fLogAll) {
-      fLogAll = false;
-      send_to_char ("Log ALL off.\r\n");
-    } else {
-      fLogAll = true;
-      send_to_char ("Log ALL on.\r\n");
-    }
-    return;
-  }
-
-  if ((victim = get_char_world (arg)) == NULL) {
-    send_to_char ("They aren't here.\r\n");
-    return;
-  }
-
-  if (victim->is_npc ()) {
-    send_to_char ("Not on NPC's.\r\n");
-    return;
-  }
-
-  /*
-   * No level check, gods can log anyone.
-   */
-  if (IS_SET (victim->actflags, PLR_LOG)) {
-    REMOVE_BIT (victim->actflags, PLR_LOG);
-    send_to_char ("LOG removed.\r\n");
-  } else {
-    SET_BIT (victim->actflags, PLR_LOG);
-    send_to_char ("LOG set.\r\n");
-  }
-
-  return;
-}
-
-
 void Character::do_noemote (std::string argument)
 {
   std::string arg;
@@ -22762,7 +21303,6 @@ void Character::do_noemote (std::string argument)
 
   return;
 }
-
 
 void Character::do_notell (std::string argument)
 {
@@ -22804,7 +21344,6 @@ void Character::do_notell (std::string argument)
   return;
 }
 
-
 void Character::do_silence (std::string argument)
 {
   std::string arg;
@@ -22845,7 +21384,6 @@ void Character::do_silence (std::string argument)
   return;
 }
 
-
 void Character::do_peace (std::string argument)
 {
   CharIter rch;
@@ -22857,7 +21395,6 @@ void Character::do_peace (std::string argument)
   send_to_char ("Ok.\r\n");
   return;
 }
-
 
 void Character::do_ban (std::string argument)
 {
@@ -22892,7 +21429,6 @@ void Character::do_ban (std::string argument)
   return;
 }
 
-
 void Character::do_allow (std::string argument)
 {
   std::string arg;
@@ -22921,7 +21457,6 @@ void Character::do_allow (std::string argument)
   return;
 }
 
-
 void Character::do_wizlock (std::string argument)
 {
   wizlock = !wizlock;
@@ -22933,7 +21468,6 @@ void Character::do_wizlock (std::string argument)
 
   return;
 }
-
 
 void Character::do_slookup (std::string argument)
 {
@@ -22970,7 +21504,6 @@ void Character::do_slookup (std::string argument)
 
   return;
 }
-
 
 void Character::do_sset (std::string argument)
 {
@@ -23033,7 +21566,6 @@ void Character::do_sset (std::string argument)
 
   return;
 }
-
 
 void Character::do_mset (std::string argument)
 {
@@ -23189,10 +21721,10 @@ void Character::do_mset (std::string argument)
   }
 
   if (!str_cmp (arg2, "class")) {
-    if (value < 0 || value >= MAX_CLASS) {
+    if (value < 0 || value >= CLASS_MAX) {
       char buf[MAX_STRING_LENGTH];
 
-      snprintf (buf, sizeof buf, "Class range is 0 to %d.\n", MAX_CLASS - 1);
+      snprintf (buf, sizeof buf, "Class range is 0 to %d.\n", CLASS_MAX - 1);
       send_to_char (buf);
       return;
     }
@@ -23360,7 +21892,6 @@ void Character::do_mset (std::string argument)
   return;
 }
 
-
 void Character::do_oset (std::string argument)
 {
   std::string arg1, arg2, arg3;
@@ -23487,7 +22018,6 @@ void Character::do_oset (std::string argument)
   return;
 }
 
-
 void Character::do_rset (std::string argument)
 {
   std::string arg1, arg2, arg3;
@@ -23541,7 +22071,6 @@ void Character::do_rset (std::string argument)
   return;
 }
 
-
 void Character::do_users (std::string argument)
 {
   char buf[MAX_STRING_LENGTH];
@@ -23568,7 +22097,6 @@ void Character::do_users (std::string argument)
   send_to_char (buf);
   return;
 }
-
 
 /*
  * Thanks to Grodyn for pointing out bugs in this function.
@@ -23638,7 +22166,6 @@ void Character::do_force (std::string argument)
   return;
 }
 
-
 /*
  * New routines by Dionysos.
  */
@@ -23660,7 +22187,6 @@ void Character::do_invis (std::string argument)
   return;
 }
 
-
 void Character::do_holylight (std::string argument)
 {
   if (is_npc ())
@@ -23678,7 +22204,6 @@ void Character::do_holylight (std::string argument)
 }
 
 /* Wizify and Wizbit sent in by M. B. King */
-
 void Character::do_wizify (std::string argument)
 {
   std::string arg1;
@@ -23711,7 +22236,6 @@ void Character::do_wizify (std::string argument)
 }
 
 /* Idea from Talen of Vego's do_where command */
-
 void Character::do_owhere (std::string argument)
 {
   char buf[MAX_STRING_LENGTH];
@@ -23754,16 +22278,12 @@ void Character::do_owhere (std::string argument)
     send_to_char ("Nothing like that in hell, earth, or heaven.\r\n");
 
   return;
-
-
 }
-
 
 /* This routine transfers between alpha and numeric forms of the
  *  mob_prog bitvector types. It allows the words to show up in mpstat to
  *  make it just a hair bit easier to see what a mob should be doing.
  */
-
 char *mprog_type_to_name (int type)
 {
   switch (type) {
@@ -23800,7 +22320,6 @@ char *mprog_type_to_name (int type)
  * enough to identify the mob and give its basic condition.  It does however,
  * show the MOBprograms which are set.
  */
-
 void Character::do_mpstat (std::string argument)
 {
   char buf[MAX_STRING_LENGTH];
@@ -23861,7 +22380,6 @@ void Character::do_mpstat (std::string argument)
 }
 
 /* prints the argument to all the rooms aroud the mobile */
-
 void Character::do_mpasound (std::string argument)
 {
 
@@ -23937,7 +22455,6 @@ void Character::do_mpkill (std::string argument)
   multi_hit (this, victim, TYPE_UNDEFINED);
   return;
 }
-
 
 /* lets the mobile destroy an object in its inventory
    it can also destroy a worn object and it can destroy
@@ -24042,7 +22559,6 @@ void Character::do_mpechoat (std::string argument)
 }
 
 /* prints the message to the room at large */
-
 void Character::do_mpecho (std::string argument)
 {
   if (!is_npc ()) {
@@ -24198,7 +22714,6 @@ void Character::do_mppurge (std::string argument)
   victim->extract_char (true);
   return;
 }
-
 
 /* lets the mobile goto any location it wishes that is not private */
 void Character::do_mpgoto (std::string argument)
@@ -24394,7 +22909,6 @@ void Character::do_mpforce (std::string argument)
   return;
 }
 
-
 /*
  * Deal with sockets that haven't logged in yet.
  */
@@ -24459,7 +22973,6 @@ void Descriptor::nanny (std::string argument)
       write_to_buffer ("Password: ");
       write_to_buffer (echo_off_str);
       connected = CON_GET_OLD_PASSWORD;
-      return;
     } else {
       /* New player */
       /* New characters with same name fix by Salem's Lot */
@@ -24468,7 +22981,6 @@ void Descriptor::nanny (std::string argument)
       buf = "Did I get that right, " + argument + " (Y/N)? ";
       write_to_buffer (buf);
       connected = CON_CONFIRM_NEW_NAME;
-      return;
     }
     break;
 
@@ -24582,7 +23094,7 @@ void Descriptor::nanny (std::string argument)
     }
 
     buf = "Select a class [";
-    for (iClass = 0; iClass < MAX_CLASS; iClass++) {
+    for (iClass = 0; iClass < CLASS_MAX; iClass++) {
       if (iClass > 0)
         buf.append(" ");
       buf.append(class_table[iClass].who_name);
@@ -24593,14 +23105,14 @@ void Descriptor::nanny (std::string argument)
     break;
 
   case CON_GET_NEW_CLASS:
-    for (iClass = 0; iClass < MAX_CLASS; iClass++) {
+    for (iClass = 0; iClass < CLASS_MAX; iClass++) {
       if (!str_cmp (argument, class_table[iClass].who_name)) {
         ch->klass = iClass;
         break;
       }
     }
 
-    if (iClass == MAX_CLASS) {
+    if (iClass == CLASS_MAX) {
       write_to_buffer ("That's not a class.\r\nWhat IS your class? ");
       return;
     }
@@ -24699,7 +23211,6 @@ void Descriptor::nanny (std::string argument)
   return;
 }
 
-
 /*
  * Transfer one line from input buffer to input line.
  */
@@ -24787,7 +23298,6 @@ void Descriptor::read_from_buffer ()
   for (j = 0; (inbuf[j] = inbuf[i + j]) != '\0'; j++);
   return;
 }
-
 
 /*
  * Bust a prompt (player settable prompt)
@@ -24885,7 +23395,6 @@ void bust_a_prompt (Character * ch)
   return;
 }
 
-
 /*
  * Low level output function.
  */
@@ -24920,14 +23429,6 @@ bool Descriptor::process_output (bool fPrompt)
     return true;
 
   /*
-   * Snoop-o-rama.
-   */
-  if (snoop_by != NULL) {
-    snoop_by->write_to_buffer ("% ");
-    snoop_by->write_to_buffer (outbuf);
-  }
-
-  /*
    * OS-dependent output.
    */
   if (!write_to_descriptor (descriptor, outbuf.c_str(), outbuf.size())) {
@@ -24939,22 +23440,12 @@ bool Descriptor::process_output (bool fPrompt)
   }
 }
 
-
 void Descriptor::close_socket ()
 {
   Character *ch;
 
   if (!outbuf.empty())
     process_output(false);
-
-  if (snoop_by != NULL) {
-    snoop_by->write_to_buffer ("Your victim has left the game.\r\n");
-  }
-
-  for (DescIter d = descriptor_list.begin(); d != descriptor_list.end(); d++) {
-    if ((*d)->snoop_by == this)
-      (*d)->snoop_by = NULL;
-  }
 
   if ((ch = character) != NULL) {
     log_printf ("Closing link to %s.", ch->name.c_str());
@@ -24972,7 +23463,6 @@ void Descriptor::close_socket ()
   delete this;
   return;
 }
-
 
 bool Descriptor::read_from_descriptor ()
 {
@@ -25015,7 +23505,6 @@ bool Descriptor::read_from_descriptor ()
   inbuf[iStart] = '\0';
   return true;
 }
-
 
 void new_descriptor (SOCKET control)
 {
@@ -25112,7 +23601,6 @@ void new_descriptor (SOCKET control)
 
   return;
 }
-
 
 void game_loop (SOCKET control)
 {
@@ -25224,8 +23712,6 @@ void game_loop (SOCKET control)
       }
     }
 
-
-
     /*
      * Autonomous game motion.
      */
@@ -25293,7 +23779,6 @@ void game_loop (SOCKET control)
 
   return;
 }
-
 
 /*
  * Big mama top level function.
@@ -25438,36 +23923,30 @@ void boot_db (void)
   return;
 }
 
-
-int init_socket (int port)
+int init_server_socket (int port)
 {
-  static struct sockaddr_in sa_zero;
-  struct sockaddr_in sa;
-  int x = 1;
   SOCKET fd;
 
   if ((fd = socket (AF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET) {
     fatal_printf("Init_socket: socket");
   }
 
+  int x = 1;
   if (setsockopt (fd, SOL_SOCKET, SO_REUSEADDR, (char *) &x, sizeof (x)) == SOCKET_ERROR) {
     closesocket (fd);
     fatal_printf ("Init_socket: SO_REUSEADDR");
   }
-#if defined(SO_DONTLINGER)
-  {
-    struct linger ld;
 
-    ld.l_onoff = 1;
-    ld.l_linger = 1000;
-
-    if (setsockopt (fd, SOL_SOCKET, SO_DONTLINGER, (char *) &ld, sizeof (ld)) == SOCKET_ERROR) {
-      closesocket (fd);
-      fatal_printf ("Init_socket: SO_DONTLINGER");
-    }
+  struct linger ld;
+  ld.l_onoff = 1;
+  ld.l_linger = 1000;
+  if (setsockopt (fd, SOL_SOCKET, SO_DONTLINGER, (char *) &ld, sizeof (ld)) == SOCKET_ERROR) {
+    closesocket (fd);
+    fatal_printf ("Init_socket: SO_DONTLINGER");
   }
-#endif
 
+  static struct sockaddr_in sa_zero;
+  struct sockaddr_in sa;
   sa = sa_zero;
   sa.sin_family = AF_INET;
   sa.sin_port = htons (port);
@@ -25485,25 +23964,19 @@ int init_socket (int port)
   return fd;
 }
 
-
 int main (int argc, char **argv)
 {
   struct timeval now_time;
-  int port;
-  SOCKET control;
 
-  /*
-   * Init time.
-   */
+  // Init time.
   gettimeofday (&now_time, NULL);
   current_time = (time_t) now_time.tv_sec;
   str_boot_time = ctime (&current_time);
 
   WIN32STARTUP
-  /*
-   * Get the port number.
-   */
-  port = 1234;
+
+  // Get the port number.
+  int port = 1234;
   if (argc > 1) {
     if (!is_number (argv[1])) {
       fatal_printf ("Usage: %s [port #]");
@@ -25512,18 +23985,14 @@ int main (int argc, char **argv)
     }
   }
 
-  /*
-   * Run the game.
-   */
-  control = init_socket (port);
+  // Run the game.
+  SOCKET control = init_server_socket (port);
   boot_db ();
   log_printf ("Merc is ready to rock on port %d.", port);
   game_loop (control);
-  closesocket (control);
 
-  /*
-   * That's all, folks.
-   */
+  // Normal exit
+  closesocket (control);
   log_printf ("Normal termination of game.");
   WIN32CLEANUP
   return 0;

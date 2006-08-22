@@ -183,7 +183,7 @@ get put drop give sacrifice       help credits areas commands socials
 wear wield hold                   report score time weather where who
 recite quaff zap brandish         channels config description password title
 lock unlock open close pick       auction chat music question answer shout yell
-inventory equipment look compare  emote pose say tell
+inventory equipment look compare  emote say tell
 eat drink fill                    bug idea typo
 list buy sell value               note wizlist slist spells autoexit
 				  autoloot autosac blank brief combine prompt
@@ -526,14 +526,11 @@ YELL sends a message to all awake players within your area.
 You can use the CHANNELS command to hear, or not hear, any of these channels.
 ~
 
-0 EMOTE , POSE SOCIAL~
+0 EMOTE , SOCIAL~
 Syntax: emote <action>
-Syntax: pose
 
 EMOTE is used to express emotions or actions.  Besides EMOTE, there are
 several dozen built-in social commands, such as CACKLE, HUG, and THANK.
-
-POSE is a variant of EMOTE.
 ~
 
 0 HOLD REMOVE WEAR WIELD~
@@ -733,8 +730,6 @@ Syntax: password <old-password> <new-password>
 
 PASSWORD changes your character's password.  The first argument must be
 your old password.  The second argument is your new password.
-
-The PASSWORD command is protected against being snooped or logged.
 ~
 
 0 TITLE~
@@ -1268,27 +1263,6 @@ files.  Neither 'sn' nor 'slot' is used for player files; these operate with
 the actual skill and spell names.
 
 SLOOKUP ALL shows this information for all skills and spells.
-~
-
-37 LOG SNOOP~
-Syntax: log   <character>
-Syntax: log   all
-Syntax: snoop <character>
-
-LOG <character> causes all of a character's commands to be logged into
-the server's log file.  Like FREEZE, it is a permanent character toggle.
-
-Certain commands (PASSWORD) are protected against LOG.  Conversely, certain
-commands (especially immortal commands) are always logged.
-
-LOG ALL logs all character commands.  It is a server-wide toggle; it does not
-persist across reboots.
-
-SNOOP shows you a copy of all the input and output going to a character.
-The character must have an open channel.  You may snoop more than one
-character at a time.
-
-SNOOP yourself to cancel all outstanding snoops.
 ~
 
 37 SWITCH RETURN~

@@ -1,7 +1,6 @@
 CC      = g++
 PROF    = -g
-NOCRYPT = 
-C_FLAGS = -O0 -Wall -W $(PROF) $(NOCRYPT) -Wno-unused -fno-default-inline
+C_FLAGS = -O0 -Wall -W $(PROF) -Wno-unused -fno-default-inline
 L_FLAGS = -O0 $(PROF)
 
 O_FILES = murk.o
