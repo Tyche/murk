@@ -5,6 +5,15 @@ Murk++ is a C++ version of Merc 2.2
 Merc Diku Mud is a Diku Mud with many enhancements and contributions.  
 
 
+=== Release Information
+
+Version 1.1
+
+* Removed log, snoop and pose.
+* Removed old mob style code from DB read and updated area files.
+* Path to exe fixed.
+
+
 === Acknowledgements
 
 This document contains information from the Merc Release 2.2 by Kahn and 
