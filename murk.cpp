@@ -111,6 +111,9 @@ std::string itoa(int value, int base) {
 /* WINDOWS DEFINITIONS SECTION                                           */
 /*-----------------------------------------------------------------------*/
 #ifdef WIN32                    /* Windows portability */
+#if defined _MSC_VER
+#define NOMINMAX
+#endif
 #define FD_SETSIZE 1024
 #include <winsock2.h>
 
