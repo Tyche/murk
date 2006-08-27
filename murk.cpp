@@ -3917,11 +3917,6 @@ void Descriptor::show_string (const std::string & input) {
   }
 }
 
-int number_bits (int width)
-{
-  return OS_RAND() % (1 << width);
-}
-
 /*
  * Generate a random number in an inclusive range.
  */
@@ -6799,12 +6794,9 @@ void Character::advance_level ()
     title_table[klass][level][sex == SEX_FEMALE ? 1 : 0]);
   set_title(buf);
 
-  add_hp =
-    con_app[get_curr_con()].hitp +
-    number_range (class_table[klass].hp_min,
-    class_table[klass].hp_max);
-  add_mana =
-    class_table[klass].fMana ? number_range (2,
+  add_hp = con_app[get_curr_con()].hitp +
+    number_range (class_table[klass].hp_min, class_table[klass].hp_max);
+  add_mana = class_table[klass].fMana ? number_range (2,
     (2 * get_curr_int() + get_curr_wis()) / 8)
     : 0;
   add_move = number_range (5, (get_curr_con() + get_curr_dex()) / 4);
@@ -9069,7 +9061,7 @@ bool Character::check_social (const std::string & command, const std::string & a
     if (!is_npc () && victim->is_npc ()
       && !victim->is_affected (AFF_CHARM)
       && victim->is_awake ()) {
-      switch (number_bits (4)) {
+      switch (number_range (0, 15)) {
       case 0:
         multi_hit (victim, this, TYPE_UNDEFINED);
         break;
@@ -10871,7 +10863,7 @@ try {
 
     /* Scavenge */
     if (IS_SET (ch->actflags, ACT_SCAVENGER)
-      && !ch->in_room->contents.empty() && number_bits (2) == 0) {
+      && !ch->in_room->contents.empty() && number_percent() <= 25) {
       Object *obj_best;
       int max;
 
@@ -10894,7 +10886,7 @@ try {
 
     /* Wander */
     if (!IS_SET (ch->actflags, ACT_SENTINEL)
-      && (door = number_bits (5)) <= 5
+      && (door = number_range (0, 31)) <= 5
       && (pexit = ch->in_room->exit[door]) != NULL
       && pexit->to_room != NULL && !IS_SET (pexit->exit_info, EX_CLOSED)
       && !IS_SET (pexit->to_room->room_flags, ROOM_NO_MOB)
@@ -10911,7 +10903,7 @@ try {
 
     /* Flee */
     if (ch->hit < (ch->max_hit / 2)
-      && (door = number_bits (3)) <= 5
+      && (door = number_range (0, 7)) <= 5
       && (pexit = ch->in_room->exit[door]) != NULL
       && pexit->to_room != NULL && !IS_SET (pexit->exit_info, EX_CLOSED)
       && !IS_SET (pexit->to_room->room_flags, ROOM_NO_MOB)) {
@@ -11006,7 +10998,7 @@ void weather_update (void)
 
   case SKY_CLOUDLESS:
     if (weather_info.mmhg < 990
-      || (weather_info.mmhg < 1010 && number_bits (2) == 0)) {
+      || (weather_info.mmhg < 1010 && number_percent() <= 25)) {
       buf.append("The sky is getting cloudy.\r\n");
       weather_info.sky = SKY_CLOUDY;
     }
@@ -11014,25 +11006,25 @@ void weather_update (void)
 
   case SKY_CLOUDY:
     if (weather_info.mmhg < 970
-      || (weather_info.mmhg < 990 && number_bits (2) == 0)) {
+      || (weather_info.mmhg < 990 && number_percent() <= 25)) {
       buf.append("It starts to rain.\r\n");
       weather_info.sky = SKY_RAINING;
     }
 
-    if (weather_info.mmhg > 1030 && number_bits (2) == 0) {
+    if (weather_info.mmhg > 1030 && number_percent() <= 25) {
       buf.append("The clouds disappear.\r\n");
       weather_info.sky = SKY_CLOUDLESS;
     }
     break;
 
   case SKY_RAINING:
-    if (weather_info.mmhg < 970 && number_bits (2) == 0) {
+    if (weather_info.mmhg < 970 && number_percent() <= 25) {
       buf.append("Lightning flashes in the sky.\r\n");
       weather_info.sky = SKY_LIGHTNING;
     }
 
     if (weather_info.mmhg > 1030
-      || (weather_info.mmhg > 1010 && number_bits (2) == 0)) {
+      || (weather_info.mmhg > 1010 && number_percent() <= 25)) {
       buf.append("The rain stopped.\r\n");
       weather_info.sky = SKY_CLOUDY;
     }
@@ -11040,7 +11032,7 @@ void weather_update (void)
 
   case SKY_LIGHTNING:
     if (weather_info.mmhg > 1010
-      || (weather_info.mmhg > 990 && number_bits (2) == 0)) {
+      || (weather_info.mmhg > 990 && number_percent() <= 25)) {
       buf.append("The lightning has stopped.\r\n");
       weather_info.sky = SKY_RAINING;
       break;
@@ -11409,7 +11401,7 @@ try {
          * NPC's assist NPC's of same type or 12.5% chance regardless.
          */
         if (rch->is_npc () && !rch->is_affected (AFF_CHARM)) {
-          if (rch->pIndexData == ch->pIndexData || number_bits (3) == 0) {
+          if (rch->pIndexData == ch->pIndexData || number_range (0, 7) == 0) {
             Character *target;
             int number;
 
@@ -11849,7 +11841,7 @@ void death_cry (Character * ch)
   int vnum;
 
   vnum = 0;
-  switch (number_bits (4)) {
+  switch (number_range (0, 15)) {
   default:
     msg = "You hear $n's death cry.";
     break;
@@ -12167,7 +12159,7 @@ void disarm (Character * ch, Character * victim)
   if ((obj = victim->get_eq_char (WEAR_WIELD)) == NULL)
     return;
 
-  if (ch->get_eq_char (WEAR_WIELD) == NULL && number_bits (1) == 0)
+  if (ch->get_eq_char (WEAR_WIELD) == NULL && number_percent() <= 50)
     return;
 
   ch->act ("$n DISARMS you!", NULL, victim, TO_VICT);
@@ -12244,7 +12236,7 @@ void damage (Character * ch, Character * victim, int dam, int dt)
         && victim->is_npc ()
         && victim->is_affected (AFF_CHARM)
         && victim->master != NULL
-        && victim->master->in_room == ch->in_room && number_bits (3) == 0) {
+        && victim->master->in_room == ch->in_room && number_range(0, 7) == 0) {
         ch->stop_fighting(false);
         multi_hit (ch, victim->master, TYPE_UNDEFINED);
         return;
@@ -12396,7 +12388,7 @@ void damage (Character * ch, Character * victim, int dam, int dt)
    * Wimp out?
    */
   if (victim->is_npc () && dam > 0) {
-    if ((IS_SET (victim->actflags, ACT_WIMPY) && number_bits (1) == 0
+    if ((IS_SET (victim->actflags, ACT_WIMPY) && number_percent() <= 50
         && victim->hit < victim->max_hit / 2)
       || (victim->is_affected (AFF_CHARM) && victim->master != NULL
         && victim->master->in_room != victim->in_room))
@@ -12422,7 +12414,6 @@ void one_hit (Character * ch, Character * victim, int dt)
   int thac0_00;
   int thac0_32;
   int dam;
-  int diceroll;
 
   /*
    * Can't beat a dead char!
@@ -12459,8 +12450,7 @@ void one_hit (Character * ch, Character * victim, int dt)
   /*
    * The moment of excitement!
    */
-  while ((diceroll = number_bits (5)) >= 20);
-
+  int diceroll = number_range(0, 19);
   if (diceroll == 0 || (diceroll != 19 && diceroll < thac0 - victim_ac)) {
     /* Miss. */
     damage (ch, victim, 0, dt);
@@ -13012,7 +13002,7 @@ bool dragon (Character * ch, char *spell_name)
 
   CharIter rch;
   for (rch = ch->in_room->people.begin(); rch != ch->in_room->people.end(); rch++) {
-    if ((*rch)->fighting == ch && number_bits (2) == 0) {
+    if ((*rch)->fighting == ch && number_percent() <= 25) {
       victim = *rch;
       break;
     }
@@ -13035,7 +13025,7 @@ bool spec_breath_any (Character * ch)
   if (ch->position != POS_FIGHTING)
     return false;
 
-  switch (number_bits (3)) {
+  switch (number_range(0, 7)) {
   case 0:
     return spec_breath_fire (ch);
   case 1:
@@ -13096,7 +13086,7 @@ bool spec_cast_adept (Character * ch)
 
   CharIter rch;
   for (rch = ch->in_room->people.begin(); rch != ch->in_room->people.end(); rch++) {
-    if (*rch != ch && ch->can_see(*rch) && number_bits (1) == 0) {
+    if (*rch != ch && ch->can_see(*rch) && number_percent() <= 50) {
       victim = *rch;
       break;
     }
@@ -13105,7 +13095,7 @@ bool spec_cast_adept (Character * ch)
   if (victim == NULL)
     return false;
 
-  switch (number_bits (3)) {
+  switch (number_range(0, 7)) {
   case 0:
     ch->act ("$n utters the word 'tehctah'.", NULL, NULL, TO_ROOM);
     ch->spell_armor (skill_lookup ("armor"), ch->level, victim);
@@ -13153,7 +13143,7 @@ bool spec_cast_cleric (Character * ch)
 
   CharIter rch;
   for (rch = ch->in_room->people.begin(); rch != ch->in_room->people.end(); rch++) {
-    if ((*rch)->fighting == ch && number_bits (2) == 0) {
+    if ((*rch)->fighting == ch && number_percent() <= 50) {
       victim = *rch;
       break;
     }
@@ -13165,7 +13155,7 @@ bool spec_cast_cleric (Character * ch)
   for (;;) {
     int min_level;
 
-    switch (number_bits (4)) {
+    switch (number_range(0, 15)) {
     case 0:
       min_level = 0;
       spell = "blindness";
@@ -13231,7 +13221,7 @@ bool spec_cast_judge (Character * ch)
 
   CharIter rch;
   for (rch = ch->in_room->people.begin(); rch != ch->in_room->people.end(); rch++) {
-    if ((*rch)->fighting == ch && number_bits (2) == 0) {
+    if ((*rch)->fighting == ch && number_percent() <= 50) {
       victim = *rch;
       break;
     }
@@ -13258,7 +13248,7 @@ bool spec_cast_mage (Character * ch)
 
   CharIter rch;
   for (rch = ch->in_room->people.begin(); rch != ch->in_room->people.end(); rch++) {
-    if ((*rch)->fighting == ch && number_bits (2) == 0) {
+    if ((*rch)->fighting == ch && number_percent() <= 50) {
       victim = *rch;
       break;
     }
@@ -13270,7 +13260,7 @@ bool spec_cast_mage (Character * ch)
   for (;;) {
     int min_level;
 
-    switch (number_bits (4)) {
+    switch (number_range(0, 15)) {
     case 0:
       min_level = 0;
       spell = "blindness";
@@ -13332,7 +13322,7 @@ bool spec_cast_undead (Character * ch)
 
   CharIter rch;
   for (rch = ch->in_room->people.begin(); rch != ch->in_room->people.end(); rch++) {
-    if ((*rch)->fighting == ch && number_bits (2) == 0) {
+    if ((*rch)->fighting == ch && number_percent() <= 50) {
       victim = *rch;
       break;
     }
@@ -13344,7 +13334,7 @@ bool spec_cast_undead (Character * ch)
   for (;;) {
     int min_level;
 
-    switch (number_bits (4)) {
+    switch (number_range(0, 15)) {
     case 0:
       min_level = 0;
       spell = "curse";
@@ -13653,8 +13643,8 @@ bool spec_thief (Character * ch)
   for (rch = ch->in_room->people.begin(); rch != ch->in_room->people.end(); rch++) {
     Character* victim = *rch;
 
-    if (victim->is_npc ()
-      || victim->level >= LEVEL_IMMORTAL || number_bits (2) != 0 || !ch->can_see(victim))      /* Thx Glop */
+    if (victim->is_npc() || victim->level >= LEVEL_IMMORTAL ||
+      number_percent() <= 75 || !ch->can_see(victim))      /* Thx Glop */
       continue;
 
     if (victim->is_awake () && number_range (0, ch->level) == 0) {
@@ -15549,7 +15539,7 @@ void Character::spell_acid_breath (int sn, int lvl, void *vo)
       onext = ++o;
       int iWear;
 
-      if (number_bits (2) != 0)
+      if (number_percent() <= 75)
         continue;
 
       switch (obj_lose->item_type) {
@@ -15593,7 +15583,7 @@ void Character::spell_fire_breath (int sn, int lvl, void *vo)
       onext = ++o;
       char *msg;
 
-      if (number_bits (2) != 0)
+      if (number_percent() <= 75)
         continue;
 
       switch (obj_lose->item_type) {
@@ -15647,7 +15637,7 @@ void Character::spell_frost_breath (int sn, int lvl, void *vo)
       onext = ++o;
       char *msg;
 
-      if (number_bits (2) != 0)
+      if (number_percent() <= 75)
         continue;
 
       switch (obj_lose->item_type) {
@@ -18639,7 +18629,7 @@ void Character::do_recall (std::string argument)
   if (fighting != NULL) {
     int lose;
 
-    if (number_bits (1) == 0) {
+    if (number_percent() <= 50) {
       wait_state (4);
       lose = (desc != NULL) ? 50 : 100;
       gain_exp(0 - lose);

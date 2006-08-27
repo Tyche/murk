@@ -10,7 +10,12 @@ AR = ar
 EXE = .exe
 #EXE =
 
-DEFS = -DOS_UNIX=1 -DOS_WIN=0 -DHAVE_USLEEP=1 -DHAVE_FDATASYNC=1 -DNDEBUG
+# This should be OS_WIN=1 for Cygwin
+DEFS = -DOS_UNIX=0 -DOS_WIN=1 -DHAVE_USLEEP=1 -DHAVE_FDATASYNC=1 -DNDEBUG
+# For other unizes
+#DEFS = -DOS_UNIX=1 -DOS_WIN=0 -DHAVE_USLEEP=1 -DHAVE_FDATASYNC=1 -DNDEBUG
+ 
+
 OPTIM = -O2 -pipe 
 WARN = -Wall -Wno-parentheses -Wno-unused 
 PROF    = -g
@@ -27,11 +32,11 @@ SQLITE_SRC = sqlite3/alter.c sqlite3/analyze.c sqlite3/attach.c \
 	sqlite3/complete.c sqlite3/date.c sqlite3/delete.c sqlite3/expr.c \
 	sqlite3/func.c sqlite3/hash.c sqlite3/insert.c sqlite3/legacy.c \
 	sqlite3/loadext.c sqlite3/main.c sqlite3/opcodes.c sqlite3/os.c \
-	sqlite3/os_unix.c sqlite3/pager.c sqlite3/parse.c sqlite3/pragma.c \
-	sqlite3/prepare.c sqlite3/printf.c sqlite3/random.c sqlite3/select.c \
-	sqlite3/table.c sqlite3/tokenize.c sqlite3/trigger.c sqlite3/update.c \
-	sqlite3/utf.c sqlite3/util.c sqlite3/vacuum.c sqlite3/vdbe.c \
-	sqlite3/vdbeapi.c sqlite3/vdbeaux.c sqlite3/vdbefifo.c \
+	sqlite3/os_unix.c sqlite3/os_win.c sqlite3/pager.c sqlite3/parse.c \
+	sqlite3/pragma.c sqlite3/prepare.c sqlite3/printf.c sqlite3/random.c \
+	sqlite3/select.c sqlite3/table.c sqlite3/tokenize.c sqlite3/trigger.c \
+	sqlite3/update.c sqlite3/utf.c sqlite3/util.c sqlite3/vacuum.c \
+	sqlite3/vdbe.c sqlite3/vdbeapi.c sqlite3/vdbeaux.c sqlite3/vdbefifo.c \
 	sqlite3/vdbemem.c sqlite3/vtab.c sqlite3/where.c
 SQLITE_OBJ = $(SQLITE_SRC:.c=.o)
 SQLITE_LIB = sqlite3/libsqlite3.a
@@ -40,7 +45,7 @@ SQLITE_PRG_SRC = sqlite3/shell.c
 SQLITE_PRG_OBJ = $(SQLITE_PRG_SRC:.c=.o)
 SQLITE_PRG = sqlite3/sqlite3$(EXE) 
 
-SQLITE_XTRA = sqlite3/os_win.c sqlite3/sqlite3.def sqlite3/btree.h \
+SQLITE_XTRA = sqlite3/sqlite3.def sqlite3/btree.h \
 	sqlite3/os.h sqlite3/sqlite3.h sqlite3/vdbeInt.h sqlite3/hash.h \
 	sqlite3/os_common.h sqlite3/sqlite3ext.h sqlite3/keywordhash.h \
 	sqlite3/pager.h sqlite3/sqliteInt.h sqlite3/opcodes.h sqlite3/parse.h \

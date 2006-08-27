@@ -30,22 +30,22 @@ LIBS      = import32.lib cw32i.lib ws2_32.lib
 BCC32STARTUP = c0x32.obj
 
 MSGS= -w -w-sig -w-par  -w-use -w-pia 
-DEFS= -DWIN32 -DWIN32_LEAN_AND_MEAN -D_NO_VCL 
+DEFS= -DWIN32 -DWIN32_LEAN_AND_MEAN -D_NO_VCL -DNDEBUG
 OPTIM= $(STATIC_CFLAGS) $(DEBUG_CFLAGS) -tWM -tWC -$(PROCESSOR_LEVEL) 
 CFLAGS= $(OPTIM) $(MSGS) $(DEFS)
 LFLAGS = -Tpe -ap -c -Gn $(DEBUG_LFLAGS) 
 
-SQLITE_SRC = sqlite3\alter.c sqlite3\analyze.c sqlite3\attach.c \
-	sqlite3\auth.c sqlite3\btree.c sqlite3\build.c sqlite3\callback.c \
-	sqlite3\complete.c sqlite3\date.c sqlite3\delete.c sqlite3\expr.c \
-	sqlite3\func.c sqlite3\hash.c sqlite3\insert.c sqlite3\legacy.c \
-	sqlite3\loadext.c sqlite3\main.c sqlite3\opcodes.c sqlite3\os.c \
-	sqlite3\os_win.c sqlite3\pager.c sqlite3\parse.c sqlite3\pragma.c \
-	sqlite3\prepare.c sqlite3\printf.c sqlite3\random.c sqlite3\select.c \
-	sqlite3\table.c sqlite3\tokenize.c sqlite3\trigger.c sqlite3\update.c \
-	sqlite3\utf.c sqlite3\util.c sqlite3\vacuum.c sqlite3\vdbe.c \
-	sqlite3\vdbeapi.c sqlite3\vdbeaux.c sqlite3\vdbefifo.c \
-	sqlite3\vdbemem.c sqlite3\vtab.c sqlite3\where.c
+SQLITE_SRC = sqlite3/alter.c sqlite3/analyze.c sqlite3/attach.c \
+	sqlite3/auth.c sqlite3/btree.c sqlite3/build.c sqlite3/callback.c \
+	sqlite3/complete.c sqlite3/date.c sqlite3/delete.c sqlite3/expr.c \
+	sqlite3/func.c sqlite3/hash.c sqlite3/insert.c sqlite3/legacy.c \
+	sqlite3/loadext.c sqlite3/main.c sqlite3/opcodes.c sqlite3/os.c \
+	sqlite3/os_unix.c sqlite3/os_win.c sqlite3/pager.c sqlite3/parse.c \
+	sqlite3/pragma.c sqlite3/prepare.c sqlite3/printf.c sqlite3/random.c \
+	sqlite3/select.c sqlite3/table.c sqlite3/tokenize.c sqlite3/trigger.c \
+	sqlite3/update.c sqlite3/utf.c sqlite3/util.c sqlite3/vacuum.c \
+	sqlite3/vdbe.c sqlite3/vdbeapi.c sqlite3/vdbeaux.c sqlite3/vdbefifo.c \
+	sqlite3/vdbemem.c sqlite3/vtab.c sqlite3/where.c
 SQLITE_OBJ = $(SQLITE_SRC:.c=.obj)
 SQLITE_LIB = sqlite3\sqlite3.lib
 
