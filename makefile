@@ -10,13 +10,13 @@ AR = ar
 EXE = .exe
 #EXE =
 
-DEFS = -DOS_UNIX=1 -DOS_WIN=0
-OPTIM = -O2 -pipe
+DEFS = -DOS_UNIX=1 -DOS_WIN=0 -DHAVE_USLEEP=1 -DHAVE_FDATASYNC=1 -DNDEBUG
+OPTIM = -O2 -pipe 
 WARN = -Wall -Wno-parentheses -Wno-unused 
 PROF    = -g
 
-CPPFLAGS = $(OPTIM) $(WARN) -W $(PROF) -fno-default-inline
-CFLAGS = $(OPTIM) $(DEFS) $(WARN)
+CPPFLAGS = $(OPTIM) $(WARN) -W $(PROF) -fno-default-inline 
+CFLAGS = $(OPTIM) $(DEFS) $(WARN) -fno-strict-aliasing
 LFLAGS = $(OPTIM) $(PROF)
 
 INCS = -Isqlite3
