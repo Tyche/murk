@@ -19,8 +19,8 @@
  MurkMUD++ - A Windows compatible, C++ compatible Merc 2.2 Mud.
 
  \author Jon A. Lambert
- \date 08/16/2006
- \version 1.1
+ \date 08/30/2006
+ \version 1.2
  \remarks
   This source code copyright (C) 2005, 2006 by Jon A. Lambert
   All rights reserved.
@@ -78,6 +78,7 @@
 #include <fcntl.h>
 #include <time.h>
 #include <sys/types.h>
+#include "sqlite3/sqlite3.h"
 
 #include <cstdarg>
 #include <string>
@@ -1021,6 +1022,7 @@ bool wizlock;                   /* Game is wizlocked        */
 std::string str_boot_time;
 time_t current_time;            /* Time of this pulse       */
 std::string help_greeting;
+sqlite3 *database = NULL;
 
 /*
  * The kludgy global is for spells who want more stuff from command line.
@@ -1436,929 +1438,6 @@ const struct liq_type {
   {"salt water", "clear", {0, 1, -2}},
 
   {"cola", "cherry", {0, 1, 5}} /* 15 */
-};
-
-/*
- * The social table.
- * Add new socials here.
- * Alphabetical order is not required.
- */
-const struct social_type {
-  const char * name;
-  const char * char_no_arg;
-  const char * others_no_arg;
-  const char * char_found;
-  const char * others_found;
-  const char * vict_found;
-  const char * char_auto;
-  const char * others_auto;
-} social_table[] = {
-  {
-      "accuse",
-      "Accuse whom?",
-      "$n is in an accusing mood.",
-      "You look accusingly at $M.",
-      "$n looks accusingly at $N.",
-      "$n looks accusingly at you.",
-      "You accuse yourself.",
-    "$n seems to have a bad conscience."},
-
-  {
-      "applaud",
-      "Clap, clap, clap.",
-      "$n gives a round of applause.",
-      "You clap at $S actions.",
-      "$n claps at $N's actions.",
-      "$n gives you a round of applause.  You MUST'VE done something good!",
-      "You applaud at yourself.  Boy, are we conceited!",
-    "$n applauds at $mself.  Boy, are we conceited!"},
-
-  {
-      "bark",
-      "Woof!  Woof!",
-      "$n barks like a dog.",
-      "You bark at $M.",
-      "$n barks at $N.",
-      "$n barks at you.",
-      "You bark at yourself.  Woof!  Woof!",
-    "$n barks at $mself.  Woof!  Woof!"},
-
-  {
-      "beer",
-      "You down a cold, frosty beer.",
-      "$n downs a cold, frosty beer.",
-      "You draw a cold, frosty beer for $N.",
-      "$n draws a cold, frosty beer for $N.",
-      "$n draws a cold, frosty beer for you.",
-      "You draw yourself a beer.",
-    "$n draws $mself a beer."},
-
-  {
-      "beg",
-      "You beg the gods for mercy.",
-      "The gods fall down laughing at $n's request for mercy.",
-      "You desperately try to squeeze a few coins from $M.",
-      "$n begs $N for a gold piece!",
-      "$n begs you for money.",
-      "Begging yourself for money doesn't help.",
-    "$n begs himself for money."},
-
-  {
-      "blush",
-      "Your cheeks are burning.",
-      "$n blushes.",
-      "You get all flustered up seeing $M.",
-      "$n blushes as $e sees $N here.",
-      "$n blushes as $e sees you here.  Such an effect on people!",
-      "You blush at your own folly.",
-    "$n blushes as $e notices $s boo-boo."},
-
-  {
-      "bounce",
-      "BOIINNNNNNGG!",
-      "$n bounces around.",
-      "You bounce onto $S lap.",
-      "$n bounces onto $N's lap.",
-      "$n bounces onto your lap.",
-      "You bounce your head like a basketball.",
-    "$n plays basketball with $s head."},
-
-  {
-      "bow",
-      "You bow deeply.",
-      "$n bows deeply.",
-      "You bow before $M.",
-      "$n bows before $N.",
-      "$n bows before you.",
-      "You kiss your toes.",
-    "$n folds up like a jack knife and kisses $s own toes."},
-
-  {
-      "burp",
-      "You burp loudly.",
-      "$n burps loudly.",
-      "You burp loudly to $M in response.",
-      "$n burps loudly in response to $N's remark.",
-      "$n burps loudly in response to your remark.",
-      "You burp at yourself.",
-    "$n burps at $mself.  What a sick sight."},
-
-  {
-      "cackle",
-      "You throw back your head and cackle with insane glee!",
-      "$n throws back $s head and cackles with insane glee!",
-      "You cackle gleefully at $N",
-      "$n cackles gleefully at $N.",
-      "$n cackles gleefully at you.  Better keep your distance from $m.",
-      "You cackle at yourself.  Now, THAT'S strange!",
-    "$n is really crazy now!  $e cackles at $mself."},
-
-  {
-      "chuckle",
-      "You chuckle politely.",
-      "$n chuckles politely.",
-      "You chuckle at $S joke.",
-      "$n chuckles at $N's joke.",
-      "$n chuckles at your joke.",
-      "You chuckle at your own joke, since no one else would.",
-    "$n chuckles at $s own joke, since none of you would."},
-
-  {
-      "clap",
-      "You clap your hands together.",
-      "$n shows $s approval by clapping $s hands together.",
-      "You clap at $S performance.",
-      "$n claps at $N's performance.",
-      "$n claps at your performance.",
-      "You clap at your own performance.",
-    "$n claps at $s own performance."},
-
-  {
-      "comb",
-      "You comb your hair - perfect.",
-      "$n combs $s hair, how dashing!",
-      "You patiently untangle $N's hair - what a mess!",
-      "$n tries patiently to untangle $N's hair.",
-      "$n pulls your hair in an attempt to comb it.",
-      "You pull your hair, but it will not be combed.",
-    "$n tries to comb $s tangled hair."},
-
-  {
-      "comfort",
-      "Do you feel uncomfortable?",
-      "",
-      "You comfort $M.",
-      "$n comforts $N.",
-      "$n comforts you.",
-      "You make a vain attempt to comfort yourself.",
-    "$n has no one to comfort $m but $mself."},
-
-  {
-      "cringe",
-      "You cringe in terror.",
-      "$n cringes in terror!",
-      "You cringe away from $M.",
-      "$n cringes away from $N in mortal terror.",
-      "$n cringes away from you.",
-      "I beg your pardon?",
-    ""},
-
-  {
-      "cry",
-      "Waaaaah ...",
-      "$n bursts into tears.",
-      "You cry on $S shoulder.",
-      "$n cries on $N's shoulder.",
-      "$n cries on your shoulder.",
-      "You cry to yourself.",
-    "$n sobs quietly to $mself."},
-
-  {
-      "cuddle",
-      "Whom do you feel like cuddling today?",
-      "",
-      "You cuddle $M.",
-      "$n cuddles $N.",
-      "$n cuddles you.",
-      "You must feel very cuddly indeed ... :)",
-    "$n cuddles up to $s shadow.  What a sorry sight."},
-
-  {
-      "curse",
-      "You swear loudly for a long time.",
-      "$n swears: @*&^%@*&!",
-      "You swear at $M.",
-      "$n swears at $N.",
-      "$n swears at you!  Where are $s manners?",
-      "You swear at your own mistakes.",
-    "$n starts swearing at $mself.  Why don't you help?"},
-
-  {
-      "curtsey",
-      "You curtsey to your audience.",
-      "$n curtseys gracefully.",
-      "You curtsey to $M.",
-      "$n curtseys gracefully to $N.",
-      "$n curtseys gracefully for you.",
-      "You curtsey to your audience (yourself).",
-    "$n curtseys to $mself, since no one is paying attention to $m."},
-
-  {
-      "dance",
-      "Feels silly, doesn't it?",
-      "$n tries to break dance, but nearly breaks $s neck!",
-      "You sweep $M into a romantic waltz.",
-      "$n sweeps $N into a romantic waltz.",
-      "$n sweeps you into a romantic waltz.",
-      "You skip and dance around by yourself.",
-    "$n dances a pas-de-une."},
-
-  /*
-   * This one's for Baka, Penn, and Onethumb!
-   */
-  {
-      "drool",
-      "You drool on yourself.",
-      "$n drools on $mself.",
-      "You drool all over $N.",
-      "$n drools all over $N.",
-      "$n drools all over you.",
-      "You drool on yourself.",
-    "$n drools on $mself."},
-
-  {
-      "fart",
-      "Where are your manners?",
-      "$n lets off a real rip-roarer ... a greenish cloud envelops $n!",
-      "You fart at $M.  Boy, you are sick.",
-      "$n farts in $N's direction.  Better flee before $e turns to you!",
-      "$n farts in your direction.  You gasp for air.",
-      "You fart at yourself.  You deserve it.",
-    "$n farts at $mself.  Better $m than you."},
-
-  {
-      "flip",
-      "You flip head over heels.",
-      "$n flips head over heels.",
-      "You flip $M over your shoulder.",
-      "$n flips $N over $s shoulder.",
-      "$n flips you over $s shoulder.  Hmmmm.",
-      "You tumble all over the room.",
-    "$n does some nice tumbling and gymnastics."},
-
-  {
-      "fondle",
-      "Who needs to be fondled?",
-      "",
-      "You fondly fondle $M.",
-      "$n fondly fondles $N.",
-      "$n fondly fondles you.",
-      "You fondly fondle yourself, feels funny doesn't it ?",
-    "$n fondly fondles $mself - this is going too far !!"},
-
-  {
-      "french",
-      "Kiss whom?",
-      "",
-      "You give $N a long and passionate kiss.",
-      "$n kisses $N passionately.",
-      "$n gives you a long and passionate kiss.",
-      "You gather yourself in your arms and try to kiss yourself.",
-    "$n makes an attempt at kissing $mself."},
-
-  {
-      "frown",
-      "What's bothering you ?",
-      "$n frowns.",
-      "You frown at what $E did.",
-      "$n frowns at what $E did.",
-      "$n frowns at what you did.",
-      "You frown at yourself.  Poor baby.",
-    "$n frowns at $mself.  Poor baby."},
-
-  {
-      "fume",
-      "You grit your teeth and fume with rage.",
-      "$n grits $s teeth and fumes with rage.",
-      "You stare at $M, fuming.",
-      "$n stares at $N, fuming with rage.",
-      "$n stares at you, fuming with rage!",
-      "That's right - hate yourself!",
-    "$n clenches $s fists and stomps his feet, fuming with anger."},
-
-  {
-      "gasp",
-      "You gasp in astonishment.",
-      "$n gasps in astonishment.",
-      "You gasp as you realize what $e did.",
-      "$n gasps as $e realizes what $N did.",
-      "$n gasps as $e realizes what you did.",
-      "You look at yourself and gasp!",
-    "$n takes one look at $mself and gasps in astonisment!"},
-
-  {
-      "giggle",
-      "You giggle.",
-      "$n giggles.",
-      "You giggle in $S's presence.",
-      "$n giggles at $N's actions.",
-      "$n giggles at you.  Hope it's not contagious!",
-      "You giggle at yourself.  You must be nervous or something.",
-    "$n giggles at $mself.  $e must be nervous or something."},
-
-  {
-      "glare",
-      "You glare at nothing in particular.",
-      "$n glares around $m.",
-      "You glare icily at $M.",
-      "$n glares at $N.",
-      "$n glares icily at you, you feel cold to your bones.",
-      "You glare icily at your feet, they are suddenly very cold.",
-    "$n glares at $s feet, what is bothering $m?"},
-
-  {
-      "grin",
-      "You grin evilly.",
-      "$n grins evilly.",
-      "You grin evilly at $M.",
-      "$n grins evilly at $N.",
-      "$n grins evilly at you.  Hmmm.  Better keep your distance.",
-      "You grin at yourself.  You must be getting very bad thoughts.",
-    "$n grins at $mself.  You must wonder what's in $s mind."},
-
-  {
-      "groan",
-      "You groan loudly.",
-      "$n groans loudly.",
-      "You groan at the sight of $M.",
-      "$n groans at the sight of $N.",
-      "$n groans at the sight of you.",
-      "You groan as you realize what you have done.",
-    "$n groans as $e realizes what $e has done."},
-
-  {
-      "grope",
-      "Whom do you wish to grope?",
-      "",
-      "Well, what sort of noise do you expect here?",
-      "$n gropes $N.",
-      "$n gropes you.",
-      "You grope yourself - YUCK.",
-    "$n gropes $mself - YUCK."},
-
-  {
-      "grovel",
-      "You grovel in the dirt.",
-      "$n grovels in the dirt.",
-      "You grovel before $M.",
-      "$n grovels in the dirt before $N.",
-      "$n grovels in the dirt before you.",
-      "That seems a little silly to me.",
-    ""},
-
-  {
-      "growl",
-      "Grrrrrrrrrr ...",
-      "$n growls.",
-      "Grrrrrrrrrr ... take that, $N!",
-      "$n growls at $N.  Better leave the room before the fighting starts.",
-      "$n growls at you.  Hey, two can play it that way!",
-      "You growl at yourself.  Boy, do you feel bitter!",
-    "$n growls at $mself.  This could get interesting..."},
-
-  {
-      "grumble",
-      "You grumble.",
-      "$n grumbles.",
-      "You grumble to $M.",
-      "$n grumbles to $N.",
-      "$n grumbles to you.",
-      "You grumble under your breath.",
-    "$n grumbles under $s breath."},
-
-  {
-      "grunt",
-      "GRNNNHTTTT.",
-      "$n grunts like a pig.",
-      "GRNNNHTTTT.",
-      "$n grunts to $N.  What a pig!",
-      "$n grunts to you.  What a pig!",
-      "GRNNNHTTTT.",
-    "$n grunts to nobody in particular.  What a pig!"},
-
-  {
-      "hand",
-      "Kiss whose hand?",
-      "",
-      "You kiss $S hand.",
-      "$n kisses $N's hand.  How continental!",
-      "$n kisses your hand.  How continental!",
-      "You kiss your own hand.",
-    "$n kisses $s own hand."},
-
-  {
-      "hop",
-      "You hop around like a little kid.",
-      "",
-      "",
-      "",
-      "",
-      "",
-    ""},
-
-  {
-      "hug",
-      "Hug whom?",
-      "",
-      "You hug $M.",
-      "$n hugs $N.",
-      "$n hugs you.",
-      "You hug yourself.",
-    "$n hugs $mself in a vain attempt to get friendship."},
-
-  {
-      "kiss",
-      "Isn't there someone you want to kiss?",
-      "",
-      "You kiss $M.",
-      "$n kisses $N.",
-      "$n kisses you.",
-      "All the lonely people :(",
-    ""},
-
-  {
-      "laugh",
-      "You laugh.",
-      "$n laughs.",
-      "You laugh at $N mercilessly.",
-      "$n laughs at $N mercilessly.",
-      "$n laughs at you mercilessly.  Hmmmmph.",
-      "You laugh at yourself.  I would, too.",
-    "$n laughs at $mself.  Let's all join in!!!"},
-
-  {
-      "lick",
-      "You lick your lips and smile.",
-      "$n licks $s lips and smiles.",
-      "You lick $M.",
-      "$n licks $N.",
-      "$n licks you.",
-      "You lick yourself.",
-    "$n licks $mself - YUCK."},
-
-  {
-      "love",
-      "You love the whole world.",
-      "$n loves everybody in the world.",
-      "You tell your true feelings to $N.",
-      "$n whispers softly to $N.",
-      "$n whispers to you sweet words of love.",
-      "Well, we already know you love yourself (lucky someone does!)",
-    "$n loves $mself, can you believe it ?"},
-
-  {
-      "massage",
-      "Massage what?  Thin air?",
-      "",
-      "You gently massage $N's shoulders.",
-      "$n massages $N's shoulders.",
-      "$n gently massages your shoulders.  Ahhhhhhhhhh ...",
-      "You practice yoga as you try to massage yourself.",
-    "$n gives a show on yoga positions, trying to massage $mself."},
-
-  {
-      "moan",
-      "You start to moan.",
-      "$n starts moaning.",
-      "You moan for the loss of $m.",
-      "$n moans for the loss of $N.",
-      "$n moans at the sight of you.  Hmmmm.",
-      "You moan at yourself.",
-    "$n makes $mself moan."},
-
-  {
-      "nibble",
-      "Nibble on whom?",
-      "",
-      "You nibble on $N's ear.",
-      "$n nibbles on $N's ear.",
-      "$n nibbles on your ear.",
-      "You nibble on your OWN ear.",
-    "$n nibbles on $s OWN ear."},
-
-  {
-      "nod",
-      "You nod your silly head off.",
-      "$n nods $s silly head off.",
-      "You nod in recognition to $M.",
-      "$n nods in recognition to $N.",
-      "$n nods in recognition to you.  You DO know $m, right?",
-      "You nod at yourself.  Are you getting senile?",
-    "$n nods at $mself.  $e must be getting senile."},
-
-  {
-      "nudge",
-      "Nudge whom?",
-      "",
-      "You nudge $M.",
-      "$n nudges $N.",
-      "$n nudges you.",
-      "You nudge yourself, for some strange reason.",
-    "$n nudges $mself, to keep $mself awake."},
-
-  {
-      "nuzzle",
-      "Nuzzle whom?",
-      "",
-      "You nuzzle $S neck softly.",
-      "$n softly nuzzles $N's neck.",
-      "$n softly nuzzles your neck.",
-      "I'm sorry, friend, but that's impossible.",
-    ""},
-
-  {
-      "pat",
-      "Pat whom?",
-      "",
-      "You pat $N on $S ass.",
-      "$n pats $N on $S ass.",
-      "$n pats you on your ass.",
-      "You pat yourself on your ass, very sensual.",
-    "$n pats $mself on the ass."},
-
-  {
-      "point",
-      "Point at whom?",
-      "",
-      "You point at $M accusingly.",
-      "$n points at $N accusingly.",
-      "$n points at you accusingly.",
-      "You point proudly at yourself.",
-    "$n points proudly at $mself."},
-
-  {
-      "poke",
-      "Poke whom?",
-      "",
-      "You poke $M in the ribs.",
-      "$n pokes $N in the ribs.",
-      "$n pokes you in the ribs.",
-      "You poke yourself in the ribs, feeling very silly.",
-    "$n pokes $mself in the ribs, looking very sheepish."},
-
-  {
-      "ponder",
-      "You ponder the question.",
-      "$n sits down and thinks deeply.",
-      "",
-      "",
-      "",
-      "",
-    ""},
-
-  {
-      "pout",
-      "Ah, don't take it so hard.",
-      "$n pouts.",
-      "",
-      "",
-      "",
-      "",
-    ""},
-
-  {
-      "pray",
-      "You feel righteous, and maybe a little foolish.",
-      "$n begs and grovels to the powers that be.",
-      "You crawl in the dust before $M.",
-      "$n falls down and grovels in the dirt before $N.",
-      "$n kisses the dirt at your feet.",
-      "Talk about narcissism ...",
-    "$n mumbles a prayer to $mself."},
-
-  {
-      "puke",
-      "You puke ... chunks everywhere!",
-      "$n pukes.",
-      "You puke on $M.",
-      "$n pukes on $N.",
-      "$n spews vomit and pukes all over your clothing!",
-      "You puke on yourself.",
-    "$n pukes on $s clothes."},
-
-  {
-      "punch",
-      "Punch whom?",
-      "",
-      "You punch $M playfully.",
-      "$n punches $N playfully.",
-      "$n punches you playfully.  OUCH!",
-      "You punch yourself.  You deserve it.",
-    "$n punches $mself.  Why don't you join in?"},
-
-  {
-      "purr",
-      "MMMMEEEEEEEEOOOOOOOOOWWWWWWWWWWWW.",
-      "$n purrs contentedly.",
-      "You purr contentedly in $M lap.",
-      "$n purrs contentedly in $N's lap.",
-      "$n purrs contentedly in your lap.",
-      "You purr at yourself.",
-    "$n purrs at $mself.  Must be a cat thing."},
-
-  {
-      "ruffle",
-      "You've got to ruffle SOMEONE.",
-      "",
-      "You ruffle $N's hair playfully.",
-      "$n ruffles $N's hair playfully.",
-      "$n ruffles your hair playfully.",
-      "You ruffle your hair.",
-    "$n ruffles $s hair."},
-
-  {
-      "scream",
-      "ARRRRRRRRRRGH!!!!!",
-      "$n screams loudly!",
-      "ARRRRRRRRRRGH!!!!!  Yes, it MUST have been $S fault!!!",
-      "$n screams loudly at $N.  Better leave before $n blames you, too!!!",
-      "$n screams at you!  That's not nice!  *sniff*",
-      "You scream at yourself.  Yes, that's ONE way of relieving tension!",
-    "$n screams loudly at $mself!  Is there a full moon up?"},
-
-  {
-      "shake",
-      "You shake your head.",
-      "$n shakes $s head.",
-      "You shake $S hand.",
-      "$n shakes $N's hand.",
-      "$n shakes your hand.",
-      "You are shaken by yourself.",
-    "$n shakes and quivers like a bowl full of jelly."},
-
-  {
-      "shiver",
-      "Brrrrrrrrr.",
-      "$n shivers uncomfortably.",
-      "You shiver at the thought of fighting $M.",
-      "$n shivers at the thought of fighting $N.",
-      "$n shivers at the suicidal thought of fighting you.",
-      "You shiver to yourself?",
-    "$n scares $mself to shivers."},
-
-  {
-      "shrug",
-      "You shrug.",
-      "$n shrugs helplessly.",
-      "You shrug in response to $s question.",
-      "$n shrugs in response to $N's question.",
-      "$n shrugs in respopnse to your question.",
-      "You shrug to yourself.",
-    "$n shrugs to $mself.  What a strange person."},
-
-  {
-      "sigh",
-      "You sigh.",
-      "$n sighs loudly.",
-      "You sigh as you think of $M.",
-      "$n sighs at the sight of $N.",
-      "$n sighs as $e thinks of you.  Touching, huh?",
-      "You sigh at yourself.  You MUST be lonely.",
-    "$n sighs at $mself.  What a sorry sight."},
-
-  {
-      "sing",
-      "You raise your clear voice towards the sky.",
-      "$n has begun to sing.",
-      "You sing a ballad to $m.",
-      "$n sings a ballad to $N.",
-      "$n sings a ballad to you!  How sweet!",
-      "You sing a little ditty to yourself.",
-    "$n sings a little ditty to $mself."},
-
-  {
-      "smile",
-      "You smile happily.",
-      "$n smiles happily.",
-      "You smile at $M.",
-      "$n beams a smile at $N.",
-      "$n smiles at you.",
-      "You smile at yourself.",
-    "$n smiles at $mself."},
-
-  {
-      "smirk",
-      "You smirk.",
-      "$n smirks.",
-      "You smirk at $S saying.",
-      "$n smirks at $N's saying.",
-      "$n smirks at your saying.",
-      "You smirk at yourself.  Okay ...",
-    "$n smirks at $s own 'wisdom'."},
-
-  {
-      "snap",
-      "PRONTO ! You snap your fingers.",
-      "$n snaps $s fingers.",
-      "You snap back at $M.",
-      "$n snaps back at $N.",
-      "$n snaps back at you!",
-      "You snap yourself to attention.",
-    "$n snaps $mself to attention."},
-
-  {
-      "snarl",
-      "You grizzle your teeth and look mean.",
-      "$n snarls angrily.",
-      "You snarl at $M.",
-      "$n snarls at $N.",
-      "$n snarls at you, for some reason.",
-      "You snarl at yourself.",
-    "$n snarls at $mself."},
-
-  {
-      "sneeze",
-      "Gesundheit!",
-      "$n sneezes.",
-      "",
-      "",
-      "",
-      "",
-    ""},
-
-  {
-      "snicker",
-      "You snicker softly.",
-      "$n snickers softly.",
-      "You snicker with $M about your shared secret.",
-      "$n snickers with $N about their shared secret.",
-      "$n snickers with you about your shared secret.",
-      "You snicker at your own evil thoughts.",
-    "$n snickers at $s own evil thoughts."},
-
-  {
-      "sniff",
-      "You sniff sadly. *SNIFF*",
-      "$n sniffs sadly.",
-      "You sniff sadly at the way $E is treating you.",
-      "$n sniffs sadly at the way $N is treating $m.",
-      "$n sniffs sadly at the way you are treating $m.",
-      "You sniff sadly at your lost opportunities.",
-    "$n sniffs sadly at $mself.  Something MUST be bothering $m."},
-
-  {
-      "snore",
-      "Zzzzzzzzzzzzzzzzz.",
-      "$n snores loudly.",
-      "",
-      "",
-      "",
-      "",
-    ""},
-
-  {
-      "snowball",
-      "Whom do you want to throw a snowball at?",
-      "",
-      "You throw a snowball in $N's face.",
-      "$n throws a snowball at $N.",
-      "$n throws a snowball at you.",
-      "You throw a snowball at yourself.",
-    "$n throws a snowball at $mself."},
-
-  {
-      "snuggle",
-      "Who?",
-      "",
-      "you snuggle $M.",
-      "$n snuggles up to $N.",
-      "$n snuggles up to you.",
-      "You snuggle up, getting ready to sleep.",
-    "$n snuggles up, getting ready to sleep."},
-
-  {
-      "spank",
-      "Spank whom?",
-      "",
-      "You spank $M playfully.",
-      "$n spanks $N playfully.",
-      "$n spanks you playfully.  OUCH!",
-      "You spank yourself.  Kinky!",
-    "$n spanks $mself.  Kinky!"},
-
-  {
-      "squeeze",
-      "Where, what, how, whom?",
-      "",
-      "You squeeze $M fondly.",
-      "$n squeezes $N fondly.",
-      "$n squeezes you fondly.",
-      "You squeeze yourself - try to relax a little!",
-    "$n squeezes $mself."},
-
-  {
-      "stare",
-      "You stare at the sky.",
-      "$n stares at the sky.",
-      "You stare dreamily at $N, completely lost in $S eyes..",
-      "$n stares dreamily at $N.",
-      "$n stares dreamily at you, completely lost in your eyes.",
-      "You stare dreamily at yourself - enough narcissism for now.",
-    "$n stares dreamily at $mself - NARCISSIST!"},
-
-  {
-      "strut",
-      "Strut your stuff.",
-      "$n struts proudly.",
-      "You strut to get $S attention.",
-      "$n struts, hoping to get $N's attention.",
-      "$n struts, hoping to get your attention.",
-      "You strut to yourself, lost in your own world.",
-    "$n struts to $mself, lost in $s own world."},
-
-  {
-      "sulk",
-      "You sulk.",
-      "$n sulks in the corner.",
-      "",
-      "",
-      "",
-      "",
-    ""},
-
-  {
-      "thank",
-      "Thank you too.",
-      "",
-      "You thank $N heartily.",
-      "$n thanks $N heartily.",
-      "$n thanks you heartily.",
-      "You thank yourself since nobody else wants to !",
-    "$n thanks $mself since you won't."},
-
-  {
-      "tickle",
-      "Whom do you want to tickle?",
-      "",
-      "You tickle $N.",
-      "$n tickles $N.",
-      "$n tickles you - hee hee hee.",
-      "You tickle yourself, how funny!",
-    "$n tickles $mself."},
-
-  {
-      "twiddle",
-      "You patiently twiddle your thumbs.",
-      "$n patiently twiddles $s thumbs.",
-      "You twiddle $S ears.",
-      "$n twiddles $N's ears.",
-      "$n twiddles your ears.",
-      "You twiddle your ears like Dumbo.",
-    "$n twiddles $s own ears like Dumbo."},
-
-  {
-      "wave",
-      "You wave.",
-      "$n waves happily.",
-      "You wave goodbye to $N.",
-      "$n waves goodbye to $N.",
-      "$n waves goodbye to you.  Have a good journey.",
-      "Are you going on adventures as well?",
-    "$n waves goodbye to $mself."},
-
-  {
-      "whistle",
-      "You whistle appreciatively.",
-      "$n whistles appreciatively.",
-      "You whistle at the sight of $M.",
-      "$n whistles at the sight of $N.",
-      "$n whistles at the sight of you.",
-      "You whistle a little tune to yourself.",
-    "$n whistles a little tune to $mself."},
-
-  {
-      "wiggle",
-      "Your wiggle your bottom.",
-      "$n wiggles $s bottom.",
-      "You wiggle your bottom toward $M.",
-      "$n wiggles $s bottom toward $N.",
-      "$n wiggles his bottom toward you.",
-      "You wiggle about like a fish.",
-    "$n wiggles about like a fish."},
-
-  {
-      "wince",
-      "You wince.  Ouch!",
-      "$n winces.  Ouch!",
-      "You wince at $M.",
-      "$n winces at $N.",
-      "$n winces at you.",
-      "You wince at yourself.  Ouch!",
-    "$n winces at $mself.  Ouch!"},
-
-  {
-      "wink",
-      "You wink suggestively.",
-      "$n winks suggestively.",
-      "You wink suggestively at $N.",
-      "$n winks at $N.",
-      "$n winks suggestively at you.",
-      "You wink at yourself ?? - what are you up to ?",
-    "$n winks at $mself - something strange is going on..."},
-
-  {
-      "yawn",
-      "You must be tired.",
-      "$n yawns.",
-      "",
-      "",
-      "",
-      "",
-    ""},
-
-  {
-      "",
-    "", "", "", "", "", "", ""}
 };
 
 /* prototypes */
@@ -4068,6 +3147,7 @@ void fatal_printf (const char * str, ...)
   va_end (args);
   bug_printf (buf);
   WIN32CLEANUP
+  sqlite3_close(database);
   abort();
   return;
 }
@@ -8998,37 +8078,53 @@ bool Character::check_social (const std::string & command, const std::string & a
   std::string arg;
   Character *victim;
   int cmd;
-  bool found;
+  bool found = false;
+  char *sql = sqlite3_mprintf(
+    "SELECT name, char_no_arg, others_no_arg, char_found, others_found, vict_found, char_auto, others_auto FROM socials WHERE NAME LIKE '%q%%'",
+    command.c_str());
+  sqlite3_stmt *stmt = NULL;
 
-  found = false;
-  for (cmd = 0; social_table[cmd].name[0] != '\0'; cmd++) {
-    if (command[0] == social_table[cmd].name[0]
-      && !str_prefix (command, social_table[cmd].name)) {
-      found = true;
-      break;
-    }
+  if (sqlite3_prepare(database, sql, -1, &stmt, 0) != SQLITE_OK) {
+    bug_printf("Could not prepare statement: %s", sqlite3_errmsg(database));
+    sqlite3_free(sql);
+    return false;
   }
 
-  if (!found)
+  if (sqlite3_step(stmt) == SQLITE_ROW) {
+    found = true;
+  }
+
+  if (!found) {
+    sqlite3_finalize(stmt);
+    sqlite3_free(sql);
     return false;
+  }
 
   if (!is_npc () && IS_SET (actflags, PLR_NO_EMOTE)) {
     send_to_char ("You are anti-social!\r\n");
+    sqlite3_finalize(stmt);
+    sqlite3_free(sql);
     return true;
   }
 
   switch (position) {
   case POS_DEAD:
     send_to_char ("Lie still; you are DEAD.\r\n");
+    sqlite3_finalize(stmt);
+    sqlite3_free(sql);
     return true;
 
   case POS_INCAP:
   case POS_MORTAL:
     send_to_char ("You are hurt far too bad for that.\r\n");
+    sqlite3_finalize(stmt);
+    sqlite3_free(sql);
     return true;
 
   case POS_STUNNED:
     send_to_char ("You are too stunned to do that.\r\n");
+    sqlite3_finalize(stmt);
+    sqlite3_free(sql);
     return true;
 
   case POS_SLEEPING:
@@ -9036,9 +8132,11 @@ bool Character::check_social (const std::string & command, const std::string & a
      * I just know this is the path to a 12" 'if' statement.  :(
      * But two players asked for it already!  -- Furey
      */
-    if (!str_cmp (social_table[cmd].name, "snore"))
+    if (!str_cmp ((const char*)sqlite3_column_text( stmt, 0 ), "snore"))
       break;
     send_to_char ("In your dreams, or what?\r\n");
+    sqlite3_finalize(stmt);
+    sqlite3_free(sql);
     return true;
 
   }
@@ -9046,17 +8144,17 @@ bool Character::check_social (const std::string & command, const std::string & a
   one_argument (argument, arg);
   victim = NULL;
   if (arg.empty()) {
-    act (social_table[cmd].others_no_arg, NULL, victim, TO_ROOM);
-    act (social_table[cmd].char_no_arg, NULL, victim, TO_CHAR);
+    act ((const char*)sqlite3_column_text( stmt, 2 ), NULL, victim, TO_ROOM);
+    act ((const char*)sqlite3_column_text( stmt, 1 ), NULL, victim, TO_CHAR);
   } else if ((victim = get_char_room (arg)) == NULL) {
     send_to_char ("They aren't here.\r\n");
   } else if (victim == this) {
-    act (social_table[cmd].others_auto, NULL, victim, TO_ROOM);
-    act (social_table[cmd].char_auto, NULL, victim, TO_CHAR);
+    act ((const char*)sqlite3_column_text( stmt, 7 ), NULL, victim, TO_ROOM);
+    act ((const char*)sqlite3_column_text( stmt, 6 ), NULL, victim, TO_CHAR);
   } else {
-    act (social_table[cmd].others_found, NULL, victim, TO_NOTVICT);
-    act (social_table[cmd].char_found, NULL, victim, TO_CHAR);
-    act (social_table[cmd].vict_found, NULL, victim, TO_VICT);
+    act ((const char*)sqlite3_column_text( stmt, 4 ), NULL, victim, TO_NOTVICT);
+    act ((const char*)sqlite3_column_text( stmt, 3 ), NULL, victim, TO_CHAR);
+    act ((const char*)sqlite3_column_text( stmt, 5 ), NULL, victim, TO_VICT);
 
     if (!is_npc () && victim->is_npc ()
       && !victim->is_affected (AFF_CHARM)
@@ -9074,9 +8172,9 @@ bool Character::check_social (const std::string & command, const std::string & a
       case 6:
       case 7:
       case 8:
-        victim->act (social_table[cmd].others_found, NULL, this, TO_NOTVICT);
-        victim->act (social_table[cmd].char_found, NULL, this, TO_CHAR);
-        victim->act (social_table[cmd].vict_found, NULL, this, TO_VICT);
+        victim->act ((const char*)sqlite3_column_text( stmt, 4 ), NULL, this, TO_NOTVICT);
+        victim->act ((const char*)sqlite3_column_text( stmt, 3 ), NULL, this, TO_CHAR);
+        victim->act ((const char*)sqlite3_column_text( stmt, 5 ), NULL, this, TO_VICT);
         break;
 
       case 9:
@@ -9091,6 +8189,8 @@ bool Character::check_social (const std::string & command, const std::string & a
     }
   }
 
+  sqlite3_finalize(stmt);
+  sqlite3_free(sql);
   return true;
 }
 
@@ -17601,10 +16701,18 @@ void Character::do_password (std::string argument)
 void Character::do_socials (std::string argument)
 {
   char buf[MAX_STRING_LENGTH];
-
   int col = 0;
-  for (int iSocial = 0; social_table[iSocial].name[0] != '\0'; iSocial++) {
-    snprintf (buf, sizeof buf, "%-12s", social_table[iSocial].name);
+  sqlite3_stmt *stmt = NULL;
+
+  if (sqlite3_prepare(database,
+      "SELECT name FROM socials ORDER BY name ASC",
+      -1, &stmt, 0) != SQLITE_OK) {
+    bug_printf("Could not prepare statement: %s", sqlite3_errmsg(database));
+    return;
+  }
+
+  while (sqlite3_step(stmt) == SQLITE_ROW) {
+    snprintf (buf, sizeof buf, "%-12s", sqlite3_column_text( stmt, 0 ));
     send_to_char (buf);
     if (++col % 6 == 0)
       send_to_char ("\r\n");
@@ -17612,6 +16720,7 @@ void Character::do_socials (std::string argument)
 
   if (col % 6 != 0)
     send_to_char ("\r\n");
+  sqlite3_finalize(stmt);
   return;
 }
 
@@ -23947,6 +23056,10 @@ int main (int argc, char **argv)
   current_time = (time_t) now_time.tv_sec;
   str_boot_time = ctime (&current_time);
 
+  if(sqlite3_open("murk.db", &database)) {
+    fatal_printf("Can't open database: %s.", sqlite3_errmsg(database));
+  }
+
   WIN32STARTUP
 
   // Get the port number.
@@ -23969,5 +23082,6 @@ int main (int argc, char **argv)
   closesocket (control);
   log_printf ("Normal termination of game.");
   WIN32CLEANUP
+  sqlite3_close(database);
   return 0;
 }
