@@ -22,10 +22,10 @@ PROF    = -g
 
 CPPFLAGS = $(OPTIM) $(WARN) -W $(PROF) -fno-default-inline 
 CFLAGS = $(OPTIM) $(DEFS) $(WARN) -fno-strict-aliasing
-LFLAGS = $(OPTIM) $(PROF)
+LFLAGS = $(OPTIM) $(PROF) 
 
-INCS = -Isqlite3
-LIBS = -lcrypt
+INCS = -Isqlite3 
+LIBS = -lcrypt 
 
 SQLITE_SRC = sqlite3/alter.c sqlite3/analyze.c sqlite3/attach.c \
 	sqlite3/auth.c sqlite3/btree.c sqlite3/build.c sqlite3/callback.c \
@@ -77,7 +77,7 @@ $(SQLITE_LIB): $(SQLITE_OBJ)
 $(SQLITE_PRG): $(SQLITE_PRG_OBJ) $(SQLITE_LIB)
 	$(CC) $(LFLAGS) -o $@ $^
 
-murk$(EXE): $(MURK_OBJ)
+murk$(EXE): $(MURK_OBJ) $(SQLITE_LIB)
 	$(CPP) $(LFLAGS) -o $@ $^ $(LIBS)
 
 clean:
