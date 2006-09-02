@@ -1,0 +1,21 @@
+CREATE TABLE item_types (
+  symbol TEXT PRIMARY KEY,
+  value  INTEGER
+);
+
+CREATE INDEX item_types_idx1 ON item_types (value); 
+
+.import item_types item_types
+
+CREATE TABLE socials (
+  name TEXT PRIMARY KEY,
+  char_no_arg TEXT,
+  others_no_arg TEXT,
+  char_found TEXT,
+  others_found TEXT,
+  vict_found TEXT,
+  char_auto TEXT,
+  others_auto TEXT
+);
+
+.import socials socials

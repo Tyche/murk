@@ -90,6 +90,13 @@ $(SQLITE_PRG): $(SQLITE_PRG_OBJ) $(SQLITE_LIB)
 murk.exe: $(MURK_OBJ) $(SQLITE_LIB)
 	$(LD) $(LFLAGS) $(BCC32STARTUP) $**, $<,, $(LIBS) 
 
+database: $(SQLITE_PRG)
+	@echo "Building database..."
+	@copy murk.db murk.db.bkup
+	@del murk.db
+	@sqlite3/sqlite3 murk.db < schema
+	@echo "Done."
+
 clean:
 	@-del *.tds sqlite3\*.tds *.map *.tr2 $(TARGETS) $(MURK_OBJ) \
 	$(SQLITE_OBJ) $(SQLITE_PRG_OBJ) 2>NUL

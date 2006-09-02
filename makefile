@@ -80,6 +80,13 @@ $(SQLITE_PRG): $(SQLITE_PRG_OBJ) $(SQLITE_LIB)
 murk$(EXE): $(MURK_OBJ) $(SQLITE_LIB)
 	$(CPP) $(LFLAGS) -o $@ $^ $(LIBS)
 
+database: $(SQLITE_PRG)
+	@echo "Building database..."
+	@cp murk.db murk.db.bkup
+	@rm murk.db
+	@sqlite3/sqlite3 murk.db < schema
+	@echo "Done."
+
 clean:
 	-rm -f $(TARGETS) $(MURK_OBJ) $(SQLITE_OBJ) $(SQLITE_PRG_OBJ)
 
