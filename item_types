@@ -9,12 +9,12 @@ potion|10
 furniture|12
 trash|13
 container|15
-drink_con|17
+drink container|17
 key|18
 food|19
 money|20
 boat|22
-corpse_npc|23
-corpse_pc|24
+npc corpse|23
+pc corpse|24
 fountain|25
 pill|26
