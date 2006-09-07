@@ -492,7 +492,9 @@ char *crypt (char *pw, const char *salt)
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#ifndef __FreeBSD__
 #include <crypt.h>
+#endif
 
 #define GETERROR  errno
 #define INVALID_SOCKET -1       /* 0 on Windows */
@@ -23020,6 +23022,7 @@ int init_server_socket (int port)
     fatal_printf ("Init_socket: SO_REUSEADDR");
   }
 
+#ifndef SO_DONTLINGER
   struct linger ld;
   ld.l_onoff = 1;
   ld.l_linger = 1000;
@@ -23027,6 +23030,7 @@ int init_server_socket (int port)
     closesocket (fd);
     fatal_printf ("Init_socket: SO_DONTLINGER");
   }
+#endif
 
   static struct sockaddr_in sa_zero;
   struct sockaddr_in sa;

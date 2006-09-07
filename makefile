@@ -12,8 +12,10 @@ EXE = .exe
 
 # This should be OS_WIN=1 for Cygwin
 DEFS = -DOS_UNIX=0 -DOS_WIN=1 -DHAVE_USLEEP=1 -DHAVE_FDATASYNC=1 -DNDEBUG
-# For other unizes
+# For other unixes
 #DEFS = -DOS_UNIX=1 -DOS_WIN=0 -DHAVE_USLEEP=1 -DHAVE_FDATASYNC=1 -DNDEBUG
+# For FreeBSD
+#DEFS = -DOS_UNIX=1 -DOS_WIN=0 -DHAVE_USLEEP=1 -DNDEBUG
  
 
 OPTIM = -O2 -pipe 

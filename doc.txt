@@ -7,12 +7,15 @@ Merc Diku Mud is a Diku Mud with many enhancements and contributions.
 
 === Release Information
 
-Version 1.1
+Version 1.2
 
+* Added schemas and data to load database.
+* Migrated social_table to sqlite database.
+* Removed and replaced use of number_bits() function.
+* Added sqlite3 library and updated makefiles.
 * Removed log, snoop and pose.
 * Removed old mob style code from DB read and updated area files.
 * Path to exe fixed.
-
 
 === Acknowledgements
 
@@ -64,7 +67,7 @@ Merc is easier to install than other muds, but every site is different.
 
 (2) Unpack the release.
 
-	tar xzvf murk++-rNN.tar.gz 
+	tar xzvf murk++-1.NrNN.tar.gz 
 
 (3) Compile the mud:
 
@@ -88,21 +91,28 @@ Merc is easier to install than other muds, but every site is different.
     Then type 'nmake -f makefile.vc'
     - To link with debugging information type 'set DEBUG=1' and then use
       'nmake -f makefile.vc'
-
-(4) Start the game:
+      
+(4) Create the database
+   * Use one of the following depending on your OS and compiler.
+     'make database'
+     'gmake database'
+     'nmake -f makefile.vc database'
+     'make -f makefile.bor database'
+ 
+(5) Start the game:
 
    * For Linux, FreeBSD or Cygwin
 	startup &
 	telnet localhost 4000
 	
-(5) There is an immortal character named 'One' with a password of 'potrzebie'
+(6) There is an immortal character named 'One' with a password of 'potrzebie'
     You can 'advance' new characters to immortal levels with 'One'.
 
-(6) If you haven't already done so, read 'license.diku' and 'license.merc'.
+(7) If you haven't already done so, read 'license.diku' and 'license.merc'.
     Because Merc is a derivative work of Diku Mud, you must register
     your mud with the original Diku implementors.
   
-(7) Of course you're going to change the title screen, help files, and so on.
+(8) Of course you're going to change the title screen, help files, and so on.
     Don't just globally erase the 'Merc' references, ok?  You wouldn't
     like it if we did that to your work, so don't do it to ours.
 
