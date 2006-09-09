@@ -1141,219 +1141,6 @@ const struct class_type {
 };
 
 /*
- * Titles.
- */
-char *const title_table[CLASS_MAX][MAX_LEVEL + 1][2] = {
-  {
-      {"Man", "Woman"},
-
-      {"Apprentice of Magic", "Apprentice of Magic"},
-      {"Spell Student", "Spell Student"},
-      {"Scholar of Magic", "Scholar of Magic"},
-      {"Delver in Spells", "Delveress in Spells"},
-      {"Medium of Magic", "Medium of Magic"},
-
-      {"Scribe of Magic", "Scribess of Magic"},
-      {"Seer", "Seeress"},
-      {"Sage", "Sage"},
-      {"Illusionist", "Illusionist"},
-      {"Abjurer", "Abjuress"},
-
-      {"Invoker", "Invoker"},
-      {"Enchanter", "Enchantress"},
-      {"Conjurer", "Conjuress"},
-      {"Magician", "Witch"},
-      {"Creator", "Creator"},
-
-      {"Savant", "Savant"},
-      {"Magus", "Craftess"},
-      {"Wizard", "Wizard"},
-      {"Warlock", "War Witch"},
-      {"Sorcerer", "Sorceress"},
-
-      {"Elder Sorcerer", "Elder Sorceress"},
-      {"Grand Sorcerer", "Grand Sorceress"},
-      {"Great Sorcerer", "Great Sorceress"},
-      {"Golem Maker", "Golem Maker"},
-      {"Greater Golem Maker", "Greater Golem Maker"},
-
-      {"Maker of Stones", "Maker of Stones",},
-      {"Maker of Potions", "Maker of Potions",},
-      {"Maker of Scrolls", "Maker of Scrolls",},
-      {"Maker of Wands", "Maker of Wands",},
-      {"Maker of Staves", "Maker of Staves",},
-
-      {"Demon Summoner", "Demon Summoner"},
-      {"Greater Demon Summoner", "Greater Demon Summoner"},
-      {"Dragon Charmer", "Dragon Charmer"},
-      {"Greater Dragon Charmer", "Greater Dragon Charmer"},
-      {"Master of all Magic", "Master of all Magic"},
-
-      {"Mage Hero", "Mage Heroine"},
-      {"Angel of Magic", "Angel of Magic"},
-      {"Deity of Magic", "Deity of Magic"},
-      {"Supremity of Magic", "Supremity of Magic"},
-      {"Implementor", "Implementress"}
-    },
-
-  {
-      {"Man", "Woman"},
-
-      {"Believer", "Believer"},
-      {"Attendant", "Attendant"},
-      {"Acolyte", "Acolyte"},
-      {"Novice", "Novice"},
-      {"Missionary", "Missionary"},
-
-      {"Adept", "Adept"},
-      {"Deacon", "Deaconess"},
-      {"Vicar", "Vicaress"},
-      {"Priest", "Priestess"},
-      {"Minister", "Lady Minister"},
-
-      {"Canon", "Canon"},
-      {"Levite", "Levitess"},
-      {"Curate", "Curess"},
-      {"Monk", "Nun"},
-      {"Healer", "Healess"},
-
-      {"Chaplain", "Chaplain"},
-      {"Expositor", "Expositress"},
-      {"Bishop", "Bishop"},
-      {"Arch Bishop", "Arch Lady of the Church"},
-      {"Patriarch", "Matriarch"},
-
-      {"Elder Patriarch", "Elder Matriarch"},
-      {"Grand Patriarch", "Grand Matriarch"},
-      {"Great Patriarch", "Great Matriarch"},
-      {"Demon Killer", "Demon Killer"},
-      {"Greater Demon Killer", "Greater Demon Killer"},
-
-      {"Cardinal of the Sea", "Cardinal of the Sea"},
-      {"Cardinal of the Earth", "Cardinal of the Earth"},
-      {"Cardinal of the Air", "Cardinal of the Air"},
-      {"Cardinal of the Ether", "Cardinal of the Ether"},
-      {"Cardinal of the Heavens", "Cardinal of the Heavens"},
-
-      {"Avatar of an Immortal", "Avatar of an Immortal"},
-      {"Avatar of a Deity", "Avatar of a Deity"},
-      {"Avatar of a Supremity", "Avatar of a Supremity"},
-      {"Avatar of an Implementor", "Avatar of an Implementor"},
-      {"Master of all Divinity", "Mistress of all Divinity"},
-
-      {"Holy Hero", "Holy Heroine"},
-      {"Angel", "Angel"},
-      {"Deity", "Deity"},
-      {"Supreme Master", "Supreme Mistress"},
-      {"Implementor", "Implementress"}
-    },
-
-  {
-      {"Man", "Woman"},
-
-      {"Pilferer", "Pilferess"},
-      {"Footpad", "Footpad"},
-      {"Filcher", "Filcheress"},
-      {"Pick-Pocket", "Pick-Pocket"},
-      {"Sneak", "Sneak"},
-
-      {"Pincher", "Pincheress"},
-      {"Cut-Purse", "Cut-Purse"},
-      {"Snatcher", "Snatcheress"},
-      {"Sharper", "Sharpress"},
-      {"Rogue", "Rogue"},
-
-      {"Robber", "Robber"},
-      {"Magsman", "Magswoman"},
-      {"Highwayman", "Highwaywoman"},
-      {"Burglar", "Burglaress"},
-      {"Thief", "Thief"},
-
-      {"Knifer", "Knifer"},
-      {"Quick-Blade", "Quick-Blade"},
-      {"Killer", "Murderess"},
-      {"Brigand", "Brigand"},
-      {"Cut-Throat", "Cut-Throat"},
-
-      {"Spy", "Spy"},
-      {"Grand Spy", "Grand Spy"},
-      {"Master Spy", "Master Spy"},
-      {"Assassin", "Assassin"},
-      {"Greater Assassin", "Greater Assassin"},
-
-      {"Master of Vision", "Mistress of Vision"},
-      {"Master of Hearing", "Mistress of Hearing"},
-      {"Master of Smell", "Mistress of Smell"},
-      {"Master of Taste", "Mistress of Taste"},
-      {"Master of Touch", "Mistress of Touch"},
-
-      {"Crime Lord", "Crime Mistress"},
-      {"Infamous Crime Lord", "Infamous Crime Mistress"},
-      {"Greater Crime Lord", "Greater Crime Mistress"},
-      {"Master Crime Lord", "Master Crime Mistress"},
-      {"Godfather", "Godmother"},
-
-      {"Assassin Hero", "Assassin Heroine"},
-      {"Angel of Death", "Angel of Death"},
-      {"Deity of Assassins", "Deity of Assassins"},
-      {"Supreme Master", "Supreme Mistress"},
-      {"Implementor", "Implementress"}
-    },
-
-  {
-      {"Man", "Woman"},
-
-      {"Swordpupil", "Swordpupil"},
-      {"Recruit", "Recruit"},
-      {"Sentry", "Sentress"},
-      {"Fighter", "Fighter"},
-      {"Soldier", "Soldier"},
-
-      {"Warrior", "Warrior"},
-      {"Veteran", "Veteran"},
-      {"Swordsman", "Swordswoman"},
-      {"Fencer", "Fenceress"},
-      {"Combatant", "Combatess"},
-
-      {"Hero", "Heroine"},
-      {"Myrmidon", "Myrmidon"},
-      {"Swashbuckler", "Swashbuckleress"},
-      {"Mercenary", "Mercenaress"},
-      {"Swordmaster", "Swordmistress"},
-
-      {"Lieutenant", "Lieutenant"},
-      {"Champion", "Lady Champion"},
-      {"Dragoon", "Lady Dragoon"},
-      {"Cavalier", "Lady Cavalier"},
-      {"Knight", "Lady Knight"},
-
-      {"Grand Knight", "Grand Knight"},
-      {"Master Knight", "Master Knight"},
-      {"Paladin", "Paladin"},
-      {"Grand Paladin", "Grand Paladin"},
-      {"Demon Slayer", "Demon Slayer"},
-
-      {"Greater Demon Slayer", "Greater Demon Slayer"},
-      {"Dragon Slayer", "Dragon Slayer"},
-      {"Greater Dragon Slayer", "Greater Dragon Slayer"},
-      {"Underlord", "Underlord"},
-      {"Overlord", "Overlord"},
-
-      {"Baron of Thunder", "Baroness of Thunder"},
-      {"Baron of Storms", "Baroness of Storms"},
-      {"Baron of Tornadoes", "Baroness of Tornadoes"},
-      {"Baron of Hurricanes", "Baroness of Hurricanes"},
-      {"Baron of Meteors", "Baroness of Meteors"},
-
-      {"Knight Hero", "Knight Heroine"},
-      {"Angel of War", "Angel of War"},
-      {"Deity of War", "Deity of War"},
-      {"Supreme Master of War", "Supreme Mistress of War"},
-      {"Implementor", "Implementress"}
-    }
-};
-
-/*
  * Attribute bonus structures.
  */
 const struct str_app_type {
@@ -5864,6 +5651,30 @@ bool Character::mp_commands ()
 
 }
 
+
+std::string get_title (int klass, int level, int sex)
+{
+  sqlite3_stmt *stmt = NULL;
+  char *sql = sqlite3_mprintf(
+    "SELECT title FROM titles WHERE class = %d AND level = %d and sex = %d",
+    klass, level, sex == SEX_FEMALE ? 1 : 0);
+  std::string str("");
+
+  if (sqlite3_prepare(database, sql, -1, &stmt, 0) != SQLITE_OK) {
+    bug_printf("Could not prepare statement: %s", sqlite3_errmsg(database));
+    sqlite3_free(sql);
+    return str;
+  }
+
+  if (sqlite3_step(stmt) == SQLITE_ROW) {
+    str.assign((const char*)sqlite3_column_text( stmt, 0 ));
+  }
+
+  sqlite3_finalize(stmt);
+  sqlite3_free(sql);
+  return str;
+}
+
 /*
  * Advancement stuff.
  */
@@ -5872,8 +5683,7 @@ void Character::advance_level ()
   char buf[MAX_STRING_LENGTH];
   int add_hp, add_mana, add_move, add_prac;
 
-  snprintf (buf, sizeof buf, "the %s",
-    title_table[klass][level][sex == SEX_FEMALE ? 1 : 0]);
+  snprintf (buf, sizeof buf, "the %s", get_title(klass, level, sex).c_str());
   set_title(buf);
 
   add_hp = con_app[get_curr_con()].hitp +
@@ -22244,7 +22054,7 @@ void Descriptor::nanny (std::string argument)
       ch->mana = ch->max_mana;
       ch->move = ch->max_move;
       buf = "the ";
-      buf.append(title_table[ch->klass][ch->level][ch->sex == SEX_FEMALE ? 1 : 0]);
+      buf.append(get_title(ch->klass, ch->level, ch->sex));
       ch->set_title(buf);
 
       obj = get_obj_index(OBJ_VNUM_SCHOOL_BANNER)->create_object(0);
@@ -23022,7 +22832,7 @@ int init_server_socket (int port)
     fatal_printf ("Init_socket: SO_REUSEADDR");
   }
 
-#ifndef SO_DONTLINGER
+#ifdef SO_DONTLINGER
   struct linger ld;
   ld.l_onoff = 1;
   ld.l_linger = 1000;

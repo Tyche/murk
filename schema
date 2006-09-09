@@ -19,3 +19,13 @@ CREATE TABLE socials (
 );
 
 .import socials socials
+
+CREATE TABLE titles (
+  class INTEGER,
+  level INTEGER,
+  sex INTEGER,
+  title TEXT
+);
+
+.import titles titles
+
