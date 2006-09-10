@@ -57,7 +57,7 @@ MURK_OBJ = murk.obj
 # Data files Areas, Mobprogs and Players
 DATAFILES = area.lst limbo.are mid_cit.prg midgaard.are school.are help.are \
         vagabond.prg beggar.prg crier.prg drunk.prg gategrd.prg gategrd2.prg \
-	janitor.prg One schema item_types socials
+	janitor.prg One schema item_types socials titles
 
 # Files in the standard distribution
 DISTFILES = $(MURK_SRC) $(DATAFILES) $(SQLITE_SRC) $(SQLITE_PRG_SRC) \
