@@ -112,7 +112,7 @@ std::string itoa(int value, int base) {
 /* WINDOWS DEFINITIONS SECTION                                           */
 /*-----------------------------------------------------------------------*/
 #ifdef WIN32                    /* Windows portability */
-#if defined _MSC_VER
+#if defined _MSC_VER || defined __DMC__
 #define NOMINMAX
 #endif
 #define FD_SETSIZE 1024
@@ -136,7 +136,9 @@ std::string itoa(int value, int base) {
 #define snprintf _snprintf
 #define vsnprintf _vsnprintf
 #endif
-
+#if defined __DMC__
+#define snprintf _snprintf
+#endif
 /*
   Not implemented in windows, although all the structural support is
   found in winsock.h
@@ -7759,8 +7761,8 @@ void Character::move_char (int door)
       }
     }
 
-    mv = movement_loss[std::min (SECT_MAX - 1, in_rm->sector_type)]
-      + movement_loss[std::min (SECT_MAX - 1, to_room->sector_type)];
+    mv = movement_loss[std::min ((int)SECT_MAX - 1, in_rm->sector_type)]
+      + movement_loss[std::min ((int)SECT_MAX - 1, to_room->sector_type)];
 
     if (move < mv) {
       send_to_char ("You are too exhausted.\r\n");

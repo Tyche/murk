@@ -63,8 +63,8 @@ DATAFILES = area.lst limbo.are mid_cit.prg midgaard.are school.are help.are \
 
 # Files in the standard distribution
 DISTFILES = $(MURK_SRC) $(DATAFILES) $(SQLITE_SRC) $(SQLITE_PRG_SRC) \
-	$(SQLITE_XTRA) Makefile Makefile.bor Makefile.vc doc.txt startup \
-	license.crypt license.diku license.merc license.murk++ 
+	$(SQLITE_XTRA) makefile makefile.bor makefile.vc makefile.dgm \
+	doc.txt startup license.crypt license.diku license.merc license.murk++ 
   
 PDIST= $(patsubst %,murk++/%,$(DISTFILES))
 RELEASE=dist

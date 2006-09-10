@@ -43,7 +43,7 @@ SQLITE_PRG_SRC = sqlite3\shell.c
 SQLITE_PRG_OBJ = $(SQLITE_PRG_SRC:.c=.obj)
 SQLITE_PRG = sqlite3\sqlite3.exe 
 
-SQLITE_XTRA = sqlite3\os_unix.c sqlite3\sqlite3.def sqlite3\btree.h \
+SQLITE_XTRA = sqlite3\sqlite3.def sqlite3\btree.h \
 	sqlite3\os.h sqlite3\sqlite3.h sqlite3\vdbeInt.h sqlite3\hash.h \
 	sqlite3\os_common.h sqlite3\sqlite3ext.h sqlite3\keywordhash.h \
 	sqlite3\pager.h sqlite3\sqliteInt.h sqlite3\opcodes.h sqlite3\parse.h \
@@ -58,9 +58,9 @@ DATAFILES = area.lst limbo.are mid_cit.prg midgaard.are school.are help.are \
 	janitor.prg One schema item_types socials
 
 # Files in the standard distribution
-DISTFILES = $(MURK_SRC) $(DATAFILES) \
-	Makefile Makefile.bor Makefile.vc doc.txt startup \
-	license.crypt license.diku license.merc license.murk++ 
+DISTFILES = $(MURK_SRC) $(DATAFILES) $(SQLITE_SRC) $(SQLITE_PRG_SRC) \
+	$(SQLITE_XTRA) makefile makefile.bor makefile.vc makefile.dgm \
+	doc.txt startup license.crypt license.diku license.merc license.murk++ 
   
 !ifndef RELEASE
 RELEASE=dist
@@ -83,7 +83,7 @@ database: $(SQLITE_PRG)
 	@echo "Building database..."
 	@copy murk.db murk.db.bkup
 	@del murk.db
-	@sqlite3/sqlite3 murk.db < schema
+	@sqlite3\sqlite3 murk.db < schema
 	@echo "Done."
 
 clean:
