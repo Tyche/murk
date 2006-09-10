@@ -6352,7 +6352,6 @@ MobProgram *mprog_file_read (const std::string & f, MobProgram *mprg, MobPrototy
 {
   MobProgram *mprg2;
   std::ifstream progfile;
-  char letter;
   bool done = false;
   char MOBProgfile[MAX_INPUT_LENGTH];
 
@@ -6362,7 +6361,7 @@ MobProgram *mprog_file_read (const std::string & f, MobProgram *mprg, MobPrototy
     fatal_printf ("Mob:%d couldnt open mobprog file", pMobIndex->vnum);
   }
   mprg2 = mprg;
-  switch (letter = fread_letter (progfile)) {
+  switch (fread_letter (progfile)) {
   case '>':
     break;
   case '|':
@@ -6385,7 +6384,7 @@ MobProgram *mprog_file_read (const std::string & f, MobProgram *mprg, MobPrototy
       pMobIndex->progtypes = pMobIndex->progtypes | mprg2->type;
       mprg2->arglist = fread_string (progfile);
       mprg2->comlist = fread_string (progfile);
-      switch (letter = fread_letter (progfile)) {
+      switch (fread_letter (progfile)) {
       case '>':
         mprg2->next = new MobProgram();
         mprg2 = mprg2->next;
@@ -6411,8 +6410,8 @@ void mprog_read_programs (std::ifstream & fp, MobPrototype *pMobIndex)
 {
   MobProgram *mprg;
   bool done = false;
-  char letter;
-  if ((letter = fread_letter (fp)) != '>') {
+
+  if ((fread_letter (fp)) != '>') {
     fatal_printf ("Load_mobiles: vnum %d MOBPROG char", pMobIndex->vnum);
   }
   pMobIndex->mobprogs = new MobProgram();
@@ -6426,7 +6425,7 @@ void mprog_read_programs (std::ifstream & fp, MobPrototype *pMobIndex)
     case IN_FILE_PROG:
       mprg = mprog_file_read (fread_string (fp), mprg, pMobIndex);
       fread_to_eol (fp);
-      switch (letter = fread_letter (fp)) {
+      switch (fread_letter (fp)) {
       case '>':
         mprg->next = new MobProgram();
         mprg = mprg->next;
@@ -6448,7 +6447,7 @@ void mprog_read_programs (std::ifstream & fp, MobPrototype *pMobIndex)
       fread_to_eol (fp);
       mprg->comlist = fread_string (fp);
       fread_to_eol (fp);
-      switch (letter = fread_letter (fp)) {
+      switch (fread_letter (fp)) {
       case '>':
         mprg->next = new MobProgram();
         mprg = mprg->next;
@@ -6704,7 +6703,8 @@ void load_resets (std::ifstream & fp)
       break;
 
     case 'R':
-      pRoomIndex = get_room_index (pReset->arg1);
+//      pRoomIndex = get_room_index (pReset->arg1);
+      get_room_index (pReset->arg1);
 
       if (pReset->arg2 < 0 || pReset->arg2 > 6) {
         fatal_printf ("Load_resets: 'R': bad exit %d.", pReset->arg2);
@@ -8570,10 +8570,10 @@ bool mprog_do_ifchck (const std::string & ifchck, Character * mob,
 
     *valpt = '\0';
   }
-  bufpt = buf;
-  argpt = arg;
-  oprpt = opr;
-  valpt = val;
+//  bufpt = buf;
+//  argpt = arg;
+//  oprpt = opr;
+//  valpt = val;
 
   /* Ok... now buf contains the ifchck, arg contains the inside of the
    *  parentheses, opr contains an operator if one is present, and val
@@ -9425,8 +9425,8 @@ void mprog_wordlist_check (const std::string & arg, Character * mob,
   std::string word;
   MobProgram *mprg;
 
-  std::string::size_type start = 0;
-  std::string::size_type end = 0;
+  std::string::size_type start;
+  std::string::size_type end;
 
   unsigned int i;
 
@@ -10837,7 +10837,6 @@ void raw_kill (Character * victim)
     victim->pIndexData->killed++;
     kill_table[URANGE (0, victim->level, MAX_LEVEL - 1)].killed++;
     victim->extract_char (true);
-    victim = NULL;
     return;
   }
 
@@ -11046,7 +11045,6 @@ void dam_message (Character * ch, Character * victim, int dam, int dt)
       attack = attack_table[dt - TYPE_HIT];
     else {
       bug_printf ("Dam_message: bad dt %d.", dt);
-      dt = TYPE_HIT;
       attack = attack_table[0];
     }
 
@@ -12985,7 +12983,7 @@ void Character::do_cast (std::string argument)
    * Locate targets.
    */
   Character *victim = NULL;
-  Object *obj = NULL;
+  Object *obj;
   void *vo = NULL;
 
   switch (skill_table[sn].target) {
@@ -16450,7 +16448,6 @@ void Character::do_password (std::string argument)
 
   while (argp != argument.end()) {
     if (*argp == cEnd) {
-      argp++;
       break;
     }
     arg1.append(1, *argp);
@@ -16469,7 +16466,6 @@ void Character::do_password (std::string argument)
 
   while (argp != argument.end()) {
     if (*argp == cEnd) {
-      argp++;
       break;
     }
     arg2.append(1, *argp);

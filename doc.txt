@@ -4,8 +4,33 @@ Murk++ is a C++ version of Merc 2.2
 
 Merc Diku Mud is a Diku Mud with many enhancements and contributions.  
 
+=== Platforms
+
+Murk++ was compiled and tested on...
+
+* Microsoft Windows XP Service Pack 2 
+  CYGWIN_NT-5.1 1.5.21(0.156/4/2) using g++ (GCC) 3.4.4 (cygming special)
+  Borland C++ 5.5.1 for Win32 (free compiler release)
+  Microsoft Visual C/C++ v7.1 (Visual C++ Toolkit 2003)
+  Digital Mars Compiler Version 8.49c (with STLPort 4.5.3)
+
+* FreeBSD 5.3-BETA4 
+  g++ (GCC) version 3.4.2 [FreeBSD] 20040728
+
+* Debian Linux 2.6.8-1-38  
+  g++ (GCC) version 4.0.2 (Debian 4.0.2-2)
+
+* SuSE Linux 2.6.4-52
+  g++ (GCC) 3.3.3 (SuSE Linux)
 
 === Release Information
+
+Version 1.3
+
+* Makefile and patches for Digital Mars C++ compiler.
+* Commented out processor optimization switch in makefiles.
+* Migrated title_table to sqlite database.
+* Fixed bug with SO_DONTLINGER macro check.
 
 Version 1.2
 
@@ -13,6 +38,9 @@ Version 1.2
 * Migrated social_table to sqlite database.
 * Removed and replaced use of number_bits() function.
 * Added sqlite3 library and updated makefiles.
+
+Version 1.1
+
 * Removed log, snoop and pose.
 * Removed old mob style code from DB read and updated area files.
 * Path to exe fixed.
@@ -27,7 +55,6 @@ This document contains information from 'database.doc', 'dbsup.doc', and
 Diku folks.  See their 'license.diku'.
 
 This document contains information from 'MOBProgram.txt' by N'atas-Ha.
-
 
 === Copyright and License
 
@@ -85,25 +112,34 @@ Merc is easier to install than other muds, but every site is different.
   * For Windows using Microsoft Visual C - ensure your Visual C bin directory
     is in your path and your INCLUDE and LIB environment variables are setup
     correctly.
-    - With Visual C++ 6.0 you may need to run the vcvars32.bat file.
     - With Visual C++ Toolkit 2003 and Platform SDK you may need to use both the
       setenv.cmd and vsvars32.bat
     Then type 'nmake -f makefile.vc'
     - To link with debugging information type 'set DEBUG=1' and then use
       'nmake -f makefile.vc'
       
+  * For Windows using Digital Mars C++ - ensure your compiler bin directory is
+    in your path and you modify the makefile.dgm to point to where you installed
+    the STLPort directory.  
+    Then type 'make -f makefile.dgm'
+
 (4) Create the database
    * Use one of the following depending on your OS and compiler.
      'make database'
      'gmake database'
      'nmake -f makefile.vc database'
      'make -f makefile.bor database'
+     'make -f makefile.dgm database'
  
 (5) Start the game:
 
    * For Linux, FreeBSD or Cygwin
 	startup &
 	telnet localhost 4000
+	
+   * For Windows
+        murk.exe <port>  
+        The default port is 1234
 	
 (6) There is an immortal character named 'One' with a password of 'potrzebie'
     You can 'advance' new characters to immortal levels with 'One'.

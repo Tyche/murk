@@ -84,8 +84,8 @@ murk$(EXE): $(MURK_OBJ) $(SQLITE_LIB)
 
 database: $(SQLITE_PRG)
 	@echo "Building database..."
-	@cp murk.db murk.db.bkup
-	@rm murk.db
+	@-cp murk.db murk.db.bkup
+	@-rm murk.db
 	@sqlite3/sqlite3 murk.db < schema
 	@echo "Done."
 

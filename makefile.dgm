@@ -84,9 +84,9 @@ murk.exe: $(MURK_OBJ) $(SQLITE_LIB)
 
 database: $(SQLITE_PRG)
 	@echo "Building database..."
-	@copy murk.db murk.db.bkup
-	@del murk.db
-	sqlite3\sqlite3 murk.db < schema
+	@-copy murk.db murk.db.bkup
+	@-del murk.db
+	@sqlite3\sqlite3 murk.db < schema
 	@echo "Done."
 
 clean:
