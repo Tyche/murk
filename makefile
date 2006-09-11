@@ -53,8 +53,11 @@ SQLITE_XTRA = sqlite3/sqlite3.def sqlite3/btree.h \
 	sqlite3/pager.h sqlite3/sqliteInt.h sqlite3/opcodes.h sqlite3/parse.h \
 	sqlite3/vdbe.h
 
-MURK_SRC = murk.cpp
-MURK_OBJ = murk.o
+MURK_SRC = murk.cpp os.cpp
+MURK_OBJ = $(MURK_SRC:.cpp=.o)
+MURK_HDR = os.hpp
+
+OBJDEPENDS = $(MURK_OBJ)
 
 # Data files Areas, Mobprogs and Players
 DATAFILES = area.lst limbo.are mid_cit.prg midgaard.are school.are help.are \
@@ -62,7 +65,7 @@ DATAFILES = area.lst limbo.are mid_cit.prg midgaard.are school.are help.are \
 	janitor.prg One schema item_types socials titles
 
 # Files in the standard distribution
-DISTFILES = $(MURK_SRC) $(DATAFILES) $(SQLITE_SRC) $(SQLITE_PRG_SRC) \
+DISTFILES = $(MURK_SRC) $(MURK_HDR) $(DATAFILES) $(SQLITE_SRC) $(SQLITE_PRG_SRC) \
 	$(SQLITE_XTRA) makefile makefile.bor makefile.vc makefile.dgm \
 	doc.txt startup license.crypt license.diku license.merc license.murk++ 
   
@@ -79,7 +82,7 @@ $(SQLITE_LIB): $(SQLITE_OBJ)
 $(SQLITE_PRG): $(SQLITE_PRG_OBJ) $(SQLITE_LIB)
 	$(CC) $(LFLAGS) -o $@ $^
 
-murk$(EXE): $(MURK_OBJ) $(SQLITE_LIB)
+murk$(EXE): $(MURK_OBJ) $(SQLITE_LIB) 
 	$(CPP) $(LFLAGS) -o $@ $^ $(LIBS)
 
 database: $(SQLITE_PRG)
@@ -90,15 +93,37 @@ database: $(SQLITE_PRG)
 	@echo "Done."
 
 clean:
-	-rm -f $(TARGETS) $(MURK_OBJ) $(SQLITE_OBJ) $(SQLITE_PRG_OBJ)
+	-rm -f $(TARGETS) $(MURK_OBJ) $(SQLITE_OBJ) $(SQLITE_PRG_OBJ) $(OBJDEPENDS:.o=.d)
 
 dist:
 	ln -s ./ murk++
 	tar czvf murk++-$(RELEASE).tar.gz $(PDIST)
 	rm murk++
 	
-.cpp.o: 
-	$(CPP) -c $(CPPFLAGS) $(INCS) $*.cpp -o $*.o 
+# pull in dependency info for *existing* .o files
+-include $(OBJDEPENDS:.o=.d)
+
+# compile and generate dependency info;
+# more complicated dependency computation, so all prereqs listed
+# will also become command-less, prereq-less targets
+#   sed:    append directory to object target. (gcc bug?)
+#   sed:    strip the target (everything before colon)
+#   sed:    remove any continuation backslashes
+#   fmt -1: list words one per line
+#   sed:    strip leading spaces
+#   sed:    add trailing colons
+%.o: %.cpp
+	$(CPP) -c $(CPPFLAGS) $(INCS) $*.cpp -o $*.o
+	@$(CPP) -MM $(CPPFLAGS) $(INCS) $*.cpp > $*.d
+	@mv -f $*.d $*.d.tmp
+	@sed -e 's|.*:|$*.o:|' < $*.d.tmp > $*.d
+	@sed -e 's/.*://' -e 's/\\$$//' < $*.d.tmp | fmt -1 | \
+	  sed -e 's/^ *//' -e 's/$$/:/' >> $*.d
+	@rm -f $*.d.tmp
+
+#.cpp.o: 
+#	$(CPP) -c $(CPPFLAGS) $(INCS) $*.cpp -o $*.o 
 
 .c.o: 
 	$(CC) -c $(CFLAGS) $(INCS) $*.c -o $*.o 
+

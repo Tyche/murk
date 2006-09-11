@@ -51,8 +51,9 @@ SQLITE_XTRA = sqlite3\sqlite3.def sqlite3\btree.h \
 	sqlite3\pager.h sqlite3\sqliteInt.h sqlite3\opcodes.h sqlite3\parse.h \
 	sqlite3\vdbe.h
 
-MURK_SRC = murk.cpp
-MURK_OBJ = murk.obj
+MURK_SRC = murk.cpp os.cpp
+MURK_OBJ = murk.obj os.obj
+MURK_HDR = os.hpp
 
 # Data files Areas, Mobprogs and Players
 DATAFILES = area.lst limbo.are mid_cit.prg midgaard.are school.are help.are \
@@ -60,7 +61,7 @@ DATAFILES = area.lst limbo.are mid_cit.prg midgaard.are school.are help.are \
 	janitor.prg One schema item_types socials titles
 
 # Files in the standard distribution
-DISTFILES = $(MURK_SRC) $(DATAFILES) $(SQLITE_SRC) $(SQLITE_PRG_SRC) \
+DISTFILES = $(MURK_SRC) $(MURK_HDR) $(DATAFILES) $(SQLITE_SRC) $(SQLITE_PRG_SRC) \
 	$(SQLITE_XTRA) makefile makefile.bor makefile.vc makefile.dgm \
 	doc.txt startup license.crypt license.diku license.merc license.murk++ 
   
