@@ -101,7 +101,7 @@ database: $(SQLITE_PRG)
 
 clean:
 	@-del *.pdb *.ilk *.idb $(TARGETS) $(MURK_OBJ) $(SQLITE_OBJ) \
-	$(SQLITE_PRG_OBJ) 2>NUL
+	$(SQLITE_PRG_OBJ) $(MURK_UTIL_OBJ) 2>NUL
 
 dist : $(DISTFILES)
 	@echo "Building distribution..."

@@ -105,7 +105,8 @@ database: $(SQLITE_PRG)
 	@echo "Done."
 
 clean:
-	@-del *.map $(TARGETS) $(MURK_OBJ) $(SQLITE_OBJ) $(SQLITE_PRG_OBJ) 2>NUL
+	@-del *.map $(TARGETS) $(MURK_OBJ) $(SQLITE_OBJ) \
+	$(SQLITE_PRG_OBJ) $(MURK_UTIL_OBJ) 2>NUL
 	
 .c.obj:
 	$(CC) $(CFLAGS) $(INCS) -c -o$@ $<

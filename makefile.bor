@@ -112,7 +112,7 @@ database: $(SQLITE_PRG) loadhelps$(EXE)
 
 clean:
 	@-del *.tds sqlite3\*.tds *.map *.tr2 $(TARGETS) $(MURK_OBJ) \
-	$(SQLITE_OBJ) $(SQLITE_PRG_OBJ) 2>NUL
+	$(SQLITE_OBJ) $(SQLITE_PRG_OBJ) $(MURK_UTIL_OBJ) 2>NUL
 	
 dist : $(DISTFILES)
 	@echo "Building distribution..."
