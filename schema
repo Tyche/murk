@@ -29,3 +29,9 @@ CREATE TABLE titles (
 
 .import titles titles
 
+CREATE TABLE helps (
+  level INTEGER,
+  keyword INTEGER,
+  text TEXT
+);
+

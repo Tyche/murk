@@ -18,7 +18,7 @@ DEFS = -DOS_UNIX=0 -DOS_WIN=1 -DHAVE_USLEEP=1 -DHAVE_FDATASYNC=1 -DNDEBUG
 #DEFS = -DOS_UNIX=1 -DOS_WIN=0 -DHAVE_USLEEP=1 -DNDEBUG
  
 
-OPTIM = -O2 -pipe 
+OPTIM = -O0 -pipe 
 WARN = -Wall -Wno-parentheses -Wno-unused 
 PROF    = -g
 
@@ -53,11 +53,18 @@ SQLITE_XTRA = sqlite3/sqlite3.def sqlite3/btree.h \
 	sqlite3/pager.h sqlite3/sqliteInt.h sqlite3/opcodes.h sqlite3/parse.h \
 	sqlite3/vdbe.h
 
-MURK_SRC = murk.cpp os.cpp
+MURK_UTIL_SRC = loadhelps.cpp
+MURK_UTIL_OBJ = $(MURK_UTIL_SRC:.cpp=.o)
+MURK_SRC = murk.cpp os.cpp descriptor.cpp utils.cpp commands.cpp io.cpp \
+	room.cpp object.cpp character.cpp spells.cpp objproto.cpp mobproto.cpp \
+	affect.cpp exit.cpp area.cpp reset.cpp extra.cpp shop.cpp
 MURK_OBJ = $(MURK_SRC:.cpp=.o)
-MURK_HDR = os.hpp
+MURK_HDR = os.hpp config.hpp descriptor.hpp character.hpp pcdata.hpp utils.hpp \
+	globals.hpp object.hpp note.hpp room.hpp area.hpp mobproto.hpp \
+	objproto.hpp affect.hpp exit.hpp extra.hpp ban.hpp shop.hpp reset.hpp \
+	io.hpp 
 
-OBJDEPENDS = $(MURK_OBJ)
+OBJDEPENDS = $(MURK_OBJ) $(MURK_UTIL_OBJ)
 
 # Data files Areas, Mobprogs and Players
 DATAFILES = area.lst limbo.are mid_cit.prg midgaard.are school.are help.are \
@@ -65,14 +72,15 @@ DATAFILES = area.lst limbo.are mid_cit.prg midgaard.are school.are help.are \
 	janitor.prg One schema item_types socials titles
 
 # Files in the standard distribution
-DISTFILES = $(MURK_SRC) $(MURK_HDR) $(DATAFILES) $(SQLITE_SRC) $(SQLITE_PRG_SRC) \
-	$(SQLITE_XTRA) makefile makefile.bor makefile.vc makefile.dgm \
+DISTFILES = $(MURK_SRC) $(MURK_UTIL_SRC) $(MURK_HDR) $(DATAFILES) \
+	$(SQLITE_SRC) $(SQLITE_PRG_SRC) $(SQLITE_XTRA) \
+	makefile makefile.bor makefile.vc makefile.dgm \
 	doc.txt startup license.crypt license.diku license.merc license.murk++ 
   
 PDIST= $(patsubst %,murk++/%,$(DISTFILES))
 RELEASE=dist
 
-TARGETS = $(SQLITE_LIB) $(SQLITE_PRG) murk$(EXE)
+TARGETS = $(SQLITE_LIB) $(SQLITE_PRG) murk$(EXE) loadhelps$(EXE)
 
 all: $(TARGETS)
 
@@ -85,15 +93,20 @@ $(SQLITE_PRG): $(SQLITE_PRG_OBJ) $(SQLITE_LIB)
 murk$(EXE): $(MURK_OBJ) $(SQLITE_LIB) 
 	$(CPP) $(LFLAGS) -o $@ $^ $(LIBS)
 
-database: $(SQLITE_PRG)
+loadhelps$(EXE): loadhelps.o io.o utils.o $(SQLITE_LIB) 
+	$(CPP) $(LFLAGS) -o $@ $^ $(LIBS)
+
+database: $(SQLITE_PRG) loadhelps$(EXE)
 	@echo "Building database..."
 	@-cp murk.db murk.db.bkup
 	@-rm murk.db
 	@sqlite3/sqlite3 murk.db < schema
+	@./loadhelps
 	@echo "Done."
 
 clean:
-	-rm -f $(TARGETS) $(MURK_OBJ) $(SQLITE_OBJ) $(SQLITE_PRG_OBJ) $(OBJDEPENDS:.o=.d)
+	-rm -f $(TARGETS) $(MURK_OBJ) $(MURK_UTIL_OBJ) $(SQLITE_OBJ) \
+	$(SQLITE_PRG_OBJ) $(OBJDEPENDS:.o=.d)
 
 dist:
 	ln -s ./ murk++

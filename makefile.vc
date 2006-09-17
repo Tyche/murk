@@ -49,9 +49,16 @@ SQLITE_XTRA = sqlite3\sqlite3.def sqlite3\btree.h \
 	sqlite3\pager.h sqlite3\sqliteInt.h sqlite3\opcodes.h sqlite3\parse.h \
 	sqlite3\vdbe.h
 
-MURK_SRC = murk.cpp os.cpp
+MURK_UTIL_SRC = loadhelps.cpp
+MURK_UTIL_OBJ = $(MURK_UTIL_SRC:.cpp=.obj)
+MURK_SRC = murk.cpp os.cpp descriptor.cpp utils.cpp commands.cpp io.cpp \
+	room.cpp object.cpp character.cpp spells.cpp objproto.cpp mobproto.cpp \
+	affect.cpp exit.cpp area.cpp reset.cpp extra.cpp shop.cpp
 MURK_OBJ = $(MURK_SRC:.cpp=.obj)
-MURK_HDR = os.hpp
+MURK_HDR = os.hpp config.hpp descriptor.hpp character.hpp pcdata.hpp utils.hpp \
+	globals.hpp object.hpp note.hpp room.hpp area.hpp mobproto.hpp \
+	objproto.hpp affect.hpp exit.hpp extra.hpp ban.hpp shop.hpp reset.hpp \
+	io.hpp 
 
 # Data files Areas, Mobprogs and Players
 DATAFILES = area.lst limbo.are mid_cit.prg midgaard.are school.are help.are \
@@ -59,15 +66,16 @@ DATAFILES = area.lst limbo.are mid_cit.prg midgaard.are school.are help.are \
 	janitor.prg One schema item_types socials titles
 
 # Files in the standard distribution
-DISTFILES = $(MURK_SRC) $(MURK_HDR) $(DATAFILES) $(SQLITE_SRC) $(SQLITE_PRG_SRC) \
-	$(SQLITE_XTRA) makefile makefile.bor makefile.vc makefile.dgm \
+DISTFILES = $(MURK_SRC) $(MURK_UTIL_SRC) $(MURK_HDR) $(DATAFILES) \
+	$(SQLITE_SRC) $(SQLITE_PRG_SRC) $(SQLITE_XTRA) \
+	makefile makefile.bor makefile.vc makefile.dgm \
 	doc.txt startup license.crypt license.diku license.merc license.murk++ 
   
 !ifndef RELEASE
 RELEASE=dist
 !endif
 
-TARGETS = $(SQLITE_LIB) $(SQLITE_PRG) murk.exe
+TARGETS = $(SQLITE_LIB) $(SQLITE_PRG) murk.exe loadhelps.exe
 
 all: $(TARGETS)
 
@@ -80,11 +88,15 @@ $(SQLITE_PRG): $(SQLITE_PRG_OBJ) $(SQLITE_LIB)
 murk.exe: $(MURK_OBJ) $(SQLITE_LIB)
 	$(LD) $** $(LIBS) /Fe$@ $(LFLAGS)
 
+loadhelps.exe: $(MURK_UTIL_OBJ) io.obj utils.obj $(SQLITE_LIB) 
+	$(CPP) $(LFLAGS) -o $@ $^ $(LIBS)
+
 database: $(SQLITE_PRG)
 	@echo "Building database..."
 	@-copy murk.db murk.db.bkup
 	@-del murk.db
 	@sqlite3\sqlite3 murk.db < schema
+	@sqlite3/sqlite3 murk.db < schema
 	@echo "Done."
 
 clean:

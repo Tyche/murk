@@ -3,50 +3,12 @@
 
  \author Jon A. Lambert
  \date 08/30/2006
- \version 1.2
+ \version 1.4
  \remarks
   This source code copyright (C) 2005, 2006 by Jon A. Lambert
   All rights reserved.
 
-  The crypt code credits and license is included inlined below.
-
-  MurkMUD++ Public License
-  Copyright(c) 2005, 2006 Jon A. Lambert. All rights reserved.
-
-  Permission is hereby granted, free of charge, to any person obtaining a
-  copy of this software and associated documentation files, the rights to
-  use, copy, modify, create derivative works, merge, publish, distribute,
-  sublicense, and/or sell copies of this software, and to permit persons
-  to whom the software is furnished to do so, subject to the following
-  conditions:
-
-  1. Redistribution in source code must retain the copyright information
-  and attributions in the original source code, the above copyright notice,
-  this list of conditions, the CONTRIBUTORS file and the following
-  disclaimer.
-
-  2. Redistribution in binary form must reproduce the above copyright
-  notice, this list of conditions, and the following disclaimer in the
-  documentation and/or other materials provided with the distribution.
-
-  3. The rights granted to you under this license automatically terminate
-  should you attempt to assert any patent claims against the licensor or
-  contributors, which in any way restrict the ability of any party to use
-  this software or portions thereof in any form under the terms of this
-  license.
-
-  4. You must also comply with both the original Diku license in
-  'license.diku' as well the Merc license in 'license.merc'.
-
-  Disclaimer:
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-  OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-  CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
+  Use governed by the MurkMUD++ public license found in license.murk++
 */
 
 #ifndef OS_HPP
