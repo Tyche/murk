@@ -3611,7 +3611,7 @@ void Character::do_train (std::string argument)
     return;
 
   std::string buf;
-  sh_int *pAbility;
+  sh_int ability;
   char *pOutput;
 
   /*
@@ -3639,40 +3639,31 @@ void Character::do_train (std::string argument)
   if (!str_cmp (argument, "str")) {
     if (class_table[klass].attr_prime == APPLY_STR)
       cost = 3;
-    pAbility = &pcdata->perm_str;
+    ability = pcdata->get_perm(argument);
     pOutput = "strength";
   } else if (!str_cmp (argument, "int")) {
     if (class_table[klass].attr_prime == APPLY_INT)
       cost = 3;
-    pAbility = &pcdata->perm_int;
+    ability = pcdata->get_perm(argument);
     pOutput = "intelligence";
   } else if (!str_cmp (argument, "wis")) {
     if (class_table[klass].attr_prime == APPLY_WIS)
       cost = 3;
-    pAbility = &pcdata->perm_wis;
+    ability = pcdata->get_perm(argument);
     pOutput = "wisdom";
   } else if (!str_cmp (argument, "dex")) {
     if (class_table[klass].attr_prime == APPLY_DEX)
       cost = 3;
-    pAbility = &pcdata->perm_dex;
+    ability = pcdata->get_perm(argument);
     pOutput = "dexterity";
   } else if (!str_cmp (argument, "con")) {
     if (class_table[klass].attr_prime == APPLY_CON)
       cost = 3;
-    pAbility = &pcdata->perm_con;
+    ability = pcdata->get_perm(argument);
     pOutput = "constitution";
   } else {
     buf = "You can train:";
-    if (pcdata->perm_str < 18)
-      buf.append(" str");
-    if (pcdata->perm_int < 18)
-      buf.append(" int");
-    if (pcdata->perm_wis < 18)
-      buf.append(" wis");
-    if (pcdata->perm_dex < 18)
-      buf.append(" dex");
-    if (pcdata->perm_con < 18)
-      buf.append(" con");
+    buf.append(pcdata->trainable_list());
 
     if (buf[buf.size() - 1] != ':') {
       buf.append(".\r\n");
@@ -3690,7 +3681,7 @@ void Character::do_train (std::string argument)
     return;
   }
 
-  if (*pAbility >= 18) {
+  if (ability >= 18) {
     act ("Your $T is already at maximum.", NULL, pOutput, TO_CHAR);
     return;
   }
@@ -3701,7 +3692,7 @@ void Character::do_train (std::string argument)
   }
 
   practice -= cost;
-  *pAbility += 1;
+  pcdata->set_perm(argument, ability+1);
   act ("Your $T increases!", NULL, pOutput, TO_CHAR);
   act ("$n's $T increases!", NULL, pOutput, TO_ROOM);
   return;
@@ -6547,7 +6538,7 @@ void Character::do_mset (std::string argument)
       return;
     }
 
-    victim->pcdata->perm_str = value;
+    victim->pcdata->set_perm("str", value);
     return;
   }
 
@@ -6568,7 +6559,7 @@ void Character::do_mset (std::string argument)
       return;
     }
 
-    victim->pcdata->perm_int = value;
+    victim->pcdata->set_perm("int", value);
     return;
   }
 
@@ -6589,7 +6580,7 @@ void Character::do_mset (std::string argument)
       return;
     }
 
-    victim->pcdata->perm_wis = value;
+    victim->pcdata->set_perm("wis", value);
     return;
   }
 
@@ -6610,7 +6601,7 @@ void Character::do_mset (std::string argument)
       return;
     }
 
-    victim->pcdata->perm_dex = value;
+    victim->pcdata->set_perm("dex", value);
     return;
   }
 
@@ -6631,7 +6622,7 @@ void Character::do_mset (std::string argument)
       return;
     }
 
-    victim->pcdata->perm_con = value;
+    victim->pcdata->set_perm("con", value);
     return;
   }
 

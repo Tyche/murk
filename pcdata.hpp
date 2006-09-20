@@ -40,6 +40,7 @@ public:
   std::string bamfin;
   std::string bamfout;
   std::string title;
+private:
   sh_int perm_str;
   sh_int perm_int;
   sh_int perm_wis;
@@ -50,16 +51,19 @@ public:
   sh_int mod_wis;
   sh_int mod_dex;
   sh_int mod_con;
+public:
   sh_int condition[3];
   sh_int pagelen;
   sh_int learned[MAX_SKILL];
 
-  PCData() :
-    perm_str(13), perm_int(13), perm_wis(13), perm_dex(13), perm_con(13),
-    mod_str(0), mod_int(0), mod_wis(0), mod_dex(0), mod_con(0), pagelen(20) {
-    memset(condition, 0, sizeof condition);
-    memset(learned, 0, sizeof learned);
-  }
+  PCData();
+  void set_prime(sh_int prime);
+  std::string trainable_list(void);
+  void set_perm(std::string attr, int value);
+  sh_int get_perm(std::string attr);
+  void set_mod(std::string attr, int value);
+  sh_int get_mod(std::string attr);
+  sh_int get_curr(std::string attr);
 
 };
 

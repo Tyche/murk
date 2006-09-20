@@ -34,7 +34,7 @@
 /*
  * Area definition.
  */
-struct Area {
+class Area {
 public:
   static int top_area;
 
@@ -44,6 +44,7 @@ public:
   sh_int nplayer;
 
   Area();
+  void reset_area (void);
 };
 
 #endif // AREA_HPP

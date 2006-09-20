@@ -762,23 +762,7 @@ void Descriptor::nanny (std::string argument)
     if (ch->level == 0) {
       Object *obj;
 
-      switch (class_table[ch->klass].attr_prime) {
-      case APPLY_STR:
-        ch->pcdata->perm_str = 16;
-        break;
-      case APPLY_INT:
-        ch->pcdata->perm_int = 16;
-        break;
-      case APPLY_WIS:
-        ch->pcdata->perm_wis = 16;
-        break;
-      case APPLY_DEX:
-        ch->pcdata->perm_dex = 16;
-        break;
-      case APPLY_CON:
-        ch->pcdata->perm_con = 16;
-        break;
-      }
+      ch->pcdata->set_prime (class_table[ch->klass].attr_prime);
 
       ch->level = 1;
       ch->exp = 1000;

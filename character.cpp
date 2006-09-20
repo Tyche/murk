@@ -411,7 +411,7 @@ int Character::get_curr_str() {
   else
     max = 22;
 
-  return URANGE (3, pcdata->perm_str + pcdata->mod_str, max);
+  return URANGE (3, pcdata->get_curr("str"), max);
 }
 
 /*
@@ -428,7 +428,7 @@ int Character::get_curr_int() {
   else
     max = 22;
 
-  return URANGE (3, pcdata->perm_int + pcdata->mod_int, max);
+  return URANGE (3, pcdata->get_curr("int"), max);
 }
 
 /*
@@ -445,7 +445,7 @@ int Character::get_curr_wis() {
   else
     max = 22;
 
-  return URANGE (3, pcdata->perm_wis + pcdata->mod_wis, max);
+  return URANGE (3, pcdata->get_curr("wis"), max);
 }
 
 /*
@@ -462,7 +462,7 @@ int Character::get_curr_dex() {
   else
     max = 22;
 
-  return URANGE (3, pcdata->perm_dex + pcdata->mod_dex, max);
+  return URANGE (3, pcdata->get_curr("dex"), max);
 }
 
 /*
@@ -479,7 +479,7 @@ int Character::get_curr_con() {
   else
     max = 22;
 
-  return URANGE (3, pcdata->perm_con + pcdata->mod_con, max);
+  return URANGE (3, pcdata->get_curr("con"), max);
 }
 
 /*
@@ -615,19 +615,19 @@ void Character::affect_modify (Affect * paf, bool fAdd)
   case APPLY_NONE:
     break;
   case APPLY_STR:
-    pcdata->mod_str += mod;
+    pcdata->set_mod("str", pcdata->get_mod("str") + mod);
     break;
   case APPLY_DEX:
-    pcdata->mod_dex += mod;
+    pcdata->set_mod("dex", pcdata->get_mod("dex") + mod);
     break;
   case APPLY_INT:
-    pcdata->mod_int += mod;
+    pcdata->set_mod("int", pcdata->get_mod("int") + mod);
     break;
   case APPLY_WIS:
-    pcdata->mod_wis += mod;
+    pcdata->set_mod("wis", pcdata->get_mod("wis") + mod);
     break;
   case APPLY_CON:
-    pcdata->mod_con += mod;
+    pcdata->set_mod("con", pcdata->get_mod("con") + mod);
     break;
   case APPLY_SEX:
     sex += mod;
@@ -1029,13 +1029,13 @@ void Character::fwrite_char (std::ofstream & fp)
     fp << "Bamfin       " << pcdata->bamfin << "~\n";
     fp << "Bamfout      " << pcdata->bamfout << "~\n";
     fp << "Title        " << pcdata->title << "~\n";
-    fp << "AttrPerm     " << pcdata->perm_str << " " << pcdata->perm_int <<
-      " " << pcdata->perm_wis << " " << pcdata->perm_dex << " " <<
-      pcdata->perm_con << "\n";
+    fp << "AttrPerm     " << pcdata->get_perm("str") << " " << pcdata->get_perm("int") <<
+      " " << pcdata->get_perm("wis") << " " << pcdata->get_perm("dex") << " " <<
+      pcdata->get_perm("con") << "\n";
 
-    fp << "AttrMod      " << pcdata->mod_str << " " << pcdata->mod_int << " "
-      << pcdata->mod_wis << " " << pcdata->mod_dex << " " <<
-      pcdata->mod_con << "\n";
+    fp << "AttrMod      " << pcdata->get_mod("str") << " " << pcdata->get_mod("int") << " "
+      << pcdata->get_mod("wis") << " " << pcdata->get_mod("dex") << " " <<
+      pcdata->get_mod("con") << "\n";
 
     fp << "Condition    " << pcdata->condition[0] << " " <<
       pcdata->condition[1] << " " << pcdata->condition[2] << "\n";
@@ -1136,21 +1136,21 @@ void Character::fread_char (std::ifstream & fp)
       }
 
       if (!str_cmp (word, "AttrMod")) {
-        pcdata->mod_str = fread_number (fp);
-        pcdata->mod_int = fread_number (fp);
-        pcdata->mod_wis = fread_number (fp);
-        pcdata->mod_dex = fread_number (fp);
-        pcdata->mod_con = fread_number (fp);
+        pcdata->set_mod("str", fread_number (fp));
+        pcdata->set_mod("int", fread_number (fp));
+        pcdata->set_mod("wis", fread_number (fp));
+        pcdata->set_mod("dex", fread_number (fp));
+        pcdata->set_mod("con", fread_number (fp));
         fMatch = true;
         break;
       }
 
       if (!str_cmp (word, "AttrPerm")) {
-        pcdata->perm_str = fread_number (fp);
-        pcdata->perm_int = fread_number (fp);
-        pcdata->perm_wis = fread_number (fp);
-        pcdata->perm_dex = fread_number (fp);
-        pcdata->perm_con = fread_number (fp);
+        pcdata->set_perm("str", fread_number (fp));
+        pcdata->set_perm("int", fread_number (fp));
+        pcdata->set_perm("wis", fread_number (fp));
+        pcdata->set_perm("dex", fread_number (fp));
+        pcdata->set_perm("con", fread_number (fp));
         fMatch = true;
         break;
       }
