@@ -19,10 +19,10 @@
  MurkMUD++ - A Windows compatible, C++ compatible Merc 2.2 Mud.
 
  \author Jon A. Lambert
- \date 08/30/2006
- \version 1.4
+ \date 01/02/2007
+ \version 1.5
  \remarks
-  This source code copyright (C) 2005, 2006 by Jon A. Lambert
+  This source code copyright (C) 2005, 2006, 2007 by Jon A. Lambert
   All rights reserved.
 
   Use governed by the MurkMUD++ public license found in license.murk++
@@ -31,6 +31,7 @@
 #include "os.hpp"
 #include "config.hpp"
 #include "globals.hpp"
+#include "database.hpp"
 
 /*
 print a series of warnings - do not exit
@@ -110,7 +111,7 @@ void fatal_printf (const char * str, ...)
   va_end (args);
   bug_printf (buf);
   WIN32CLEANUP
-  sqlite3_close(database);
+//  Database::instance()->shutdown();
   abort();
   return;
 }

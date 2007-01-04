@@ -19,10 +19,10 @@
  MurkMUD++ - A Windows compatible, C++ compatible Merc 2.2 Mud.
 
  \author Jon A. Lambert
- \date 08/30/2006
- \version 1.4
+ \date 01/02/2007
+ \version 1.5
  \remarks
-  This source code copyright (C) 2005, 2006 by Jon A. Lambert
+  This source code copyright (C) 2005, 2006, 2007 by Jon A. Lambert
   All rights reserved.
 
   Use governed by the MurkMUD++ public license found in license.murk++
@@ -40,6 +40,8 @@
 #include "config.hpp"
 #include "utils.hpp"
 #include "io.hpp"
+#include "database.hpp"
+#include "symbols.hpp"
 
 /*
  * Globals.
@@ -67,13 +69,7 @@ std::map<int, Room *> room_table;
 struct time_info_data time_info;
 struct weather_data weather_info;
 
-/*
- * A kill structure (indexed by level).
- */
-struct kill_data {
-  int number;
-  int killed;
-} kill_table[MAX_LEVEL];
+struct kill_data kill_table[MAX_LEVEL];
 
 /*
  * Global variables.
@@ -83,14 +79,12 @@ bool wizlock;                   /* Game is wizlocked        */
 std::string str_boot_time;
 time_t current_time;            /* Time of this pulse       */
 std::string help_greeting;
-sqlite3 *database = NULL;
 
 /*
  * The kludgy global is for spells who want more stuff from command line.
  */
 std::string target_name;
 
-bool fBootDb;
 std::ifstream * fpArea;
 std::string strArea;
 
@@ -100,33 +94,6 @@ std::string strArea;
 Object *rgObjNest[MAX_NEST];
 
 bool MOBtrigger;
-
-/*
- * These are skill_lookup return values for common skills and spells.
- */
-sh_int gsn_backstab;
-sh_int gsn_dodge;
-sh_int gsn_hide;
-sh_int gsn_peek;
-sh_int gsn_pick_lock;
-sh_int gsn_sneak;
-sh_int gsn_steal;
-
-sh_int gsn_disarm;
-sh_int gsn_enhanced_damage;
-sh_int gsn_kick;
-sh_int gsn_parry;
-sh_int gsn_rescue;
-sh_int gsn_second_attack;
-sh_int gsn_third_attack;
-
-sh_int gsn_blindness;
-sh_int gsn_charm_person;
-sh_int gsn_curse;
-sh_int gsn_invis;
-sh_int gsn_mass_invis;
-sh_int gsn_poison;
-sh_int gsn_sleep;
 
 std::string dir_name[] = {
   "north", "east", "south", "west", "up", "down"
@@ -587,277 +554,277 @@ struct skill_type skill_table[MAX_SKILL] = {
 
   {   "reserved", {99, 99, 99, 99},
       NULL, TAR_IGNORE, POS_STANDING,
-      NULL, 0, 0, 0, "", ""},
+      0, 0, "", ""},
   {   "acid blast", {20, 37, 37, 37},
       &Character::spell_acid_blast, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, 70, 20, 12, "acid blast", "!Acid Blast!"},
+      20, 12, "acid blast", "!Acid Blast!"},
   {   "armor", {5, 1, 37, 37},
       &Character::spell_armor, TAR_CHAR_DEFENSIVE, POS_STANDING,
-      NULL, 1, 5, 12, "", "You feel less protected."},
+      5, 12, "", "You feel less protected."},
   {   "bless", {37, 5, 37, 37},
       &Character::spell_bless, TAR_CHAR_DEFENSIVE, POS_STANDING,
-      NULL, 3, 5, 12, "", "You feel less righteous."},
+      5, 12, "", "You feel less righteous."},
   {   "blindness", {8, 5, 37, 37},
       &Character::spell_blindness, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      &gsn_blindness, 4, 5, 12, "", "You can see again."},
+      5, 12, "", "You can see again."},
   {   "burning hands", {5, 37, 37, 37},
       &Character::spell_burning_hands, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, 5, 15, 12, "burning hands", "!Burning Hands!"},
+      15, 12, "burning hands", "!Burning Hands!"},
   {   "call lightning", {37, 12, 37, 37},
       &Character::spell_call_lightning, TAR_IGNORE, POS_FIGHTING,
-      NULL, 6, 15, 12, "lightning bolt", "!Call Lightning!"},
+      15, 12, "lightning bolt", "!Call Lightning!"},
   {   "cause critical", {37, 9, 37, 37},
       &Character::spell_cause_critical, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, 63, 20, 12, "spell", "!Cause Critical!"},
+      20, 12, "spell", "!Cause Critical!"},
   {   "cause light", {37, 1, 37, 37},
       &Character::spell_cause_light, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, 62, 15, 12, "spell", "!Cause Light!"},
+      15, 12, "spell", "!Cause Light!"},
   {   "cause serious", {37, 5, 37, 37},
       &Character::spell_cause_serious, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, 64, 17, 12, "spell", "!Cause Serious!"},
+      17, 12, "spell", "!Cause Serious!"},
   {   "change sex", {37, 37, 37, 37},
       &Character::spell_change_sex, TAR_CHAR_DEFENSIVE, POS_FIGHTING,
-      NULL, 82, 15, 12, "", "Your body feels familiar again."},
+      15, 12, "", "Your body feels familiar again."},
   {   "charm person", {14, 37, 37, 37},
       &Character::spell_charm_person, TAR_CHAR_OFFENSIVE, POS_STANDING,
-      &gsn_charm_person, 7, 5, 12, "", "You feel more self-confident."},
+      5, 12, "", "You feel more self-confident."},
   {   "chill touch", {3, 37, 37, 37},
       &Character::spell_chill_touch, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, 8, 15, 12, "chilling touch", "You feel less cold."},
+      15, 12, "chilling touch", "You feel less cold."},
   {   "colour spray", {11, 37, 37, 37},
       &Character::spell_colour_spray, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, 10, 15, 12, "colour spray", "!Colour Spray!"},
+      15, 12, "colour spray", "!Colour Spray!"},
   {   "continual light", {4, 2, 37, 37},
       &Character::spell_continual_light, TAR_IGNORE, POS_STANDING,
-      NULL, 57, 7, 12, "", "!Continual Light!"},
+      7, 12, "", "!Continual Light!"},
   {   "control weather", {10, 13, 37, 37},
       &Character::spell_control_weather, TAR_IGNORE, POS_STANDING,
-      NULL, 11, 25, 12, "", "!Control Weather!"},
+      25, 12, "", "!Control Weather!"},
   {   "create food", {37, 3, 37, 37},
       &Character::spell_create_food, TAR_IGNORE, POS_STANDING,
-      NULL, 12, 5, 12, "", "!Create Food!"},
+      5, 12, "", "!Create Food!"},
   {   "create spring", {10, 37, 37, 37},
       &Character::spell_create_spring, TAR_IGNORE, POS_STANDING,
-      NULL, 80, 20, 12, "", "!Create Spring!"},
+      20, 12, "", "!Create Spring!"},
   {   "create water", {37, 2, 37, 37},
       &Character::spell_create_water, TAR_OBJ_INV, POS_STANDING,
-      NULL, 13, 5, 12, "", "!Create Water!"},
+      5, 12, "", "!Create Water!"},
   {   "cure blindness", {37, 4, 37, 37},
       &Character::spell_cure_blindness, TAR_CHAR_DEFENSIVE, POS_FIGHTING,
-      NULL, 14, 5, 12, "", "!Cure Blindness!"},
+      5, 12, "", "!Cure Blindness!"},
   {   "cure critical", {37, 9, 37, 37},
       &Character::spell_cure_critical, TAR_CHAR_DEFENSIVE, POS_FIGHTING,
-      NULL, 15, 20, 12, "", "!Cure Critical!"},
+      20, 12, "", "!Cure Critical!"},
   {   "cure light", {37, 1, 37, 37},
       &Character::spell_cure_light, TAR_CHAR_DEFENSIVE, POS_FIGHTING,
-      NULL, 16, 10, 12, "", "!Cure Light!"},
+      10, 12, "", "!Cure Light!"},
   {   "cure poison", {37, 9, 37, 37},
       &Character::spell_cure_poison, TAR_CHAR_DEFENSIVE, POS_STANDING,
-      NULL, 43, 5, 12, "", "!Cure Poison!"},
+      5, 12, "", "!Cure Poison!"},
   {   "cure serious", {37, 5, 37, 37},
       &Character::spell_cure_serious, TAR_CHAR_DEFENSIVE, POS_FIGHTING,
-      NULL, 61, 15, 12, "", "!Cure Serious!"},
+      15, 12, "", "!Cure Serious!"},
   {   "curse", {12, 12, 37, 37},
       &Character::spell_curse, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      &gsn_curse, 17, 20, 12, "curse", "The curse wears off."},
+      20, 12, "curse", "The curse wears off."},
   {   "detect evil", {37, 4, 37, 37},
       &Character::spell_detect_evil, TAR_CHAR_SELF, POS_STANDING,
-      NULL, 18, 5, 12, "", "The red in your vision disappears."},
+      5, 12, "", "The red in your vision disappears."},
   {   "detect hidden", {37, 7, 37, 37},
       &Character::spell_detect_hidden, TAR_CHAR_SELF, POS_STANDING,
-      NULL, 44, 5, 12, "", "You feel less aware of your suroundings."},
+      5, 12, "", "You feel less aware of your suroundings."},
   {   "detect invis", {2, 5, 37, 37},
       &Character::spell_detect_invis, TAR_CHAR_SELF, POS_STANDING,
-      NULL, 19, 5, 12, "", "You no longer see invisible objects."},
+      5, 12, "", "You no longer see invisible objects."},
   {   "detect magic", {2, 3, 37, 37},
       &Character::spell_detect_magic, TAR_CHAR_SELF, POS_STANDING,
-      NULL, 20, 5, 12, "", "The detect magic wears off."},
+      5, 12, "", "The detect magic wears off."},
   {   "detect poison", {37, 5, 37, 37},
       &Character::spell_detect_poison, TAR_OBJ_INV, POS_STANDING,
-      NULL, 21, 5, 12, "", "!Detect Poison!"},
+      5, 12, "", "!Detect Poison!"},
   {   "dispel evil", {37, 10, 37, 37},
       &Character::spell_dispel_evil, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, 22, 15, 12, "dispel evil", "!Dispel Evil!"},
+      15, 12, "dispel evil", "!Dispel Evil!"},
   {   "dispel magic", {26, 31, 37, 37},
       &Character::spell_dispel_magic, TAR_CHAR_OFFENSIVE, POS_STANDING,
-      NULL, 59, 15, 12, "", "!Dispel Magic!"},
+      15, 12, "", "!Dispel Magic!"},
   {   "earthquake", {37, 7, 37, 37},
       &Character::spell_earthquake, TAR_IGNORE, POS_FIGHTING,
-      NULL, 23, 15, 12, "earthquake", "!Earthquake!"},
+      15, 12, "earthquake", "!Earthquake!"},
   {   "enchant weapon", {12, 37, 37, 37},
       &Character::spell_enchant_weapon, TAR_OBJ_INV, POS_STANDING,
-      NULL, 24, 100, 24, "", "!Enchant Weapon!"},
+      100, 24, "", "!Enchant Weapon!"},
   {   "energy drain", {13, 37, 37, 37},
       &Character::spell_energy_drain, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, 25, 35, 12, "energy drain", "!Energy Drain!"},
+      35, 12, "energy drain", "!Energy Drain!"},
   {   "faerie fire", {4, 2, 37, 37},
       &Character::spell_faerie_fire, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, 72, 5, 12, "faerie fire", "The pink aura around you fades away."},
+      5, 12, "faerie fire", "The pink aura around you fades away."},
   {   "faerie fog", {10, 14, 37, 37},
       &Character::spell_faerie_fog, TAR_IGNORE, POS_STANDING,
-      NULL, 73, 12, 12, "faerie fog", "!Faerie Fog!"},
+      12, 12, "faerie fog", "!Faerie Fog!"},
   {   "fireball", {15, 37, 37, 37},
       &Character::spell_fireball, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, 26, 15, 12, "fireball", "!Fireball!"},
+      15, 12, "fireball", "!Fireball!"},
   {   "flamestrike", {37, 13, 37, 37},
       &Character::spell_flamestrike, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, 65, 20, 12, "flamestrike", "!Flamestrike!"},
+      20, 12, "flamestrike", "!Flamestrike!"},
   {   "fly", {7, 12, 37, 37},
       &Character::spell_fly, TAR_CHAR_DEFENSIVE, POS_STANDING,
-      NULL, 56, 10, 18, "", "You slowly float to the ground."},
+      10, 18, "", "You slowly float to the ground."},
   {   "gate", {37, 37, 37, 37},
       &Character::spell_gate, TAR_CHAR_DEFENSIVE, POS_FIGHTING,
-      NULL, 83, 50, 12, "", "!Gate!"},
+      50, 12, "", "!Gate!"},
   {   "giant strength", {7, 37, 37, 37},
       &Character::spell_giant_strength, TAR_CHAR_DEFENSIVE, POS_STANDING,
-      NULL, 39, 20, 12, "", "You feel weaker."},
+      20, 12, "", "You feel weaker."},
   {   "harm", {37, 15, 37, 37},
       &Character::spell_harm, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, 27, 35, 12, "harm spell", "!Harm!"},
+      35, 12, "harm spell", "!Harm!"},
   {   "heal", {37, 14, 37, 37},
       &Character::spell_heal, TAR_CHAR_DEFENSIVE, POS_FIGHTING,
-      NULL, 28, 50, 12, "", "!Heal!"},
+      50, 12, "", "!Heal!"},
   {   "identify", {10, 10, 37, 37},
       &Character::spell_identify, TAR_OBJ_INV, POS_STANDING,
-      NULL, 53, 12, 24, "", "!Identify!"},
+      12, 24, "", "!Identify!"},
   {   "infravision", {6, 9, 37, 37},
       &Character::spell_infravision, TAR_CHAR_DEFENSIVE, POS_STANDING,
-      NULL, 77, 5, 18, "", "You no longer see in the dark."},
+      5, 18, "", "You no longer see in the dark."},
   {   "invis", {4, 37, 37, 37},
       &Character::spell_invis, TAR_CHAR_DEFENSIVE, POS_STANDING,
-      &gsn_invis, 29, 5, 12, "", "You are no longer invisible."},
+      5, 12, "", "You are no longer invisible."},
   {   "know alignment", {8, 5, 37, 37},
       &Character::spell_know_alignment, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, 58, 9, 12, "", "!Know Alignment!"},
+      9, 12, "", "!Know Alignment!"},
   {   "lightning bolt", {9, 37, 37, 37},
       &Character::spell_lightning_bolt, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, 30, 15, 12, "lightning bolt", "!Lightning Bolt!"},
+      15, 12, "lightning bolt", "!Lightning Bolt!"},
   {   "locate object", {6, 10, 37, 37},
       &Character::spell_locate_object, TAR_IGNORE, POS_STANDING,
-      NULL, 31, 20, 18, "", "!Locate Object!"},
+      20, 18, "", "!Locate Object!"},
   {   "magic missile", {1, 37, 37, 37},
       &Character::spell_magic_missile, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, 32, 15, 12, "magic missile", "!Magic Missile!"},
+      15, 12, "magic missile", "!Magic Missile!"},
   {   "mass invis", {15, 17, 37, 37},
       &Character::spell_mass_invis, TAR_IGNORE, POS_STANDING,
-      &gsn_mass_invis, 69, 20, 24, "", "!Mass Invis!"},
+      20, 24, "", "!Mass Invis!"},
   {   "pass door", {18, 37, 37, 37},
       &Character::spell_pass_door, TAR_CHAR_SELF, POS_STANDING,
-      NULL, 74, 20, 12, "", "You feel solid again."},
+      20, 12, "", "You feel solid again."},
   {   "poison", {37, 8, 37, 37},
       &Character::spell_poison, TAR_CHAR_OFFENSIVE, POS_STANDING,
-      &gsn_poison, 33, 10, 12, "poison", "You feel less sick."},
+      10, 12, "poison", "You feel less sick."},
   {   "protection", {37, 6, 37, 37},
       &Character::spell_protection, TAR_CHAR_SELF, POS_STANDING,
-      NULL, 34, 5, 12, "", "You feel less protected."},
+      5, 12, "", "You feel less protected."},
   {   "refresh", {5, 3, 37, 37},
       &Character::spell_refresh, TAR_CHAR_DEFENSIVE, POS_STANDING,
-      NULL, 81, 12, 18, "refresh", "!Refresh!"},
+      12, 18, "refresh", "!Refresh!"},
   {   "remove curse", {37, 12, 37, 37},
       &Character::spell_remove_curse, TAR_CHAR_DEFENSIVE, POS_STANDING,
-      NULL, 35, 5, 12, "", "!Remove Curse!"},
+      5, 12, "", "!Remove Curse!"},
   {   "sanctuary", {37, 13, 37, 37},
       &Character::spell_sanctuary, TAR_CHAR_DEFENSIVE, POS_STANDING,
-      NULL, 36, 75, 12, "", "The white aura around your body fades."},
+      75, 12, "", "The white aura around your body fades."},
   {   "shield", {13, 37, 37, 37},
       &Character::spell_shield, TAR_CHAR_DEFENSIVE, POS_STANDING,
-      NULL, 67, 12, 18, "", "Your force shield shimmers then fades away."},
+      12, 18, "", "Your force shield shimmers then fades away."},
   {   "shocking grasp", {7, 37, 37, 37},
       &Character::spell_shocking_grasp, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, 37, 15, 12, "shocking grasp", "!Shocking Grasp!"},
+      15, 12, "shocking grasp", "!Shocking Grasp!"},
   {   "sleep", {14, 37, 37, 37},
       &Character::spell_sleep, TAR_CHAR_OFFENSIVE, POS_STANDING,
-      &gsn_sleep, 38, 15, 12, "", "You feel less tired."},
+      15, 12, "", "You feel less tired."},
   {   "stone skin", {17, 37, 37, 37},
       &Character::spell_stone_skin, TAR_CHAR_SELF, POS_STANDING,
-      NULL, 66, 12, 18, "", "Your skin feels soft again."},
+      12, 18, "", "Your skin feels soft again."},
   {   "summon", {37, 8, 37, 37},
       &Character::spell_summon, TAR_IGNORE, POS_STANDING,
-      NULL, 40, 50, 12, "", "!Summon!"},
+      50, 12, "", "!Summon!"},
   {   "teleport", {8, 37, 37, 37},
       &Character::spell_teleport, TAR_CHAR_SELF, POS_FIGHTING,
-      NULL, 2, 35, 12, "", "!Teleport!"},
+      35, 12, "", "!Teleport!"},
   {   "ventriloquate", {1, 37, 37, 37},
       &Character::spell_ventriloquate, TAR_IGNORE, POS_STANDING,
-      NULL, 41, 5, 12, "", "!Ventriloquate!"},
+      5, 12, "", "!Ventriloquate!"},
   {   "weaken", {7, 37, 37, 37},
       &Character::spell_weaken, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, 68, 20, 12, "spell", "You feel stronger."},
+      20, 12, "spell", "You feel stronger."},
   {   "word of recall", {37, 37, 37, 37},
       &Character::spell_word_of_recall, TAR_CHAR_SELF, POS_RESTING,
-      NULL, 42, 5, 12, "", "!Word of Recall!"},
+      5, 12, "", "!Word of Recall!"},
 /*
  * Dragon breath
  */
   {   "acid breath", {33, 37, 37, 37},
       &Character::spell_acid_breath, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, 200, 0, 4, "blast of acid", "!Acid Breath!"},
+      0, 4, "blast of acid", "!Acid Breath!"},
   {   "fire breath", {34, 37, 37, 37},
       &Character::spell_fire_breath, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, 201, 0, 4, "blast of flame", "!Fire Breath!"},
+      0, 4, "blast of flame", "!Fire Breath!"},
   {   "frost breath", {31, 37, 37, 37},
       &Character::spell_frost_breath, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, 202, 0, 4, "blast of frost", "!Frost Breath!"},
+      0, 4, "blast of frost", "!Frost Breath!"},
   {   "gas breath", {35, 37, 37, 37},
       &Character::spell_gas_breath, TAR_IGNORE, POS_FIGHTING,
-      NULL, 203, 0, 4, "blast of gas", "!Gas Breath!"},
+      0, 4, "blast of gas", "!Gas Breath!"},
   {   "lightning breath", {32, 37, 37, 37},
       &Character::spell_lightning_breath, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, 204, 0, 4, "blast of lightning", "!Lightning Breath!"},
+      0, 4, "blast of lightning", "!Lightning Breath!"},
 /*
  * Fighter and thief skills.
  */
   {   "backstab", {37, 37, 1, 37},
       &Character::spell_null, TAR_IGNORE, POS_STANDING,
-      &gsn_backstab, 0, 0, 24, "backstab", "!Backstab!"},
+      0, 24, "backstab", "!Backstab!"},
   {   "disarm", {37, 37, 10, 37},
       &Character::spell_null, TAR_IGNORE, POS_FIGHTING,
-      &gsn_disarm, 0, 0, 24, "", "!Disarm!"},
+      0, 24, "", "!Disarm!"},
   {   "dodge", {37, 37, 1, 37},
       &Character::spell_null, TAR_IGNORE, POS_FIGHTING,
-      &gsn_dodge, 0, 0, 0, "", "!Dodge!"},
+      0, 0, "", "!Dodge!"},
   {   "enhanced damage", {37, 37, 37, 1},
       &Character::spell_null, TAR_IGNORE, POS_FIGHTING,
-      &gsn_enhanced_damage, 0, 0, 0, "", "!Enhanced Damage!"},
+      0, 0, "", "!Enhanced Damage!"},
   {   "hide", {37, 37, 1, 37},
       &Character::spell_null, TAR_IGNORE, POS_RESTING,
-      &gsn_hide, 0, 0, 12, "", "!Hide!"},
+      0, 12, "", "!Hide!"},
   {   "kick", {37, 37, 37, 1},
       &Character::spell_null, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      &gsn_kick, 0, 0, 8, "kick", "!Kick!"},
+      0, 8, "kick", "!Kick!"},
   {   "parry", {37, 37, 37, 1},
       &Character::spell_null, TAR_IGNORE, POS_FIGHTING,
-      &gsn_parry, 0, 0, 0, "", "!Parry!"},
+      0, 0, "", "!Parry!"},
   {   "peek", {37, 37, 1, 37},
       &Character::spell_null, TAR_IGNORE, POS_STANDING,
-      &gsn_peek, 0, 0, 0, "", "!Peek!"},
+      0, 0, "", "!Peek!"},
   {   "pick lock", {37, 37, 1, 37},
       &Character::spell_null, TAR_IGNORE, POS_STANDING,
-      &gsn_pick_lock, 0, 0, 12, "", "!Pick!"},
+      0, 12, "", "!Pick!"},
   {   "rescue", {37, 37, 37, 1},
       &Character::spell_null, TAR_IGNORE, POS_FIGHTING,
-      &gsn_rescue, 0, 0, 12, "", "!Rescue!"},
+      0, 12, "", "!Rescue!"},
   {   "second attack", {37, 37, 1, 1},
       &Character::spell_null, TAR_IGNORE, POS_FIGHTING,
-      &gsn_second_attack, 0, 0, 0, "", "!Second Attack!"},
+      0, 0, "", "!Second Attack!"},
   {   "sneak", {37, 37, 1, 37},
       &Character::spell_null, TAR_IGNORE, POS_STANDING,
-      &gsn_sneak, 0, 0, 12, "", NULL},
+      0, 12, "", NULL},
   {   "steal", {37, 37, 1, 37},
       &Character::spell_null, TAR_IGNORE, POS_STANDING,
-      &gsn_steal, 0, 0, 24, "", "!Steal!"},
+      0, 24, "", "!Steal!"},
   {   "third attack", {37, 37, 37, 1},
       &Character::spell_null, TAR_IGNORE, POS_FIGHTING,
-      &gsn_third_attack, 0, 0, 0, "", "!Third Attack!"},
+      0, 0, "", "!Third Attack!"},
 /*
  *  Spells for mega1.are from Glop/Erkenbrand.
 */
   {   "general purpose", {37, 37, 37, 37},
       &Character::spell_general_purpose, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, 205, 0, 12, "general purpose ammo", "!General Purpose Ammo!"},
+      0, 12, "general purpose ammo", "!General Purpose Ammo!"},
   {   "high explosive", {37, 37, 37, 37},
       &Character::spell_high_explosive, TAR_CHAR_OFFENSIVE, POS_FIGHTING,
-      NULL, 206, 0, 12, "high explosive ammo", "!High Explosive Ammo!"}
+      0, 12, "high explosive ammo", "!High Explosive Ammo!"}
 };
 
 ///////////////////
@@ -1078,29 +1045,6 @@ int skill_lookup (const std::string & name)
 }
 
 /*
- * Lookup a skill by slot number.
- * Used for object loading.
- */
-int slot_lookup (int slot)
-{
-  int sn;
-
-  if (slot <= 0)
-    return -1;
-
-  for (sn = 0; sn < MAX_SKILL; sn++) {
-    if (slot == skill_table[sn].slot)
-      return sn;
-  }
-
-  if (fBootDb) {
-    fatal_printf ("Slot_lookup: bad slot %d.", slot);
-  }
-
-  return -1;
-}
-
-/*
  * Translates mob virtual number to its mob index struct.
  * Hash table lookup.
  */
@@ -1113,7 +1057,7 @@ MobPrototype *get_mob_index (int vnum)
   if (pMobIndex != mob_table.end())
       return (*pMobIndex).second;
 
-  if (fBootDb) {
+  if (Database::instance()->fBootDb) {
     fatal_printf ("Get_mob_index: bad vnum %d.", vnum);
   }
 
@@ -1133,7 +1077,7 @@ ObjectPrototype *get_obj_index (int vnum)
   if (pObjIndex != obj_table.end())
       return (*pObjIndex).second;
 
-  if (fBootDb) {
+  if (Database::instance()->fBootDb) {
     fatal_printf ("Get_obj_index: bad vnum %d.", vnum);
   }
 
@@ -1153,7 +1097,7 @@ Room *get_room_index (int vnum)
   if (pRoomIndex != room_table.end())
       return (*pRoomIndex).second;
 
-  if (fBootDb) {
+  if (Database::instance()->fBootDb) {
     fatal_printf ("Get_room_index: bad vnum %d.", vnum);
   }
 
@@ -1232,9 +1176,10 @@ std::string get_title (int klass, int level, int sex)
     "SELECT title FROM titles WHERE class = %d AND level = %d and sex = %d",
     klass, level, sex == SEX_FEMALE ? 1 : 0);
   std::string str("");
+  Database* db = Database::instance();
 
-  if (sqlite3_prepare(database, sql, -1, &stmt, 0) != SQLITE_OK) {
-    bug_printf("Could not prepare statement: %s", sqlite3_errmsg(database));
+  if (sqlite3_prepare(db->database, sql, -1, &stmt, 0) != SQLITE_OK) {
+    bug_printf("Could not prepare statement: %s", sqlite3_errmsg(db->database));
     sqlite3_free(sql);
     return str;
   }
@@ -1303,42 +1248,6 @@ SPEC_FUN *spec_lookup (const std::string & name)
   if (!str_cmp (name, "spec_thief"))
     return spec_thief;
   return 0;
-}
-
-/*
- * Snarf an 'area' header line.
- */
-void load_area (std::ifstream & fp)
-{
-  Area *pArea;
-
-  pArea = new Area();
-  pArea->name = fread_string (fp);
-  pArea->age = 15;
-  pArea->nplayer = 0;
-  area_list.push_back(pArea);
-  area_last = pArea;
-  return;
-}
-
-void load_greeting(void)
-{
-  sqlite3_stmt *stmt = NULL;
-
-  char *sql = sqlite3_mprintf("SELECT text FROM helps WHERE keyword = 'GREETING'");
-  if (sqlite3_prepare(database, sql, -1, &stmt, 0) != SQLITE_OK) {
-    bug_printf("Could not prepare statement: %s", sqlite3_errmsg(database));
-    sqlite3_free(sql);
-    return;
-  }
-
-  if (sqlite3_step(stmt) == SQLITE_ROW) {
-    help_greeting.assign((const char*)sqlite3_column_text( stmt, 0 ));
-  }
-
-  sqlite3_finalize(stmt);
-  sqlite3_free(sql);
-  return;
 }
 
 /*
@@ -1497,522 +1406,6 @@ void mprog_read_programs (std::ifstream & fp, MobPrototype *pMobIndex)
       break;
     }
   }
-}
-
-/*
- * Snarf a mob section.
- */
-void load_mobiles (std::ifstream & fp)
-{
-  MobPrototype *pMobIndex;
-
-  for (;;) {
-    sh_int vnum;
-    char letter;
-
-    letter = fread_letter (fp);
-    if (letter != '#') {
-      fatal_printf ("Load_mobiles: # not found.");
-    }
-
-    vnum = fread_number (fp);
-    if (vnum == 0)
-      break;
-
-    fBootDb = false;
-    if (get_mob_index (vnum) != NULL) {
-      fatal_printf ("Load_mobiles: vnum %d duplicated.", vnum);
-    }
-    fBootDb = true;
-
-    pMobIndex = new MobPrototype();
-    pMobIndex->vnum = vnum;
-    pMobIndex->player_name = fread_string (fp);
-    pMobIndex->short_descr = fread_string (fp);
-    pMobIndex->long_descr = fread_string (fp);
-    pMobIndex->description = fread_string (fp);
-
-    pMobIndex->long_descr[0] = toupper (pMobIndex->long_descr[0]);
-    pMobIndex->description[0] = toupper (pMobIndex->description[0]);
-
-    pMobIndex->actflags = fread_number (fp) | ACT_IS_NPC;
-    pMobIndex->affected_by = fread_number (fp);
-    pMobIndex->pShop = NULL;
-    pMobIndex->alignment = fread_number (fp);
-    letter = fread_letter (fp);
-    pMobIndex->level = number_fuzzy (fread_number (fp));
-    pMobIndex->sex = fread_number (fp);
-
-    if (letter != 'S') {
-      fatal_printf ("Load_mobiles: vnum %d non-S.", vnum);
-    }
-
-    letter = fread_letter (fp);
-    if (letter == '>') {
-      fp.unget();
-      mprog_read_programs (fp, pMobIndex);
-    } else
-      fp.unget();
-    mob_table.insert (std::map<int, MobPrototype*>::value_type (vnum, pMobIndex));
-    kill_table[URANGE (0, pMobIndex->level, MAX_LEVEL - 1)].number++;
-  }
-
-  return;
-}
-
-/*
- * Snarf an obj section.
- */
-void load_objects (std::ifstream & fp)
-{
-  ObjectPrototype *pObjIndex;
-
-  for (;;) {
-    sh_int vnum;
-    char letter;
-
-    letter = fread_letter (fp);
-    if (letter != '#') {
-      fatal_printf ("Load_objects: # not found.");
-    }
-
-    vnum = fread_number (fp);
-    if (vnum == 0)
-      break;
-
-    fBootDb = false;
-    if (get_obj_index (vnum) != NULL) {
-      fatal_printf ("Load_objects: vnum %d duplicated.", vnum);
-    }
-    fBootDb = true;
-
-    pObjIndex = new ObjectPrototype();
-    pObjIndex->vnum = vnum;
-    pObjIndex->name = fread_string (fp);
-    pObjIndex->short_descr = fread_string (fp);
-    pObjIndex->description = fread_string (fp);
-    /* Action description */ fread_string (fp);
-
-    pObjIndex->short_descr[0] = tolower (pObjIndex->short_descr[0]);
-    pObjIndex->description[0] = toupper (pObjIndex->description[0]);
-
-    pObjIndex->item_type = fread_number (fp);
-    pObjIndex->extra_flags = fread_number (fp);
-    pObjIndex->wear_flags = fread_number (fp);
-    pObjIndex->value[0] = fread_number (fp);
-    pObjIndex->value[1] = fread_number (fp);
-    pObjIndex->value[2] = fread_number (fp);
-    pObjIndex->value[3] = fread_number (fp);
-    pObjIndex->weight = fread_number (fp);
-    pObjIndex->cost = fread_number (fp);        /* Unused */
-    /* Cost per day */ fread_number (fp);
-
-    if (pObjIndex->item_type == ITEM_POTION)
-      SET_BIT (pObjIndex->extra_flags, ITEM_NODROP);
-
-    for (;;) {
-      char letter;
-
-      letter = fread_letter (fp);
-
-      if (letter == 'A') {
-        Affect* paf = new Affect();
-        paf->type = -1;
-        paf->duration = -1;
-        paf->location = fread_number (fp);
-        paf->modifier = fread_number (fp);
-        paf->bitvector = 0;
-        pObjIndex->affected.push_back(paf);
-      } else if (letter == 'E') {
-        ExtraDescription* ed = new ExtraDescription();
-        ed->keyword = fread_string (fp);
-        ed->description = fread_string (fp);
-        pObjIndex->extra_descr.push_back(ed);
-      } else {
-        fp.unget();
-        break;
-      }
-    }
-
-    // Translate spell "slot numbers" to internal "skill numbers."
-    switch (pObjIndex->item_type) {
-    case ITEM_PILL:
-    case ITEM_POTION:
-    case ITEM_SCROLL:
-      pObjIndex->value[1] = slot_lookup (pObjIndex->value[1]);
-      pObjIndex->value[2] = slot_lookup (pObjIndex->value[2]);
-      pObjIndex->value[3] = slot_lookup (pObjIndex->value[3]);
-      break;
-
-    case ITEM_STAFF:
-    case ITEM_WAND:
-      pObjIndex->value[3] = slot_lookup (pObjIndex->value[3]);
-      break;
-    }
-
-    obj_table.insert (std::map<int, ObjectPrototype*>::value_type (vnum, pObjIndex));
-  }
-
-  return;
-}
-
-/*
- * Snarf a reset section.
- */
-void load_resets (std::ifstream & fp)
-{
-  Reset *pReset;
-
-  if (area_last == NULL) {
-    fatal_printf ("Load_resets: no #AREA seen yet.");
-  }
-
-  for (;;) {
-    Room *pRoomIndex;
-    Exit *pexit;
-    char letter;
-
-    if ((letter = fread_letter (fp)) == 'S')
-      break;
-
-    if (letter == '*') {
-      fread_to_eol (fp);
-      continue;
-    }
-
-    pReset = new Reset();
-    pReset->command = letter;
-    /* if_flag */ fread_number (fp);
-    pReset->arg1 = fread_number (fp);
-    pReset->arg2 = fread_number (fp);
-    pReset->arg3 = (letter == 'G' || letter == 'R')
-      ? 0 : fread_number (fp);
-    fread_to_eol (fp);
-
-    /*
-     * Validate parameters.
-     * We're calling the index functions for the side effect.
-     */
-    switch (letter) {
-    default:
-      fatal_printf ("Load_resets: bad command '%c'.", letter);
-      break;
-
-    case 'M':
-      get_mob_index (pReset->arg1);
-      get_room_index (pReset->arg3);
-      break;
-
-    case 'O':
-      get_obj_index (pReset->arg1);
-      get_room_index (pReset->arg3);
-      break;
-
-    case 'P':
-      get_obj_index (pReset->arg1);
-      get_obj_index (pReset->arg3);
-      break;
-
-    case 'G':
-    case 'E':
-      get_obj_index (pReset->arg1);
-      break;
-
-    case 'D':
-      pRoomIndex = get_room_index (pReset->arg1);
-
-      if (pReset->arg2 < 0
-        || pReset->arg2 > 5
-        || (pexit = pRoomIndex->exit[pReset->arg2]) == NULL
-        || !IS_SET (pexit->exit_info, EX_ISDOOR)) {
-        fatal_printf ("Load_resets: 'D': exit %d not door.", pReset->arg2);
-      }
-
-      if (pReset->arg3 < 0 || pReset->arg3 > 2) {
-        fatal_printf ("Load_resets: 'D': bad 'locks': %d.", pReset->arg3);
-      }
-
-      break;
-
-    case 'R':
-//      pRoomIndex = get_room_index (pReset->arg1);
-      get_room_index (pReset->arg1);
-
-      if (pReset->arg2 < 0 || pReset->arg2 > 6) {
-        fatal_printf ("Load_resets: 'R': bad exit %d.", pReset->arg2);
-      }
-
-      break;
-    }
-
-    area_last->reset_list.push_back(pReset);
-  }
-
-  return;
-}
-
-/*
- * Snarf a room section.
- */
-void load_rooms (std::ifstream & fp)
-{
-  Room *pRoomIndex;
-
-  if (area_last == NULL) {
-    fatal_printf ("Load_resets: no #AREA seen yet.");
-  }
-
-  for (;;) {
-    sh_int vnum;
-    char letter;
-    int door;
-
-    letter = fread_letter (fp);
-    if (letter != '#') {
-      fatal_printf ("Load_rooms: # not found.");
-    }
-
-    vnum = fread_number (fp);
-    if (vnum == 0)
-      break;
-
-    fBootDb = false;
-    if (get_room_index (vnum) != NULL) {
-      fatal_printf ("Load_rooms: vnum %d duplicated.", vnum);
-    }
-    fBootDb = true;
-
-    pRoomIndex = new Room();
-    pRoomIndex->area = area_last;
-    pRoomIndex->vnum = vnum;
-    pRoomIndex->name = fread_string (fp);
-    pRoomIndex->description = fread_string (fp);
-    /* Area number */ fread_number (fp);
-    pRoomIndex->room_flags = fread_number (fp);
-    pRoomIndex->sector_type = fread_number (fp);
-    pRoomIndex->light = 0;
-    for (door = 0; door <= 5; door++)
-      pRoomIndex->exit[door] = NULL;
-
-    for (;;) {
-      letter = fread_letter (fp);
-
-      if (letter == 'S')
-        break;
-
-      if (letter == 'D') {
-        Exit *pexit;
-        int locks;
-
-        door = fread_number (fp);
-        if (door < 0 || door > 5) {
-          fatal_printf ("Fread_rooms: vnum %d has bad door number.", vnum);
-        }
-
-        pexit = new Exit();
-        pexit->description = fread_string (fp);
-        pexit->keyword = fread_string (fp);
-        pexit->exit_info = 0;
-        locks = fread_number (fp);
-        pexit->key = fread_number (fp);
-        pexit->vnum = fread_number (fp);
-
-        switch (locks) {
-        case 1:
-          pexit->exit_info = EX_ISDOOR;
-          break;
-        case 2:
-          pexit->exit_info = EX_ISDOOR | EX_PICKPROOF;
-          break;
-        }
-
-        pRoomIndex->exit[door] = pexit;
-      } else if (letter == 'E') {
-        ExtraDescription *ed;
-
-        ed = new ExtraDescription();
-        ed->keyword = fread_string (fp);
-        ed->description = fread_string (fp);
-        pRoomIndex->extra_descr.push_back(ed);
-      } else {
-        fatal_printf ("Load_rooms: vnum %d has flag not 'DES'.", vnum);
-      }
-    }
-
-    room_table.insert (std::map<int, Room*>::value_type (vnum, pRoomIndex));
-  }
-
-  return;
-}
-
-/*
- * Snarf a shop section.
- */
-void load_shops (std::ifstream & fp)
-{
-  Shop *pShop;
-
-  for (;;) {
-    MobPrototype *pMobIndex;
-    int iTrade;
-
-    pShop = new Shop();
-    pShop->keeper = fread_number (fp);
-    if (pShop->keeper == 0)
-      break;
-    for (iTrade = 0; iTrade < MAX_TRADE; iTrade++)
-      pShop->buy_type[iTrade] = fread_number (fp);
-    pShop->profit_buy = fread_number (fp);
-    pShop->profit_sell = fread_number (fp);
-    pShop->open_hour = fread_number (fp);
-    pShop->close_hour = fread_number (fp);
-    fread_to_eol (fp);
-    pMobIndex = get_mob_index (pShop->keeper);
-    pMobIndex->pShop = pShop;
-
-    shop_list.push_back(pShop);
-  }
-
-  return;
-}
-
-/*
- * Snarf spec proc declarations.
- */
-void load_specials (std::ifstream & fp)
-{
-  for (;;) {
-    MobPrototype *pMobIndex;
-    char letter;
-
-    switch (letter = fread_letter (fp)) {
-    default:
-      fatal_printf ("Load_specials: letter '%c' not *MS.", letter);
-
-    case 'S':
-      return;
-
-    case '*':
-      break;
-
-    case 'M':
-      pMobIndex = get_mob_index (fread_number (fp));
-      pMobIndex->spec_fun = spec_lookup (fread_word (fp));
-      if (pMobIndex->spec_fun == 0) {
-        fatal_printf ("Load_specials: 'M': vnum %d.", pMobIndex->vnum);
-      }
-      break;
-    }
-
-    fread_to_eol (fp);
-  }
-}
-
-/*
- * Snarf notes file.
- */
-void load_notes (void)
-{
-  std::ifstream fp;
-
-  fp.open (NOTE_FILE, std::ifstream::in | std::ifstream::binary);
-  if (!fp.is_open())
-    return;
-
-  for (;;) {
-    Note *pnote;
-    char letter;
-
-    do {
-      letter = fp.get();
-      if (fp.eof()) {
-        fp.close();
-        return;
-      }
-    } while (isspace (letter));
-    fp.unget();
-
-    pnote = new Note();
-
-    if (str_cmp (fread_word (fp), "sender"))
-      break;
-    pnote->sender = fread_string (fp);
-
-    if (str_cmp (fread_word (fp), "date"))
-      break;
-    pnote->date = fread_string (fp);
-
-    if (str_cmp (fread_word (fp), "stamp"))
-      break;
-    pnote->date_stamp = fread_number (fp);
-
-    if (str_cmp (fread_word (fp), "to"))
-      break;
-    pnote->to_list = fread_string (fp);
-
-    if (str_cmp (fread_word (fp), "subject"))
-      break;
-    pnote->subject = fread_string (fp);
-
-    if (str_cmp (fread_word (fp), "text"))
-      break;
-    pnote->text = fread_string (fp);
-
-    note_list.push_back(pnote);
-  }
-
-  strArea = NOTE_FILE;
-  fpArea = &fp;
-  fatal_printf ("Load_notes: bad key word.");
-  return;
-}
-
-/*
- * Translate all room exits from virtual to real.
- * Has to be done after all rooms are read in.
- * Check for bad reverse exits.
- */
-void fix_exits (void)
-{
-  Room *to_room;
-  Exit *pexit;
-  Exit *pexit_rev;
-  int door;
-
-  std::map<int,Room*>::iterator proom;
-  for (proom = room_table.begin(); proom != room_table.end(); proom++) {
-    bool fexit;
-
-    fexit = false;
-    for (door = 0; door <= 5; door++) {
-      if ((pexit = (*proom).second->exit[door]) != NULL) {
-        fexit = true;
-        if (pexit->vnum <= 0)
-          pexit->to_room = NULL;
-        else
-          pexit->to_room = get_room_index (pexit->vnum);
-      }
-    }
-
-    if (!fexit)
-      SET_BIT ((*proom).second->room_flags, ROOM_NO_MOB);
-  }
-
-  for (proom = room_table.begin(); proom != room_table.end(); proom++) {
-    for (door = 0; door <= 5; door++) {
-      if ((pexit = (*proom).second->exit[door]) != NULL
-        && (to_room = pexit->to_room) != NULL
-        && (pexit_rev = to_room->exit[rev_dir[door]]) != NULL
-        && pexit_rev->to_room != (*proom).second) {
-        bug_printf ("Fix_exits: %d:%d -> %d:%d -> %d.",
-          (*proom).second->vnum, door,
-          to_room->vnum, rev_dir[door], (pexit_rev->to_room == NULL)
-          ? 0 : pexit_rev->to_room->vnum);
-      }
-    }
-  }
-
-  return;
 }
 
 /*
@@ -3870,7 +3263,7 @@ try {
     if (ch->is_affected (AFF_POISON)) {
       ch->act ("$n shivers and suffers.", NULL, NULL, TO_ROOM);
       ch->send_to_char ("You shiver and suffer.\r\n");
-      damage (ch, ch, 2, gsn_poison);
+      damage (ch, ch, 2, skill_lookup("poison"));
     } else if (ch->position == POS_INCAP) {
       damage (ch, ch, 1, TYPE_UNDEFINED);
     } else if (ch->position == POS_MORTAL) {
@@ -4417,7 +3810,7 @@ void check_killer (Character * ch, Character * victim)
     if (ch->master == NULL) {
       bug_printf ("Check_killer: %s bad AFF_CHARM",
         ch->is_npc () ? ch->short_descr.c_str() : ch->name.c_str());
-      ch->affect_strip (gsn_charm_person);
+      ch->affect_strip (skill_lookup("charm person"));
       REMOVE_BIT (ch->affected_by, AFF_CHARM);
       return;
     }
@@ -4461,7 +3854,7 @@ bool check_parry (Character * ch, Character * victim)
   } else {
     if (victim->get_eq_char (WEAR_WIELD) == NULL)
       return false;
-    chance = victim->pcdata->learned[gsn_parry] / 2;
+    chance = victim->pcdata->learned[skill_lookup("parry")] / 2;
   }
 
   if (number_percent () >= chance + victim->level - ch->level)
@@ -4486,7 +3879,7 @@ bool check_dodge (Character * ch, Character * victim)
     /* Tuan was here.  :) */
     chance = std::min (60, 2 * victim->level);
   else
-    chance = victim->pcdata->learned[gsn_dodge] / 2;
+    chance = victim->pcdata->learned[skill_lookup("dodge")] / 2;
 
   if (number_percent () >= chance + victim->level - ch->level)
     return false;
@@ -4962,8 +4355,8 @@ void damage (Character * ch, Character * victim, int dam, int dt)
      * Inviso attacks ... not.
      */
     if (ch->is_affected (AFF_INVISIBLE)) {
-      ch->affect_strip (gsn_invis);
-      ch->affect_strip (gsn_mass_invis);
+      ch->affect_strip (skill_lookup("invis"));
+      ch->affect_strip (skill_lookup("mass invis"));
       REMOVE_BIT (ch->affected_by, AFF_INVISIBLE);
       ch->act ("$n fades into existence.", NULL, NULL, TO_ROOM);
     }
@@ -5186,11 +4579,12 @@ void one_hit (Character * ch, Character * victim, int dt)
    * Bonuses.
    */
   dam += ch->get_damroll();
-  if (!ch->is_npc () && ch->pcdata->learned[gsn_enhanced_damage] > 0)
-    dam += dam * ch->pcdata->learned[gsn_enhanced_damage] / 150;
+  int enh = skill_lookup("enhanced damage");
+  if (!ch->is_npc () && ch->pcdata->learned[enh] > 0)
+    dam += dam * ch->pcdata->learned[enh] / 150;
   if (!victim->is_awake ())
     dam *= 2;
-  if (dt == gsn_backstab)
+  if (dt == skill_lookup("backstab"))
     dam *= 2 + ch->level / 8;
 
   if (dam <= 0)
@@ -5209,11 +4603,11 @@ void multi_hit (Character * ch, Character * victim, int dt)
   int chance;
 
   one_hit (ch, victim, dt);
-  if (ch->fighting != victim || dt == gsn_backstab)
+  if (ch->fighting != victim || dt == skill_lookup("backstab"))
     return;
 
   chance =
-    ch->is_npc () ? ch->level : ch->pcdata->learned[gsn_second_attack] / 2;
+    ch->is_npc () ? ch->level : ch->pcdata->learned[skill_lookup("second attack")] / 2;
   if (number_percent () < chance) {
     one_hit (ch, victim, dt);
     if (ch->fighting != victim)
@@ -5221,7 +4615,7 @@ void multi_hit (Character * ch, Character * victim, int dt)
   }
 
   chance =
-    ch->is_npc () ? ch->level : ch->pcdata->learned[gsn_third_attack] / 4;
+    ch->is_npc () ? ch->level : ch->pcdata->learned[skill_lookup("third attack")] / 4;
   if (number_percent () < chance) {
     one_hit (ch, victim, dt);
     if (ch->fighting != victim)
@@ -6290,7 +5684,7 @@ bool spec_poison (Character * ch)
   ch->act ("You bite $N!", NULL, victim, TO_CHAR);
   ch->act ("$n bites $N!", NULL, victim, TO_NOTVICT);
   ch->act ("$n bites you!", NULL, victim, TO_VICT);
-  ch->spell_poison (gsn_poison, ch->level, victim);
+  ch->spell_poison (skill_lookup("poison"), ch->level, victim);
   return true;
 }
 
@@ -7267,150 +6661,6 @@ bool check_parse_name (const std::string & name)
   return true;
 }
 
-/*
- * Big mama top level function.
- */
-void boot_db (void)
-{
-  /*
-   * Init some data space stuff.
-   */
-  fBootDb = true;
-
-  /*
-   * Seed random number generator.
-   */
-  OS_SRAND (time (NULL));
-
-  /*
-   * Set time and weather.
-   */
-  {
-    long lhour, lday, lmonth;
-
-    lhour = (current_time - 650336715)
-      / (PULSE_TICK / PULSE_PER_SECOND);
-    time_info.hour = lhour % 24;
-    lday = lhour / 24;
-    time_info.day = lday % 35;
-    lmonth = lday / 35;
-    time_info.month = lmonth % 17;
-    time_info.year = lmonth / 17;
-
-    if (time_info.hour < 5)
-      weather_info.sunlight = SUN_DARK;
-    else if (time_info.hour < 6)
-      weather_info.sunlight = SUN_RISE;
-    else if (time_info.hour < 19)
-      weather_info.sunlight = SUN_LIGHT;
-    else if (time_info.hour < 20)
-      weather_info.sunlight = SUN_SET;
-    else
-      weather_info.sunlight = SUN_DARK;
-
-    weather_info.change = 0;
-    weather_info.mmhg = 960;
-    if (time_info.month >= 7 && time_info.month <= 12)
-      weather_info.mmhg += number_range (1, 50);
-    else
-      weather_info.mmhg += number_range (1, 80);
-
-    if (weather_info.mmhg <= 980)
-      weather_info.sky = SKY_LIGHTNING;
-    else if (weather_info.mmhg <= 1000)
-      weather_info.sky = SKY_RAINING;
-    else if (weather_info.mmhg <= 1020)
-      weather_info.sky = SKY_CLOUDY;
-    else
-      weather_info.sky = SKY_CLOUDLESS;
-
-  }
-
-  // Set welcome screen
-  load_greeting();
-
-  /*
-   * Assign gsn's for skills which have them.
-   */
-  for (int sn = 0; sn < MAX_SKILL; sn++) {
-    if (skill_table[sn].pgsn != NULL)
-      *skill_table[sn].pgsn = sn;
-  }
-
-  /*
-   * Read in all the area files.
-   */
-  std::ifstream fpList;
-  std::ifstream fp;
-
-  fpList.open (AREA_LIST, std::ifstream::in | std::ifstream::binary);
-  if (!fpList.is_open()) {
-    fatal_printf (AREA_LIST);
-  }
-
-  for (;;) {
-    strArea = fread_word (fpList);
-    if (strArea[0] == '$')
-      break;
-
-    fp.open (strArea.c_str(), std::ifstream::in | std::ifstream::binary);
-    if (!fp.is_open()) {
-      fatal_printf (strArea.c_str());
-    }
-    fpArea = &fp;
-    for (;;) {
-      std::string word;
-
-      if (fread_letter (fp) != '#') {
-        fatal_printf ("Boot_db: # not found.");
-      }
-
-      word = fread_word (fp);
-
-      if (word[0] == '$')
-        break;
-      else if (!str_cmp (word, "AREA"))
-        load_area (fp);
-      else if (!str_cmp (word, "MOBILES"))
-        load_mobiles (fp);
-      else if (!str_cmp (word, "MOBPROGS"))
-        load_mobprogs (fp);
-      else if (!str_cmp (word, "OBJECTS"))
-        load_objects (fp);
-      else if (!str_cmp (word, "RESETS"))
-        load_resets (fp);
-      else if (!str_cmp (word, "ROOMS"))
-        load_rooms (fp);
-      else if (!str_cmp (word, "SHOPS"))
-        load_shops (fp);
-      else if (!str_cmp (word, "SPECIALS"))
-        load_specials (fp);
-      else {
-        fatal_printf ("Boot_db: bad section name.");
-      }
-    }
-
-    fp.close();
-    fpArea = NULL;
-  }
-  fpList.close();
-
-  /*
-   * Fix up exits.
-   * Declare db booting over.
-   * Reset all areas once.
-   * Load up the notes file.
-   * Set the MOBtrigger.
-   */
-  fix_exits ();
-  fBootDb = false;
-  area_update ();
-  load_notes ();
-  MOBtrigger = true;
-
-  return;
-}
-
 int init_server_socket (int port)
 {
   SOCKET fd;
@@ -7457,15 +6707,14 @@ int init_server_socket (int port)
 int main (int argc, char **argv)
 {
   struct timeval now_time;
+  Database* db = Database::instance();
 
   // Init time.
   gettimeofday (&now_time, NULL);
   current_time = (time_t) now_time.tv_sec;
   str_boot_time = ctime (&current_time);
 
-  if(sqlite3_open("murk.db", &database)) {
-    fatal_printf("Can't open database: %s.", sqlite3_errmsg(database));
-  }
+  db->initialize("murk.db");
 
   // Get the port number.
   int port = 1234;
@@ -7481,7 +6730,7 @@ int main (int argc, char **argv)
 
   // Run the game.
   SOCKET control = init_server_socket (port);
-  boot_db ();
+  db->boot();
   log_printf ("Merc is ready to rock on port %d.", port);
   game_loop (control);
 
@@ -7489,6 +6738,6 @@ int main (int argc, char **argv)
   closesocket (control);
   log_printf ("Normal termination of game.");
   WIN32CLEANUP
-  sqlite3_close(database);
+  db->shutdown();
   return 0;
 }

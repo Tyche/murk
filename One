@@ -10,19 +10,19 @@ Race         0
 Level        40
 Trust        0
 Wizbit       1
-Played       7802
+Played       8358
 Note         1146299794
 Room         3001
-HpManaMove   302 302 232 232 490 490
+HpManaMove   242 302 232 232 239 490
 Gold         1
 Exp          40000
 Act          1600
 AffectedBy   0
 Position     7
 Practice     0
-SavingThrow  -5
+SavingThrow  -9
 Alignment    -1000
-Hitroll      2
+Hitroll      6
 Damroll      2
 Armor        54
 Wimpy        0
@@ -33,9 +33,11 @@ Bamfout      ~
 Title         the Implementor~
 AttrPerm     18 18 16 18 18
 AttrMod      0 0 0 0 0
-Condition    0 45 45
+Condition    0 45 48
 Pagelen      40
 Skill        95'fireball'
+Affect 3 43 4 18 0
+Affect 3 43 -4 24 0
 End
 
 #END

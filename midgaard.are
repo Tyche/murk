@@ -773,7 +773,7 @@ a scroll of identify~
 A scroll has carelessly been left here.~
 ~
 2 64 1
-12 53 -1 -1
+12 'identify' 'none' 'none'
 1 2000 50
 E
 scroll identify~
@@ -791,7 +791,7 @@ a yellow potion of see invisible~
 A small yellow potion has carelessly been left here.~
 ~
 10 64 1
-12 19 -1 -1
+12 'detect invis' 'none' 'none'
 1 400 50
 E
 potion yellow~
@@ -803,7 +803,7 @@ a scroll of recall~
 A scroll has carelessly been left here.~
 ~
 2 64 1
-12 42 -1 -1
+12 'word of recall' 'none' 'none'
 4 2000 100
 E
 scroll~

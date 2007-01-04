@@ -19,10 +19,10 @@
  MurkMUD++ - A Windows compatible, C++ compatible Merc 2.2 Mud.
 
  \author Jon A. Lambert
- \date 08/30/2006
- \version 1.4
+ \date 01/02/2007
+ \version 1.5
  \remarks
-  This source code copyright (C) 2005, 2006 by Jon A. Lambert
+  This source code copyright (C) 2005, 2006, 2007 by Jon A. Lambert
   All rights reserved.
 
   Use governed by the MurkMUD++ public license found in license.murk++
@@ -61,6 +61,7 @@ extern std::string month_name[];
 extern std::string day_name[];
 extern struct time_info_data time_info;
 extern struct weather_data weather_info;
+extern struct kill_data kill_table[];
 
 extern struct int_app_type int_app[26];
 extern struct str_app_type str_app[26];
@@ -72,34 +73,10 @@ extern bool merc_down;
 extern bool wizlock;
 extern std::string str_boot_time;
 extern time_t current_time;            /* Time of this pulse       */
-extern sqlite3 *database;
+extern std::string help_greeting;
 extern bool MOBtrigger;
 extern std::ifstream * fpArea;
 extern std::string strArea;
-
-extern sh_int gsn_backstab;
-extern sh_int gsn_dodge;
-extern sh_int gsn_hide;
-extern sh_int gsn_peek;
-extern sh_int gsn_pick_lock;
-extern sh_int gsn_sneak;
-extern sh_int gsn_steal;
-
-extern sh_int gsn_disarm;
-extern sh_int gsn_enhanced_damage;
-extern sh_int gsn_kick;
-extern sh_int gsn_parry;
-extern sh_int gsn_rescue;
-extern sh_int gsn_second_attack;
-extern sh_int gsn_third_attack;
-
-extern sh_int gsn_blindness;
-extern sh_int gsn_charm_person;
-extern sh_int gsn_curse;
-extern sh_int gsn_invis;
-extern sh_int gsn_mass_invis;
-extern sh_int gsn_poison;
-extern sh_int gsn_sleep;
 
 extern std::string target_name;
 extern std::string dir_name[];
@@ -111,5 +88,9 @@ extern ObjectPrototype *get_obj_index (int vnum);
 extern Room *get_room_index (int vnum);
 extern MobPrototype *get_mob_index (int vnum);
 extern int skill_lookup (const std::string & name);
+extern void area_update (void);
+extern void load_mobprogs (std::ifstream & fp);
+extern SPEC_FUN *spec_lookup (const std::string & name);
+extern void mprog_read_programs (std::ifstream & fp, MobPrototype *pMobIndex);
 
 #endif

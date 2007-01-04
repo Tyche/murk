@@ -19,10 +19,10 @@
  MurkMUD++ - A Windows compatible, C++ compatible Merc 2.2 Mud.
 
  \author Jon A. Lambert
- \date 08/30/2006
- \version 1.4
+ \date 01/02/2007
+ \version 1.5
  \remarks
-  This source code copyright (C) 2005, 2006 by Jon A. Lambert
+  This source code copyright (C) 2005, 2006, 2007 by Jon A. Lambert
   All rights reserved.
 
   Use governed by the MurkMUD++ public license found in license.murk++
@@ -383,9 +383,9 @@ void Character::spell_create_water (int sn, int lvl, void *vo)
 void Character::spell_cure_blindness (int sn, int lvl, void *vo)
 {
   Character *victim = (Character *) vo;
-  if (!victim->has_affect(gsn_blindness))
+  if (!victim->has_affect(skill_lookup("blindness")))
     return;
-  victim->affect_strip (gsn_blindness);
+  victim->affect_strip (skill_lookup("blindness"));
   victim->send_to_char ("Your vision returns!\r\n");
   if (this != victim)
     send_to_char ("Ok.\r\n");
@@ -421,8 +421,10 @@ void Character::spell_cure_light (int sn, int lvl, void *vo)
 void Character::spell_cure_poison (int sn, int lvl, void *vo)
 {
   Character *victim = (Character *) vo;
-  if (victim->has_affect(gsn_poison)) {
-    victim->affect_strip (gsn_poison);
+  int pois = skill_lookup("poison");
+
+  if (victim->has_affect(pois)) {
+    victim->affect_strip (pois);
     act ("$N looks better.", NULL, victim, TO_NOTVICT);
     victim->send_to_char ("A warm feeling runs through your body.\r\n");
     send_to_char ("Ok.\r\n");
@@ -748,9 +750,9 @@ void Character::spell_faerie_fog (int sn, int lvl, void *vo)
     if (*ich == this || (*ich)->saves_spell (lvl))
       continue;
 
-    (*ich)->affect_strip (gsn_invis);
-    (*ich)->affect_strip (gsn_mass_invis);
-    (*ich)->affect_strip (gsn_sneak);
+    (*ich)->affect_strip (skill_lookup("invis"));
+    (*ich)->affect_strip (skill_lookup("mass invis"));
+    (*ich)->affect_strip (skill_lookup("sneak"));
     REMOVE_BIT ((*ich)->affected_by, AFF_HIDE);
     REMOVE_BIT ((*ich)->affected_by, AFF_INVISIBLE);
     REMOVE_BIT ((*ich)->affected_by, AFF_SNEAK);
@@ -1181,8 +1183,8 @@ void Character::spell_refresh (int sn, int lvl, void *vo)
 void Character::spell_remove_curse (int sn, int lvl, void *vo)
 {
   Character *victim = (Character *) vo;
-  if (victim->has_affect(gsn_curse)) {
-    victim->affect_strip (gsn_curse);
+  if (victim->has_affect(skill_lookup("curse"))) {
+    victim->affect_strip (skill_lookup("curse"));
     victim->send_to_char ("You feel better.\r\n");
     if (this != victim)
       send_to_char ("Ok.\r\n");

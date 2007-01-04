@@ -19,10 +19,10 @@
  MurkMUD++ - A Windows compatible, C++ compatible Merc 2.2 Mud.
 
  \author Jon A. Lambert
- \date 08/30/2006
- \version 1.4
+ \date 01/02/2007
+ \version 1.5
  \remarks
-  This source code copyright (C) 2005, 2006 by Jon A. Lambert
+  This source code copyright (C) 2005, 2006, 2007 by Jon A. Lambert
   All rights reserved.
 
   Use governed by the MurkMUD++ public license found in license.murk++
@@ -511,6 +511,14 @@ struct weather_data {
   int sunlight;
 };
 
+/*
+ * A kill structure (indexed by level).
+ */
+struct kill_data {
+  int number;
+  int killed;
+};
+
 struct str_app_type {
   sh_int tohit;
   sh_int todam;
@@ -558,8 +566,6 @@ struct skill_type {
   spellfun_T spell_fun;         /* Spell pointer (for spells)   */
   sh_int target;                /* Legal targets        */
   sh_int minimum_position;      /* Position for caster / user   */
-  sh_int *pgsn;                 /* Pointer to associated gsn    */
-  sh_int slot;                  /* Slot for #OBJECT loading */
   int min_mana;              /* Minimum mana used        */
   int beats;                 /* Waiting time after use   */
   const char * noun_damage;            /* Damage message       */

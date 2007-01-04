@@ -19,10 +19,10 @@
  MurkMUD++ - A Windows compatible, C++ compatible Merc 2.2 Mud.
 
  \author Jon A. Lambert
- \date 08/30/2006
- \version 1.4
+ \date 01/02/2007
+ \version 1.5
  \remarks
-  This source code copyright (C) 2005, 2006 by Jon A. Lambert
+  This source code copyright (C) 2005, 2006, 2007 by Jon A. Lambert
   All rights reserved.
 
   Use governed by the MurkMUD++ public license found in license.murk++
@@ -43,6 +43,7 @@
 #include "affect.hpp"
 #include "area.hpp"
 #include "exit.hpp"
+#include "database.hpp"
 
 // temp globals
 extern void multi_hit(Character *ch, Character *victim, int dt);
@@ -1642,7 +1643,7 @@ void Character::stop_follower()
 
   if (is_affected (AFF_CHARM)) {
     REMOVE_BIT (affected_by, AFF_CHARM);
-    affect_strip (gsn_charm_person);
+    affect_strip (skill_lookup("charm person"));
   }
 
   if (master->can_see(this))
@@ -1708,7 +1709,7 @@ void Character::set_fighting (Character * victim)
   }
 
   if (is_affected (AFF_SLEEP))
-    affect_strip (gsn_sleep);
+    affect_strip (skill_lookup("sleep"));
 
   fighting = victim;
   position = POS_FIGHTING;
@@ -2371,7 +2372,7 @@ void Character::show_char_to_char_1 (Character * victim)
   }
 
   if (victim != this && !is_npc ()
-    && number_percent () < pcdata->learned[gsn_peek]) {
+    && number_percent () < pcdata->learned[skill_lookup("peek")]) {
     send_to_char ("\r\nYou peek at the inventory:\r\n");
     show_list_to_char (victim->carrying, true, true);
   }
@@ -2533,9 +2534,10 @@ bool Character::check_social (const std::string & command, const std::string & a
     "SELECT name, char_no_arg, others_no_arg, char_found, others_found, vict_found, char_auto, others_auto FROM socials WHERE NAME LIKE '%q%%'",
     command.c_str());
   sqlite3_stmt *stmt = NULL;
+  Database* db = Database::instance();
 
-  if (sqlite3_prepare(database, sql, -1, &stmt, 0) != SQLITE_OK) {
-    bug_printf("Could not prepare statement: %s", sqlite3_errmsg(database));
+  if (sqlite3_prepare(db->database, sql, -1, &stmt, 0) != SQLITE_OK) {
+    bug_printf("Could not prepare statement: %s", sqlite3_errmsg(db->database));
     sqlite3_free(sql);
     return false;
   }

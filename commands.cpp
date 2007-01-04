@@ -19,10 +19,10 @@
  MurkMUD++ - A Windows compatible, C++ compatible Merc 2.2 Mud.
 
  \author Jon A. Lambert
- \date 08/30/2006
- \version 1.4
+ \date 01/02/2007
+ \version 1.5
  \remarks
-  This source code copyright (C) 2005, 2006 by Jon A. Lambert
+  This source code copyright (C) 2005, 2006, 2007 by Jon A. Lambert
   All rights reserved.
 
   Use governed by the MurkMUD++ public license found in license.murk++
@@ -48,6 +48,7 @@
 #include "shop.hpp"
 #include "reset.hpp"
 #include "note.hpp"
+#include "database.hpp"
 
 // Temp externs
 extern Room *find_location (Character * ch, const std::string & arg);
@@ -67,7 +68,6 @@ extern std::string affect_bit_name (int vector);
 extern void mprog_bribe_trigger (Character * mob, Character * ch, int amount);
 extern void mprog_speech_trigger (const std::string & txt, Character * mob);
 extern void mprog_give_trigger (Character * mob, Character * ch, Object * obj);
-extern SPEC_FUN *spec_lookup (const std::string & name);
 extern Object *create_money (int amount);
 extern void note_attach (Character * ch);
 extern void note_remove (Character * ch, Note * pnote);
@@ -233,7 +233,7 @@ void Character::do_backstab (std::string argument)
   std::string arg;
 
   if (!is_npc ()
-    && level < skill_table[gsn_backstab].skill_level[klass]) {
+    && level < skill_table[skill_lookup("backstab")].skill_level[klass]) {
     send_to_char ("You better leave the assassin trade to thieves.\r\n");
     return;
   }
@@ -277,13 +277,14 @@ void Character::do_backstab (std::string argument)
   }
 
   check_killer (this, victim);
-  wait_state (skill_table[gsn_backstab].beats);
+  int bck = skill_lookup("backstab");
+  wait_state (skill_table[bck].beats);
   if (!victim->is_awake ()
     || is_npc ()
-    || number_percent () < pcdata->learned[gsn_backstab])
-    multi_hit (this, victim, gsn_backstab);
+    || number_percent () < pcdata->learned[bck])
+    multi_hit (this, victim, bck);
   else
-    damage (this, victim, 0, gsn_backstab);
+    damage (this, victim, 0, bck);
 
   return;
 }
@@ -337,7 +338,7 @@ void Character::do_flee (std::string argument)
 void Character::do_rescue (std::string argument)
 {
   if (!is_npc ()
-    && level < skill_table[gsn_rescue].skill_level[klass]) {
+    && level < skill_table[skill_lookup("rescue")].skill_level[klass]) {
     send_to_char ("You better leave the heroic acts to warriors.\r\n");
     return;
   }
@@ -378,8 +379,9 @@ void Character::do_rescue (std::string argument)
     return;
   }
 
-  wait_state (skill_table[gsn_rescue].beats);
-  if (!is_npc () && number_percent () > pcdata->learned[gsn_rescue]) {
+  int rsc = skill_lookup("rescue");
+  wait_state (skill_table[rsc].beats);
+  if (!is_npc () && number_percent () > pcdata->learned[rsc]) {
     send_to_char ("You fail the rescue.\r\n");
     return;
   }
@@ -400,7 +402,7 @@ void Character::do_rescue (std::string argument)
 void Character::do_kick (std::string argument)
 {
   if (!is_npc ()
-    && level < skill_table[gsn_kick].skill_level[klass]) {
+    && level < skill_table[skill_lookup("kick")].skill_level[klass]) {
     send_to_char ("You better leave the martial arts to fighters.\r\n");
     return;
   }
@@ -412,11 +414,12 @@ void Character::do_kick (std::string argument)
     return;
   }
 
-  wait_state (skill_table[gsn_kick].beats);
-  if (is_npc () || number_percent () < pcdata->learned[gsn_kick])
-    damage (this, victim, number_range (1, level), gsn_kick);
+  int kck = skill_lookup("kick");
+  wait_state (skill_table[kck].beats);
+  if (is_npc () || number_percent () < pcdata->learned[kck])
+    damage (this, victim, number_range (1, level), kck);
   else
-    damage (this, victim, 0, gsn_kick);
+    damage (this, victim, 0, kck);
 
   return;
 }
@@ -424,7 +427,7 @@ void Character::do_kick (std::string argument)
 void Character::do_disarm (std::string argument)
 {
   if (!is_npc ()
-    && level < skill_table[gsn_disarm].skill_level[klass]) {
+    && level < skill_table[skill_lookup("disarm")].skill_level[klass]) {
     send_to_char ("You don't know how to disarm opponents.\r\n");
     return;
   }
@@ -446,9 +449,9 @@ void Character::do_disarm (std::string argument)
     return;
   }
 
-  wait_state (skill_table[gsn_disarm].beats);
+  wait_state (skill_table[skill_lookup("disarm")].beats);
   int percent = number_percent () + victim->level - level;
-  if (is_npc () || percent < pcdata->learned[gsn_disarm] * 2 / 3)
+  if (is_npc () || percent < pcdata->learned[skill_lookup("disarm")] * 2 / 3)
     disarm (this, victim);
   else
     send_to_char ("You failed.\r\n");
@@ -1850,14 +1853,15 @@ void Character::do_weather (std::string argument)
 void Character::do_help (std::string argument)
 {
   sqlite3_stmt *stmt = NULL;
+  Database* db = Database::instance();
 
   if (argument.empty())
     argument = "summary";
 
   char *sql = sqlite3_mprintf("SELECT level, keyword, text FROM helps WHERE level <= %d", level);
 
-  if (sqlite3_prepare(database, sql, -1, &stmt, 0) != SQLITE_OK) {
-    bug_printf("Could not prepare statement: %s", sqlite3_errmsg(database));
+  if (sqlite3_prepare(db->database, sql, -1, &stmt, 0) != SQLITE_OK) {
+    bug_printf("Could not prepare statement: %s", sqlite3_errmsg(db->database));
     sqlite3_free(sql);
     return;
   }
@@ -2544,11 +2548,12 @@ void Character::do_socials (std::string argument)
   char buf[MAX_STRING_LENGTH];
   int col = 0;
   sqlite3_stmt *stmt = NULL;
+  Database* db = Database::instance();
 
-  if (sqlite3_prepare(database,
+  if (sqlite3_prepare(db->database,
       "SELECT name FROM socials ORDER BY name ASC",
       -1, &stmt, 0) != SQLITE_OK) {
-    bug_printf("Could not prepare statement: %s", sqlite3_errmsg(database));
+    bug_printf("Could not prepare statement: %s", sqlite3_errmsg(db->database));
     return;
   }
 
@@ -3306,7 +3311,7 @@ void Character::do_pick (std::string argument)
     return;
   }
 
-  wait_state (skill_table[gsn_pick_lock].beats);
+  wait_state (skill_table[skill_lookup("pick lock")].beats);
 
   /* look for guards */
   CharIter rch;
@@ -3317,7 +3322,7 @@ void Character::do_pick (std::string argument)
     }
   }
 
-  if (!is_npc () && number_percent () > pcdata->learned[gsn_pick_lock]) {
+  if (!is_npc () && number_percent () > pcdata->learned[skill_lookup("pick lock")]) {
     send_to_char ("You failed.\r\n");
     return;
   }
@@ -3511,12 +3516,13 @@ void Character::do_wake (std::string argument)
 void Character::do_sneak (std::string argument)
 {
   Affect af;
+  int snk = skill_lookup("sneak");
 
   send_to_char ("You attempt to move silently.\r\n");
-  affect_strip (gsn_sneak);
+  affect_strip (snk);
 
-  if (is_npc () || number_percent () < pcdata->learned[gsn_sneak]) {
-    af.type = gsn_sneak;
+  if (is_npc () || number_percent () < pcdata->learned[snk]) {
+    af.type = snk;
     af.duration = level;
     af.location = APPLY_NONE;
     af.modifier = 0;
@@ -3534,7 +3540,7 @@ void Character::do_hide (std::string argument)
   if (is_affected (AFF_HIDE))
     REMOVE_BIT (affected_by, AFF_HIDE);
 
-  if (is_npc () || number_percent () < pcdata->learned[gsn_hide])
+  if (is_npc () || number_percent () < pcdata->learned[skill_lookup("hide")])
     SET_BIT (affected_by, AFF_HIDE);
 
   return;
@@ -3545,9 +3551,9 @@ void Character::do_hide (std::string argument)
  */
 void Character::do_visible (std::string argument)
 {
-  affect_strip (gsn_invis);
-  affect_strip (gsn_mass_invis);
-  affect_strip (gsn_sneak);
+  affect_strip (skill_lookup("invis"));
+  affect_strip (skill_lookup("mass invis"));
+  affect_strip (skill_lookup("sneak"));
   REMOVE_BIT (affected_by, AFF_HIDE);
   REMOVE_BIT (affected_by, AFF_INVISIBLE);
   REMOVE_BIT (affected_by, AFF_SNEAK);
@@ -4259,7 +4265,7 @@ void Character::do_drink (std::string argument)
 
       act ("$n chokes and gags.", NULL, NULL, TO_ROOM);
       send_to_char ("You choke and gag.\r\n");
-      af.type = gsn_poison;
+      af.type = skill_lookup("poison");
       af.duration = 3 * amount;
       af.location = APPLY_NONE;
       af.modifier = 0;
@@ -4330,7 +4336,7 @@ void Character::do_eat (std::string argument)
       act ("$n chokes and gags.", 0, 0, TO_ROOM);
       send_to_char ("You choke and gag.\r\n");
 
-      af.type = gsn_poison;
+      af.type = skill_lookup("poison");
       af.duration = 2 * obj->value[0];
       af.location = APPLY_NONE;
       af.modifier = 0;
@@ -4668,12 +4674,12 @@ void Character::do_steal (std::string argument)
     return;
   }
 
-  wait_state (skill_table[gsn_steal].beats);
+  wait_state (skill_table[skill_lookup("steal")].beats);
   percent = number_percent () + (victim->is_awake () ? 10 : -50);
 
   if (level + 5 < victim->level
     || victim->position == POS_FIGHTING || !victim->is_npc ()
-    || (!is_npc () && percent > pcdata->learned[gsn_steal])) {
+    || (!is_npc () && percent > pcdata->learned[skill_lookup("steal")])) {
     /*
      * Failure.
      */
@@ -6401,8 +6407,8 @@ void Character::do_slookup (std::string argument)
     for (sn = 0; sn < MAX_SKILL; sn++) {
       if (skill_table[sn].name == NULL)
         break;
-      snprintf (buf, sizeof buf, "Sn: %4d Slot: %4d Skill/spell: '%s'\r\n",
-        sn, skill_table[sn].slot, skill_table[sn].name);
+      snprintf (buf, sizeof buf, "Sn: %4d Skill/spell: '%s'\r\n",
+        sn, skill_table[sn].name);
       buf1.append(buf);
     }
     send_to_char (buf1);
@@ -6412,8 +6418,8 @@ void Character::do_slookup (std::string argument)
       return;
     }
 
-    snprintf (buf, sizeof buf, "Sn: %4d Slot: %4d Skill/spell: '%s'\r\n",
-      sn, skill_table[sn].slot, skill_table[sn].name);
+    snprintf (buf, sizeof buf, "Sn: %4d Skill/spell: '%s'\r\n",
+      sn, skill_table[sn].name);
     send_to_char (buf);
   }
 
