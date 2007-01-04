@@ -70,7 +70,8 @@ DATAFILES = area.lst limbo.are mid_cit.prg midgaard.are school.are help.are \
 DISTFILES = $(MURK_SRC) $(MURK_UTIL_SRC) $(MURK_HDR) $(DATAFILES) \
 	$(SQLITE_SRC) $(SQLITE_PRG_SRC) $(SQLITE_XTRA) \
 	makefile makefile.bor makefile.vc makefile.dgm \
-	doc.txt startup license.crypt license.diku license.merc license.murk++ 
+	doc.txt startup startup.bash startup.cmd \
+	license.crypt license.diku license.merc license.murk++ 
   
 !ifndef RELEASE
 RELEASE=dist
@@ -90,7 +91,7 @@ murk.exe: $(MURK_OBJ) $(SQLITE_LIB)
 	$(LD) $** $(LIBS) /Fe$@ $(LFLAGS)
 
 loadhelps.exe: $(MURK_UTIL_OBJ) io.obj utils.obj $(SQLITE_LIB) 
-	$(CPP) $(LFLAGS) -o $@ $^ $(LIBS)
+	$(LD) $** $(LIBS) /Fe$@ $(LFLAGS)
 
 database: $(SQLITE_PRG)
 	@echo "Building database..."
