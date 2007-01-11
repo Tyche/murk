@@ -8,7 +8,7 @@ AR = lib
 WINZIP = C:\apps\Winzip\wzzip
 
 MSGS= -w2 -w7
-DEFS= -DWIN32 -DWIN32_LEAN_AND_MEAN -DNDEBUG
+DEFS= -DWIN32 -DWIN32_LEAN_AND_MEAN -DNDEBUG -DSQLITE_OMIT_UTF16 -DSQLITE_OMIT_AUTHORIZATION
 OPTIM = -o -Ae # -$(PROCESSOR_LEVEL) 
 CFLAGS= $(OPTIM) $(MSGS) $(DEFS)
 
@@ -100,15 +100,19 @@ murk.exe: $(MURK_OBJ) $(SQLITE_LIB)
 loadhelps.exe: $(MURK_UTIL_OBJ) io.obj utils.obj $(SQLITE_LIB) 
 	$(LD) $(LFLAGS) $**, $@,, $(LIBS) 
 
-database: $(SQLITE_PRG)
+database: $(SQLITE_PRG) loadhelps.exe
 	@echo "Building database..."
 	@-copy murk.db murk.db.bkup
 	@-del murk.db
 	@sqlite3\sqlite3 murk.db < schema
-	@./loadhelps
+	@loadhelps
 	@echo "Done."
 
 clean:
+	@-del *.map murk.exe loadhelps.exe $(MURK_OBJ) \
+	$(MURK_UTIL_OBJ) 2>NUL
+	
+cleanall:
 	@-del *.map $(TARGETS) $(MURK_OBJ) $(SQLITE_OBJ) \
 	$(SQLITE_PRG_OBJ) $(MURK_UTIL_OBJ) 2>NUL
 	

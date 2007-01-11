@@ -18,7 +18,7 @@ DEBUG_LFLAGS =
 LIBS= libc.lib kernel32.lib ws2_32.lib libcp.lib
 !endif
 
-DEFS= /D "WIN32" /D "WIN32_LEAN_AND_MEAN" /D "_CONSOLE" /D "_MBCS" /D "NDEBUG"
+DEFS= /D "WIN32" /D "WIN32_LEAN_AND_MEAN" /D "_CONSOLE" /D "_MBCS" /D "SQLITE_OMIT_UTF16" /D "SQLITE_OMIT_AUTHORIZATION"
 OPTIM= /nologo /GX /W1 $(DEBUG_CFLAGS) # /G$(PROCESSOR_LEVEL) 
 CFLAGS= $(OPTIM) $(DEFS)
 LFLAGS = /link /NOLOGO /NODEFAULTLIB /SUBSYSTEM:CONSOLE $(DEBUG_LFLAGS) 
@@ -93,15 +93,19 @@ murk.exe: $(MURK_OBJ) $(SQLITE_LIB)
 loadhelps.exe: $(MURK_UTIL_OBJ) io.obj utils.obj $(SQLITE_LIB) 
 	$(LD) $** $(LIBS) /Fe$@ $(LFLAGS)
 
-database: $(SQLITE_PRG)
+database: $(SQLITE_PRG) loadhelps.exe
 	@echo "Building database..."
 	@-copy murk.db murk.db.bkup
 	@-del murk.db
 	@sqlite3\sqlite3 murk.db < schema
-	@sqlite3/sqlite3 murk.db < schema
+	@loadhelps
 	@echo "Done."
 
 clean:
+	@-del *.pdb *.ilk *.idb murk.exe loadhelps.exe $(MURK_OBJ) \
+	$(MURK_UTIL_OBJ) 2>NUL
+
+cleanall:
 	@-del *.pdb *.ilk *.idb $(TARGETS) $(MURK_OBJ) $(SQLITE_OBJ) \
 	$(SQLITE_PRG_OBJ) $(MURK_UTIL_OBJ) 2>NUL
 

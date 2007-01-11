@@ -56,7 +56,7 @@ Database* Database::instance() {
 }
 
 Database::Database() {
-  sqlite3 *database = NULL;
+  database = NULL;
   fBootDb = false;
 }
 
@@ -231,7 +231,7 @@ void Database::load_greeting(void)
 
   char *sql = sqlite3_mprintf("SELECT text FROM helps WHERE keyword = 'GREETING'");
   if (sqlite3_prepare(db->database, sql, -1, &stmt, 0) != SQLITE_OK) {
-    bug_printf("Could not prepare statement: %s", sqlite3_errmsg(db->database));
+    bug_printf("Could not prepare statement: '%s' Error: %s", sql, sqlite3_errmsg(db->database));
     sqlite3_free(sql);
     return;
   }

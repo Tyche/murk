@@ -1861,7 +1861,7 @@ void Character::do_help (std::string argument)
   char *sql = sqlite3_mprintf("SELECT level, keyword, text FROM helps WHERE level <= %d", level);
 
   if (sqlite3_prepare(db->database, sql, -1, &stmt, 0) != SQLITE_OK) {
-    bug_printf("Could not prepare statement: %s", sqlite3_errmsg(db->database));
+    bug_printf("Could not prepare statement: '%s' Error: %s", sql, sqlite3_errmsg(db->database));
     sqlite3_free(sql);
     return;
   }

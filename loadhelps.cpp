@@ -31,6 +31,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <time.h>
 #include "sqlite3/sqlite3.h"
 
 #include "utils.hpp"

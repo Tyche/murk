@@ -2529,7 +2529,6 @@ bool Character::check_social (const std::string & command, const std::string & a
   std::string arg;
   Character *victim;
   int cmd;
-  bool found = false;
   char *sql = sqlite3_mprintf(
     "SELECT name, char_no_arg, others_no_arg, char_found, others_found, vict_found, char_auto, others_auto FROM socials WHERE NAME LIKE '%q%%'",
     command.c_str());
@@ -2537,16 +2536,12 @@ bool Character::check_social (const std::string & command, const std::string & a
   Database* db = Database::instance();
 
   if (sqlite3_prepare(db->database, sql, -1, &stmt, 0) != SQLITE_OK) {
-    bug_printf("Could not prepare statement: %s", sqlite3_errmsg(db->database));
+    bug_printf("Could not prepare statement: '%s' Error: %s", sql, sqlite3_errmsg(db->database));
     sqlite3_free(sql);
     return false;
   }
 
-  if (sqlite3_step(stmt) == SQLITE_ROW) {
-    found = true;
-  }
-
-  if (!found) {
+  if (sqlite3_step(stmt) != SQLITE_ROW) {
     sqlite3_finalize(stmt);
     sqlite3_free(sql);
     return false;

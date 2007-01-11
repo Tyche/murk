@@ -56,7 +56,7 @@ extern struct cmd_type cmd_table[];
 extern struct skill_type skill_table[MAX_SKILL];
 extern struct class_type class_table[CLASS_MAX];
 extern struct liq_type liq_table[LIQ_MAX];
-extern const std::string where_name[];
+extern std::string where_name[];
 extern std::string month_name[];
 extern std::string day_name[];
 extern struct time_info_data time_info;
