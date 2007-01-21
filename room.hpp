@@ -31,10 +31,12 @@
 #ifndef ROOM_HPP
 #define ROOM_HPP
 
+#include "baseobject.hpp"
+
 /*
  * Room type.
  */
-class Room {
+class Room : public BaseObject {
 public:
   static int top_room;
   std::list<Character *> people;
@@ -42,8 +44,6 @@ public:
   std::list<ExtraDescription *> extra_descr;
   Area *area;
   Exit *exit[6];
-  std::string name;
-  std::string description;
   sh_int vnum;
   sh_int room_flags;
   sh_int light;

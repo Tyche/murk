@@ -31,10 +31,12 @@
 #ifndef CHARACTER_HPP
 #define CHARACTER_HPP
 
+#include "baseobject.hpp"
+
 /*
  * One character (PC or NPC).
  */
-class Character {
+class Character : public BaseObject {
 public:
   Character *master;
   Character *leader;
@@ -49,10 +51,7 @@ public:
   Room *in_room;
   Room *was_in_room;
   PCData *pcdata;
-  std::string name;
-  std::string short_descr;
   std::string long_descr;
-  std::string description;
   std::string prompt;
   sh_int sex;
   sh_int klass;

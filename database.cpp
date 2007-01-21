@@ -270,7 +270,7 @@ void Database::load_mobiles (std::ifstream & fp)
 
     pMobIndex = new MobPrototype();
     pMobIndex->vnum = vnum;
-    pMobIndex->player_name = fread_string (fp);
+    pMobIndex->name = fread_string (fp);
     pMobIndex->short_descr = fread_string (fp);
     pMobIndex->long_descr = fread_string (fp);
     pMobIndex->description = fread_string (fp);
@@ -550,7 +550,7 @@ void Database::load_rooms (std::ifstream & fp)
 
         pexit = new Exit();
         pexit->description = fread_string (fp);
-        pexit->keyword = fread_string (fp);
+        pexit->name = fread_string (fp);
         pexit->exit_info = 0;
         locks = fread_number (fp);
         pexit->key = fread_number (fp);

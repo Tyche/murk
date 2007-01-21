@@ -75,7 +75,8 @@ MURK_OBJ = $(MURK_SRC:.cpp=.o)
 MURK_HDR = os.hpp config.hpp descriptor.hpp character.hpp pcdata.hpp utils.hpp \
 	globals.hpp object.hpp note.hpp room.hpp area.hpp mobproto.hpp \
 	objproto.hpp affect.hpp exit.hpp extra.hpp ban.hpp shop.hpp reset.hpp \
-	io.hpp symbols.hpp database.hpp spell_list.hpp cmd_list.hpp
+	io.hpp symbols.hpp database.hpp spell_list.hpp cmd_list.hpp \
+	baseobject.hpp 
 
 OBJDEPENDS = $(MURK_OBJ) $(MURK_UTIL_OBJ)
 

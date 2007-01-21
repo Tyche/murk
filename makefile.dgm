@@ -64,7 +64,8 @@ MURK_OBJ = murk.obj os.obj descriptor.obj utils.obj commands.obj io.obj \
 MURK_HDR = os.hpp config.hpp descriptor.hpp character.hpp pcdata.hpp utils.hpp \
 	globals.hpp object.hpp note.hpp room.hpp area.hpp mobproto.hpp \
 	objproto.hpp affect.hpp exit.hpp extra.hpp ban.hpp shop.hpp reset.hpp \
-	io.hpp symbols.hpp database.hpp spell_list.hpp cmd_list.hpp
+	io.hpp symbols.hpp database.hpp spell_list.hpp cmd_list.hpp \
+	baseobject.hpp 
 
 
 # Data files Areas, Mobprogs and Players

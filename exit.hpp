@@ -31,18 +31,18 @@
 #ifndef EXIT_HPP
 #define EXIT_HPP
 
+#include "baseobject.hpp"
+
 /*
  * Exit data.
  */
-class Exit {
+class Exit : public BaseObject {
 public:
   static int top_exit;
   Room *to_room;
   sh_int vnum;
   sh_int exit_info;
   sh_int key;
-  std::string keyword;
-  std::string description;
 
   Exit();
 };

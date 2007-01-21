@@ -69,7 +69,8 @@ MURK_OBJ = $(MURK_SRC:.cpp=.obj)
 MURK_HDR = os.hpp config.hpp descriptor.hpp character.hpp pcdata.hpp utils.hpp \
 	globals.hpp object.hpp note.hpp room.hpp area.hpp mobproto.hpp \
 	objproto.hpp affect.hpp exit.hpp extra.hpp ban.hpp shop.hpp reset.hpp \
-	io.hpp symbols.hpp database.hpp spell_list.hpp cmd_list.hpp
+	io.hpp symbols.hpp database.hpp spell_list.hpp cmd_list.hpp \
+	baseobject.hpp 
 
 # Data files Areas, Mobprogs and Players
 DATAFILES = area.lst limbo.are mid_cit.prg midgaard.are school.are help.are \

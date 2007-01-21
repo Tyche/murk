@@ -60,7 +60,7 @@ Character * MobPrototype::create_mobile ()
 
   mob->pIndexData = this;
 
-  mob->name = player_name;
+  mob->name = name;
   mob->short_descr = short_descr;
   mob->long_descr = long_descr;
   mob->description = description;

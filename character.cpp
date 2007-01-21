@@ -131,14 +131,12 @@ void Character::append_file (char *file, const std::string & str)
   if (is_npc () || str.empty())
     return;
 
-  char hdr[MAX_STRING_LENGTH];
-  snprintf(hdr, sizeof hdr, "[%5d]", in_room ? in_room->vnum : 0);
-
   std::ofstream outfile;
 
   outfile.open (file, std::ofstream::out | std::ofstream::app | std::ofstream::binary);
   if (outfile.is_open()) {
-    outfile << hdr << " " << name << ": " << str << std::endl;
+    outfile << "[" << std::setw(5) << (in_room ? in_room->vnum : 0) <<
+      "] " << name << ": " << str << std::endl;
     outfile.close();
   } else {
     perror (file);
@@ -1768,7 +1766,7 @@ int Character::find_door (const std::string & arg)
     for (door = 0; door <= 5; door++) {
       if ((pexit = in_room->exit[door]) != NULL
         && IS_SET (pexit->exit_info, EX_ISDOOR)
-        && !pexit->keyword.empty() && is_name (arg, pexit->keyword))
+        && !pexit->name.empty() && is_name (arg, pexit->name))
         return door;
     }
     act ("I see no $T here.", NULL, arg.c_str(), TO_CHAR);
@@ -2425,7 +2423,7 @@ void Character::move_char (int door)
 
   if (IS_SET (pexit->exit_info, EX_CLOSED)
     && !is_affected (AFF_PASS_DOOR)) {
-    act ("The $d is closed.", NULL, pexit->keyword.c_str(), TO_CHAR);
+    act ("The $d is closed.", NULL, pexit->name.c_str(), TO_CHAR);
     return;
   }
 

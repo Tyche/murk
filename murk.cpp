@@ -6654,7 +6654,7 @@ bool check_parse_name (const std::string & name)
    */
   std::map<int,MobPrototype*>::iterator pmob;
   for (pmob = mob_table.begin(); pmob != mob_table.end(); pmob++) {
-    if (is_name (name, (*pmob).second->player_name))
+    if (is_name (name, (*pmob).second->name))
       return false;
   }
 

@@ -31,19 +31,18 @@
 #ifndef MOBPROTO_HPP
 #define MOBPROTO_HPP
 
+#include "baseobject.hpp"
+
 /*
  * Prototype for a mob.
  * This is the in-memory version of #MOBILES.
  */
-class MobPrototype {
+class MobPrototype : public BaseObject {
 public:
   static int top_mob;
   SPEC_FUN *spec_fun;
   Shop *pShop;
-  std::string player_name;
-  std::string short_descr;
   std::string long_descr;
-  std::string description;
   sh_int vnum;
   int count;
   int killed;

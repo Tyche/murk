@@ -31,17 +31,16 @@
 #ifndef OBJPROTO_HPP
 #define OBJPROTO_HPP
 
+#include "baseobject.hpp"
+
 /*
  * Prototype for an object.
  */
-class ObjectPrototype {
+class ObjectPrototype : public BaseObject {
 public:
   static int top_obj;
   std::list<ExtraDescription *> extra_descr;
   std::list<Affect *> affected;
-  std::string name;
-  std::string short_descr;
-  std::string description;
   sh_int vnum;
   sh_int item_type;
   sh_int extra_flags;

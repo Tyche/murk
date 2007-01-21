@@ -1540,11 +1540,11 @@ void Character::do_look (std::string argument)
   else
     send_to_char ("Nothing special there.\r\n");
 
-  if (!pexit->keyword.empty() && pexit->keyword[0] != ' ') {
+  if (!pexit->name.empty() && pexit->name[0] != ' ') {
     if (IS_SET (pexit->exit_info, EX_CLOSED)) {
-      act ("The $d is closed.", NULL, pexit->keyword.c_str(), TO_CHAR);
+      act ("The $d is closed.", NULL, pexit->name.c_str(), TO_CHAR);
     } else if (IS_SET (pexit->exit_info, EX_ISDOOR)) {
-      act ("The $d is open.", NULL, pexit->keyword.c_str(), TO_CHAR);
+      act ("The $d is open.", NULL, pexit->name.c_str(), TO_CHAR);
     }
   }
 
@@ -3055,7 +3055,7 @@ void Character::do_open (std::string argument)
     }
 
     REMOVE_BIT (pexit->exit_info, EX_CLOSED);
-    act ("$n opens the $d.", NULL, pexit->keyword.c_str(), TO_ROOM);
+    act ("$n opens the $d.", NULL, pexit->name.c_str(), TO_ROOM);
     send_to_char ("Ok.\r\n");
 
     /* open the other side */
@@ -3066,7 +3066,7 @@ void Character::do_open (std::string argument)
       REMOVE_BIT (pexit_rev->exit_info, EX_CLOSED);
       CharIter rch;
       for (rch = to_room->people.begin(); rch != to_room->people.end(); rch++)
-        (*rch)->act ("The $d opens.", NULL, pexit_rev->keyword.c_str(), TO_CHAR);
+        (*rch)->act ("The $d opens.", NULL, pexit_rev->name.c_str(), TO_CHAR);
     }
   }
 
@@ -3120,7 +3120,7 @@ void Character::do_close (std::string argument)
     }
 
     SET_BIT (pexit->exit_info, EX_CLOSED);
-    act ("$n closes the $d.", NULL, pexit->keyword.c_str(), TO_ROOM);
+    act ("$n closes the $d.", NULL, pexit->name.c_str(), TO_ROOM);
     send_to_char ("Ok.\r\n");
 
     /* close the other side */
@@ -3131,7 +3131,7 @@ void Character::do_close (std::string argument)
       SET_BIT (pexit_rev->exit_info, EX_CLOSED);
       CharIter rch;
       for (rch = to_room->people.begin(); rch != to_room->people.end(); rch++)
-        (*rch)->act ("The $d closes.", NULL, pexit_rev->keyword.c_str(), TO_CHAR);
+        (*rch)->act ("The $d closes.", NULL, pexit_rev->name.c_str(), TO_CHAR);
     }
   }
 
@@ -3206,7 +3206,7 @@ void Character::do_lock (std::string argument)
 
     SET_BIT (pexit->exit_info, EX_LOCKED);
     send_to_char ("*Click*\r\n");
-    act ("$n locks the $d.", NULL, pexit->keyword.c_str(), TO_ROOM);
+    act ("$n locks the $d.", NULL, pexit->name.c_str(), TO_ROOM);
 
     /* lock the other side */
     if ((to_room = pexit->to_room) != NULL
@@ -3287,7 +3287,7 @@ void Character::do_unlock (std::string argument)
 
     REMOVE_BIT (pexit->exit_info, EX_LOCKED);
     send_to_char ("*Click*\r\n");
-    act ("$n unlocks the $d.", NULL, pexit->keyword.c_str(), TO_ROOM);
+    act ("$n unlocks the $d.", NULL, pexit->name.c_str(), TO_ROOM);
 
     /* unlock the other side */
     if ((to_room = pexit->to_room) != NULL
@@ -3384,7 +3384,7 @@ void Character::do_pick (std::string argument)
 
     REMOVE_BIT (pexit->exit_info, EX_LOCKED);
     send_to_char ("*Click*\r\n");
-    act ("$n picks the $d.", NULL, pexit->keyword.c_str(), TO_ROOM);
+    act ("$n picks the $d.", NULL, pexit->name.c_str(), TO_ROOM);
 
     /* pick the other side */
     if ((to_room = pexit->to_room) != NULL
@@ -5469,7 +5469,7 @@ void Character::do_rstat (std::string argument)
         pexit->to_room != NULL ? pexit->to_room->vnum : 0,
         pexit->key,
         pexit->exit_info,
-        pexit->keyword.c_str(),
+        pexit->name.c_str(),
         !pexit->description.empty() ? pexit->description.c_str() : "(none).\r\n");
       buf1.append(buf);
     }
@@ -5697,7 +5697,7 @@ void Character::do_mfind (std::string argument)
   for (int vn = 0; nMatch < MobPrototype::top_mob; vn++) {
     if ((pMobIndex = get_mob_index (vn)) != NULL) {
       nMatch++;
-      if (fAll || is_name (arg, pMobIndex->player_name)) {
+      if (fAll || is_name (arg, pMobIndex->name)) {
         found = true;
         snprintf (buf, sizeof buf, "[%5d] %s\r\n",
           pMobIndex->vnum, capitalize (pMobIndex->short_descr).c_str());

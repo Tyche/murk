@@ -31,10 +31,12 @@
 #ifndef OBJECT_HPP
 #define OBJECT_HPP
 
+#include "baseobject.hpp"
+
 /*
  * One object.
  */
-class Object {
+class Object : public BaseObject {
 public:
   std::list<Object *> contains;
   Object *in_obj;
@@ -43,9 +45,6 @@ public:
   std::list<Affect *> affected;
   ObjectPrototype *pIndexData;
   Room *in_room;
-  std::string name;
-  std::string short_descr;
-  std::string description;
   sh_int item_type;
   sh_int extra_flags;
   sh_int wear_flags;
