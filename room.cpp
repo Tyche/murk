@@ -32,6 +32,7 @@
 #include "config.hpp"
 #include "globals.hpp"
 #include "room.hpp"
+#include "world.hpp"
 
 int Room::top_room = 0;
 
@@ -71,7 +72,7 @@ bool Room::is_dark ()
   if (sector_type == SECT_INSIDE || sector_type == SECT_CITY)
     return false;
 
-  if (weather_info.sunlight == SUN_SET || weather_info.sunlight == SUN_DARK)
+  if (g_world->is_dark())
     return true;
 
   return false;

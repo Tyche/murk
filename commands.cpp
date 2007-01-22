@@ -49,6 +49,7 @@
 #include "reset.hpp"
 #include "note.hpp"
 #include "database.hpp"
+#include "world.hpp"
 
 // Temp externs
 extern Room *find_location (Character * ch, const std::string & arg);
@@ -79,23 +80,7 @@ extern void disarm (Character * ch, Character * victim);
 
 void Character::do_areas (std::string argument)
 {
-  char buf[MAX_STRING_LENGTH];
-  std::list<Area *>::iterator pArea1;
-  std::list<Area *>::iterator pArea2;
-  int iArea;
-  int iAreaHalf;
-
-  iAreaHalf = (Area::top_area + 1) / 2;
-  pArea1 = pArea2 = area_list.begin();
-
-  for (iArea = 0; iArea < iAreaHalf; iArea++, pArea2++);
-
-  for (iArea = 0; iArea < iAreaHalf; iArea++, pArea1++, pArea2++) {
-    snprintf (buf, sizeof buf, "%-39s%-39s\r\n",
-      (*pArea1)->name.c_str(), (pArea2 != area_list.end()) ? (*pArea2)->name.c_str() : "");
-    send_to_char (buf);
-  }
-
+  send_to_char (g_world->list_areas());
   return;
 }
 
@@ -779,8 +764,6 @@ void Character::do_note (std::string argument)
   }
 
   if (!str_cmp (arg, "post") || !str_prefix (arg, "send")) {
-    char *strtime;
-
     if (pnote == NULL) {
       send_to_char ("You have no note in progress.\r\n");
       return;
@@ -797,10 +780,8 @@ void Character::do_note (std::string argument)
       return;
     }
 
-    strtime = ctime (&current_time);
-    strtime[strlen (strtime) - 1] = '\0';
-    pnote->date = strtime;
-    pnote->date_stamp = current_time;
+    pnote->date = g_world->get_time_text();
+    pnote->date_stamp = g_world->get_current_time();
 
     note_list.push_back(pnote);
 
@@ -1795,29 +1776,11 @@ void Character::do_score (std::string argument)
 
 void Character::do_time (std::string argument)
 {
-  char *suf;
-
-  int day = time_info.day + 1;
-
-  if (day > 4 && day < 20)
-    suf = "th";
-  else if (day % 10 == 1)
-    suf = "st";
-  else if (day % 10 == 2)
-    suf = "nd";
-  else if (day % 10 == 3)
-    suf = "rd";
-  else
-    suf = "th";
-
   char buf[MAX_STRING_LENGTH];
+  std::string wt = g_world->world_time();
   snprintf (buf, sizeof buf,
-    "It is %d o'clock %s, Day of %s, %d%s the Month of %s.\r\nMerc started up at %s\rThe system time is %s\r",
-    (time_info.hour % 12 == 0) ? 12 : time_info.hour % 12,
-    time_info.hour >= 12 ? "pm" : "am",
-    day_name[day % 7].c_str(),
-    day, suf,
-    month_name[time_info.month].c_str(), str_boot_time.c_str(), (char *) ctime (&current_time)
+    "%sMerc started up at %s\r\nThe system time is %s\r\n",  wt.c_str(),
+    str_boot_time.c_str(), g_world->get_time_text()
     );
 
   send_to_char (buf);
@@ -1826,42 +1789,26 @@ void Character::do_time (std::string argument)
 
 void Character::do_weather (std::string argument)
 {
-  static char *const sky_look[4] = {
-    "cloudless",
-    "cloudy",
-    "rainy",
-    "lit by flashes of lightning"
-  };
-
   if (!is_outside()) {
     send_to_char ("You can't see the weather indoors.\r\n");
     return;
   }
 
-  std::string buf;
-
-  buf.append("The sky is ");
-  buf.append(sky_look[weather_info.sky]);
-  buf.append(" and ");
-  buf.append(weather_info.change >= 0 ? "a warm southerly breeze blows" :
-    "a cold northern gust blows");
-  buf.append(".\r\n");
-  send_to_char (buf);
+  send_to_char (g_world->world_weather());
   return;
 }
 
 void Character::do_help (std::string argument)
 {
   sqlite3_stmt *stmt = NULL;
-  Database* db = Database::instance();
 
   if (argument.empty())
     argument = "summary";
 
   char *sql = sqlite3_mprintf("SELECT level, keyword, text FROM helps WHERE level <= %d", level);
 
-  if (sqlite3_prepare(db->database, sql, -1, &stmt, 0) != SQLITE_OK) {
-    bug_printf("Could not prepare statement: '%s' Error: %s", sql, sqlite3_errmsg(db->database));
+  if (sqlite3_prepare(g_db->database, sql, -1, &stmt, 0) != SQLITE_OK) {
+    bug_printf("Could not prepare statement: '%s' Error: %s", sql, sqlite3_errmsg(g_db->database));
     sqlite3_free(sql);
     return;
   }
@@ -2548,12 +2495,11 @@ void Character::do_socials (std::string argument)
   char buf[MAX_STRING_LENGTH];
   int col = 0;
   sqlite3_stmt *stmt = NULL;
-  Database* db = Database::instance();
 
-  if (sqlite3_prepare(db->database,
+  if (sqlite3_prepare(g_db->database,
       "SELECT name FROM socials ORDER BY name ASC",
       -1, &stmt, 0) != SQLITE_OK) {
-    bug_printf("Could not prepare statement: %s", sqlite3_errmsg(db->database));
+    bug_printf("Could not prepare statement: %s", sqlite3_errmsg(g_db->database));
     return;
   }
 

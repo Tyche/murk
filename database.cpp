@@ -46,6 +46,7 @@
 #include "object.hpp"
 #include "mobproto.hpp"
 #include "extra.hpp"
+#include "world.hpp"
 
 Database* Database::_instance = 0;
 
@@ -89,50 +90,6 @@ void Database::boot(void) {
    * Seed random number generator.
    */
   OS_SRAND (time (NULL));
-
-  /*
-   * Set time and weather.
-   */
-  {
-    long lhour, lday, lmonth;
-
-    lhour = (current_time - 650336715)
-      / (PULSE_TICK / PULSE_PER_SECOND);
-    time_info.hour = lhour % 24;
-    lday = lhour / 24;
-    time_info.day = lday % 35;
-    lmonth = lday / 35;
-    time_info.month = lmonth % 17;
-    time_info.year = lmonth / 17;
-
-    if (time_info.hour < 5)
-      weather_info.sunlight = SUN_DARK;
-    else if (time_info.hour < 6)
-      weather_info.sunlight = SUN_RISE;
-    else if (time_info.hour < 19)
-      weather_info.sunlight = SUN_LIGHT;
-    else if (time_info.hour < 20)
-      weather_info.sunlight = SUN_SET;
-    else
-      weather_info.sunlight = SUN_DARK;
-
-    weather_info.change = 0;
-    weather_info.mmhg = 960;
-    if (time_info.month >= 7 && time_info.month <= 12)
-      weather_info.mmhg += number_range (1, 50);
-    else
-      weather_info.mmhg += number_range (1, 80);
-
-    if (weather_info.mmhg <= 980)
-      weather_info.sky = SKY_LIGHTNING;
-    else if (weather_info.mmhg <= 1000)
-      weather_info.sky = SKY_RAINING;
-    else if (weather_info.mmhg <= 1020)
-      weather_info.sky = SKY_CLOUDY;
-    else
-      weather_info.sky = SKY_CLOUDLESS;
-
-  }
 
   // Set welcome screen
   load_greeting();
@@ -204,7 +161,6 @@ void Database::boot(void) {
    */
   fix_exits ();
   fBootDb = false;
-  area_update ();
   load_notes ();
   MOBtrigger = true;
 
@@ -213,13 +169,9 @@ void Database::boot(void) {
 
 void Database::load_area (std::ifstream & fp)
 {
-  Area *pArea;
-
-  pArea = new Area();
+  Area *pArea = new Area();
   pArea->name = fread_string (fp);
-  pArea->age = 15;
-  pArea->nplayer = 0;
-  area_list.push_back(pArea);
+  g_world->add_area(pArea);
   area_last = pArea;
   return;
 }

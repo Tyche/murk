@@ -38,6 +38,7 @@
 #include "affect.hpp"
 #include "objproto.hpp"
 #include "mobproto.hpp"
+#include "world.hpp"
 
 // temp externs
 extern void damage(Character *ch, Character *victim, int dam, int dt);
@@ -152,7 +153,7 @@ void Character::spell_call_lightning (int sn, int lvl, void *vo)
     return;
   }
 
-  if (weather_info.sky < SKY_RAINING) {
+  if (!g_world->is_raining()) {
     send_to_char ("You need bad weather.\r\n");
     return;
   }
@@ -319,13 +320,15 @@ void Character::spell_continual_light (int sn, int lvl, void *vo)
 
 void Character::spell_control_weather (int sn, int lvl, void *vo)
 {
+  int change = dice (lvl / 3, 4);
   if (!str_cmp (target_name, "better"))
-    weather_info.change += dice (lvl / 3, 4);
+    change *= 1;
   else if (!str_cmp (target_name, "worse"))
-    weather_info.change -= dice (lvl / 3, 4);
+    change *= -1;
   else
     send_to_char ("Do you want it to get better or worse?\r\n");
 
+  g_world->change_weather(change);
   send_to_char ("Ok.\r\n");
   return;
 }
@@ -364,7 +367,7 @@ void Character::spell_create_water (int sn, int lvl, void *vo)
     return;
   }
 
-  int water = std::min (lvl * (weather_info.sky >= SKY_RAINING ? 4 : 2),
+  int water = std::min (lvl * (g_world->is_raining() ? 4 : 2),
     obj->value[0] - obj->value[1]
     );
 

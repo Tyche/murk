@@ -32,22 +32,22 @@
 #include "config.hpp"
 #include "globals.hpp"
 #include "database.hpp"
+#include "world.hpp"
 
 /*
 print a series of warnings - do not exit
 */
 void log_printf (const char * str, ...) {
   char buf[MAX_STRING_LENGTH];
-  char *strtime;
   va_list args;
-
-  strtime = ctime (&current_time);
-  strtime[strlen (strtime) - 1] = '\0';
 
   va_start (args, str);
   vsnprintf (buf, sizeof buf, str, args);
   va_end (args);
 
+  time_t tm = time(NULL);
+  char * strtime = ctime (&tm);
+  strtime[strlen (strtime) - 1] = '\0';
   std::cerr << strtime << " :: " << buf << std::endl;
   return;
 }
@@ -111,7 +111,7 @@ void fatal_printf (const char * str, ...)
   va_end (args);
   bug_printf (buf);
   WIN32CLEANUP
-//  Database::instance()->shutdown();
+//  g_db->shutdown();
   abort();
   return;
 }

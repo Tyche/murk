@@ -44,6 +44,7 @@
 #include "area.hpp"
 #include "exit.hpp"
 #include "database.hpp"
+#include "world.hpp"
 
 // temp globals
 extern void multi_hit(Character *ch, Character *victim, int dt);
@@ -64,12 +65,13 @@ Character::Character() :
   reply(NULL), spec_fun(NULL), pIndexData(NULL), desc(NULL),
   pnote(NULL), in_room(NULL), was_in_room(NULL),
   pcdata(NULL), sex(0), klass(0), race(0), level(0), trust(0), wizbit(false),
-  played(0), logon(current_time), save_time(0), last_note(0), timer(0),
+  played(0), save_time(0), last_note(0), timer(0),
   wait(0), hit(20), max_hit(20), mana(100), max_mana(100), move(100),
   max_move(100), gold(0), exp(0), actflags(0), affected_by(0),
   position(POS_STANDING), practice(21), carry_weight(0), carry_number(0),
   saving_throw(0), alignment(0), hitroll(0), damroll(0), armor(100),
   wimpy(0), deaf(0), mpact(NULL), mpactnum(0) {
+  logon = g_world->get_current_time();
 }
 
 /*
@@ -485,7 +487,7 @@ int Character::get_curr_con() {
  * Retrieve a character's age.
  */
 int Character::get_age() {
-  return 17 + (played + (int) (current_time - logon)) / 14400;
+  return 17 + (played + (int) (g_world->get_current_time() - logon)) / 14400;
   /* 12240 assumes 30 second hours, 24 hours a day, 20 day - Kahn */
 }
 
@@ -992,7 +994,7 @@ void Character::fwrite_char (std::ofstream & fp)
   fp << "Level        " << level << "\n";
   fp << "Trust        " << trust << "\n";
   fp << "Wizbit       " << wizbit << "\n";
-  fp << "Played       " << played + (int) (current_time - logon) << "\n";
+  fp << "Played       " << played + (int) (g_world->get_current_time() - logon) << "\n";
   fp << "Note         " << last_note << "\n";
   fp << "Room         " <<
     ((in_room == get_room_index (ROOM_VNUM_LIMBO)
@@ -1076,7 +1078,7 @@ void Character::save_char_obj ()
   if (desc != NULL && desc->original != NULL)
     ch = desc->original;
 
-  ch->save_time = current_time;
+  ch->save_time = g_world->get_current_time();
 
   /* player files parsed directories by Yaz 4th Realm */
   snprintf (strsave, sizeof strsave, "%s%s", PLAYER_DIR, capitalize(ch->name).c_str());
@@ -2531,10 +2533,9 @@ bool Character::check_social (const std::string & command, const std::string & a
     "SELECT name, char_no_arg, others_no_arg, char_found, others_found, vict_found, char_auto, others_auto FROM socials WHERE NAME LIKE '%q%%'",
     command.c_str());
   sqlite3_stmt *stmt = NULL;
-  Database* db = Database::instance();
 
-  if (sqlite3_prepare(db->database, sql, -1, &stmt, 0) != SQLITE_OK) {
-    bug_printf("Could not prepare statement: '%s' Error: %s", sql, sqlite3_errmsg(db->database));
+  if (sqlite3_prepare(g_db->database, sql, -1, &stmt, 0) != SQLITE_OK) {
+    bug_printf("Could not prepare statement: '%s' Error: %s", sql, sqlite3_errmsg(g_db->database));
     sqlite3_free(sql);
     return false;
   }

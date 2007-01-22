@@ -10,10 +10,10 @@ Race         0
 Level        40
 Trust        0
 Wizbit       1
-Played       8358
+Played       8784
 Note         1146299794
-Room         3001
-HpManaMove   242 302 232 232 239 490
+Room         3014
+HpManaMove   302 302 232 232 490 490
 Gold         100000
 Exp          40000
 Act          1600
@@ -36,8 +36,8 @@ AttrMod      0 0 0 0 0
 Condition    0 45 48
 Pagelen      40
 Skill        95'fireball'
-Affect 3 43 4 18 0
-Affect 3 43 -4 24 0
+Affect 3 27 4 18 0
+Affect 3 27 -4 24 0
 End
 
 #END

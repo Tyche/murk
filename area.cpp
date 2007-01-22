@@ -45,7 +45,7 @@
 int Area::top_area = 0;
 
 Area::Area() :
-  age(0), nplayer(0) {
+  age(15), nplayer(0) {
   top_area++;
 }
 

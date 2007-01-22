@@ -32,7 +32,8 @@
 #define GLOBALS_HPP
 
 // Global variables
-extern std::list<Area *> area_list;
+extern World *g_world;
+extern Database *g_db;
 extern Area *area_last;
 extern std::list<Ban *> ban_list;
 extern std::list<Character *> char_list;
@@ -57,10 +58,6 @@ extern struct skill_type skill_table[MAX_SKILL];
 extern struct class_type class_table[CLASS_MAX];
 extern struct liq_type liq_table[LIQ_MAX];
 extern std::string where_name[];
-extern std::string month_name[];
-extern std::string day_name[];
-extern struct time_info_data time_info;
-extern struct weather_data weather_info;
 extern struct kill_data kill_table[];
 
 extern struct int_app_type int_app[26];
@@ -72,7 +69,6 @@ extern struct wis_app_type wis_app[26];
 extern bool merc_down;
 extern bool wizlock;
 extern std::string str_boot_time;
-extern time_t current_time;            /* Time of this pulse       */
 extern std::string help_greeting;
 extern bool MOBtrigger;
 extern std::ifstream * fpArea;
@@ -88,7 +84,6 @@ extern ObjectPrototype *get_obj_index (int vnum);
 extern Room *get_room_index (int vnum);
 extern MobPrototype *get_mob_index (int vnum);
 extern int skill_lookup (const std::string & name);
-extern void area_update (void);
 extern void load_mobprogs (std::ifstream & fp);
 extern SPEC_FUN *spec_lookup (const std::string & name);
 extern void mprog_read_programs (std::ifstream & fp, MobPrototype *pMobIndex);

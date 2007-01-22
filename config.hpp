@@ -51,7 +51,8 @@ class Room;
 class Shop;
 class MobProgram;        /* MOBprogram */
 class MobProgramActList;        /* MOBprogram */
-
+class World;
+class Database;
 
 /*
  * Function types.
@@ -392,12 +393,6 @@ enum {POS_DEAD, POS_MORTAL, POS_INCAP, POS_STUNNED, POS_SLEEPING,
 #define BRIBE_PROG      1 << 10
 
 /*
- * Time and weather stuff.
- */
-enum {SUN_DARK, SUN_RISE, SUN_LIGHT, SUN_SET };
-enum {SKY_CLOUDLESS, SKY_CLOUDY, SKY_RAINING, SKY_LIGHTNING};
-
-/*
  * Liquids.
  */
 #define LIQ_WATER    0
@@ -495,20 +490,6 @@ struct liq_type {
   const char * liq_name;
   const char * liq_color;
   sh_int liq_affect[3];
-};
-
-struct time_info_data {
-  int hour;
-  int day;
-  int month;
-  int year;
-};
-
-struct weather_data {
-  int mmhg;
-  int change;
-  int sky;
-  int sunlight;
 };
 
 /*

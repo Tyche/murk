@@ -70,13 +70,13 @@ MURK_UTIL_OBJ = $(MURK_UTIL_SRC:.cpp=.o)
 MURK_SRC = murk.cpp os.cpp descriptor.cpp utils.cpp commands.cpp io.cpp \
 	room.cpp object.cpp character.cpp spells.cpp objproto.cpp mobproto.cpp \
 	affect.cpp exit.cpp area.cpp reset.cpp extra.cpp shop.cpp pcdata.cpp \
-	symbols.cpp database.cpp
+	symbols.cpp database.cpp world.cpp
 MURK_OBJ = $(MURK_SRC:.cpp=.o)
 MURK_HDR = os.hpp config.hpp descriptor.hpp character.hpp pcdata.hpp utils.hpp \
 	globals.hpp object.hpp note.hpp room.hpp area.hpp mobproto.hpp \
 	objproto.hpp affect.hpp exit.hpp extra.hpp ban.hpp shop.hpp reset.hpp \
 	io.hpp symbols.hpp database.hpp spell_list.hpp cmd_list.hpp \
-	baseobject.hpp 
+	baseobject.hpp world.hpp
 
 OBJDEPENDS = $(MURK_OBJ) $(MURK_UTIL_OBJ)
 

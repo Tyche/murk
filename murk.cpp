@@ -42,11 +42,13 @@
 #include "io.hpp"
 #include "database.hpp"
 #include "symbols.hpp"
+#include "world.hpp"
 
 /*
  * Globals.
  */
-std::list<Area *> area_list;
+World *g_world = NULL;
+Database *g_db = NULL;
 Area *area_last = NULL;
 std::list<Ban *> ban_list;
 std::list<Character *> char_list;
@@ -66,9 +68,6 @@ std::map<int, MobPrototype *> mob_table;
 std::map<int, ObjectPrototype *> obj_table;
 std::map<int, Room *> room_table;
 
-struct time_info_data time_info;
-struct weather_data weather_info;
-
 struct kill_data kill_table[MAX_LEVEL];
 
 /*
@@ -77,7 +76,6 @@ struct kill_data kill_table[MAX_LEVEL];
 bool merc_down;                 /* Shutdown         */
 bool wizlock;                   /* Game is wizlocked        */
 std::string str_boot_time;
-time_t current_time;            /* Time of this pulse       */
 std::string help_greeting;
 
 /*
@@ -101,18 +99,6 @@ std::string dir_name[] = {
 
 sh_int rev_dir[] = {
   2, 3, 0, 1, 5, 4
-};
-
-std::string day_name[] = {
-  "the Moon", "the Bull", "Deception", "Thunder", "Freedom",
-  "the Great Gods", "the Sun"
-};
-
-std::string month_name[] = {
-  "Winter", "the Winter Wolf", "the Frost Giant", "the Old Forces",
-  "the Grand Struggle", "the Spring", "Nature", "Futility", "the Dragon",
-  "the Sun", "the Heat", "the Battle", "the Dark Shades", "the Shadows",
-  "the Long Shadows", "the Ancient Darkness", "the Great Evil"
 };
 
 std::string where_name[] = {
@@ -197,7 +183,6 @@ struct con_app_type con_app[26] = {
 
 /*
  * Liquid properties.
- * Used in world.obj.
  */
 struct liq_type liq_table[LIQ_MAX] = {
   {"water", "clear", {0, 1, 10}},       /*  0 */
@@ -1057,7 +1042,7 @@ MobPrototype *get_mob_index (int vnum)
   if (pMobIndex != mob_table.end())
       return (*pMobIndex).second;
 
-  if (Database::instance()->fBootDb) {
+  if (g_db->fBootDb) {
     fatal_printf ("Get_mob_index: bad vnum %d.", vnum);
   }
 
@@ -1077,7 +1062,7 @@ ObjectPrototype *get_obj_index (int vnum)
   if (pObjIndex != obj_table.end())
       return (*pObjIndex).second;
 
-  if (Database::instance()->fBootDb) {
+  if (g_db->fBootDb) {
     fatal_printf ("Get_obj_index: bad vnum %d.", vnum);
   }
 
@@ -1097,7 +1082,7 @@ Room *get_room_index (int vnum)
   if (pRoomIndex != room_table.end())
       return (*pRoomIndex).second;
 
-  if (Database::instance()->fBootDb) {
+  if (g_db->fBootDb) {
     fatal_printf ("Get_room_index: bad vnum %d.", vnum);
   }
 
@@ -2880,52 +2865,6 @@ void mprog_wordlist_check (const std::string & arg, Character * mob,
 }
 
 /*
- * Repopulate areas periodically.
- */
-void area_update (void)
-{
-  Area *pArea;
-
-  std::list<Area*>::iterator a;
-  for (a = area_list.begin(); a != area_list.end(); a++) {
-    pArea = *a;
-
-    if (++pArea->age < 3)
-      continue;
-
-    /*
-     * Check for PC's.
-     */
-    if (pArea->nplayer > 0 && pArea->age == 15 - 1) {
-      CharIter c;
-      for (c = char_list.begin(); c != char_list.end(); c++) {
-        if (!(*c)->is_npc ()
-          && (*c)->is_awake ()
-          && (*c)->in_room != NULL && (*c)->in_room->area == pArea) {
-          (*c)->send_to_char ("You hear the patter of little feet.\r\n");
-        }
-      }
-    }
-
-    /*
-     * Check age and reset.
-     * Note: Mud School resets every 3 minutes (not 15).
-     */
-    if (pArea->nplayer == 0 || pArea->age >= 15) {
-      Room *pRoomIndex;
-
-      pArea->reset_area ();
-      pArea->age = number_range (0, 3);
-      pRoomIndex = get_room_index (ROOM_VNUM_SCHOOL);
-      if (pRoomIndex != NULL && pArea == pRoomIndex->area)
-        pArea->age = 15 - 3;
-    }
-  }
-
-  return;
-}
-
-/*
  * Mob autonomous action.
  * This function takes 25% to 35% of ALL Merc cpu time.
  * -- Furey
@@ -3038,111 +2977,7 @@ try {
  */
 void weather_update (void)
 {
-  std::string buf;
-  int diff;
-
-  switch (++time_info.hour) {
-  case 5:
-    weather_info.sunlight = SUN_LIGHT;
-    buf.append("The day has begun.\r\n");
-    break;
-
-  case 6:
-    weather_info.sunlight = SUN_RISE;
-    buf.append("The sun rises in the east.\r\n");
-    break;
-
-  case 19:
-    weather_info.sunlight = SUN_SET;
-    buf.append("The sun slowly disappears in the west.\r\n");
-    break;
-
-  case 20:
-    weather_info.sunlight = SUN_DARK;
-    buf.append("The night has begun.\r\n");
-    break;
-
-  case 24:
-    time_info.hour = 0;
-    time_info.day++;
-    break;
-  }
-
-  if (time_info.day >= 35) {
-    time_info.day = 0;
-    time_info.month++;
-  }
-
-  if (time_info.month >= 17) {
-    time_info.month = 0;
-    time_info.year++;
-  }
-
-  /*
-   * Weather change.
-   */
-  if (time_info.month >= 9 && time_info.month <= 16)
-    diff = weather_info.mmhg > 985 ? -2 : 2;
-  else
-    diff = weather_info.mmhg > 1015 ? -2 : 2;
-
-  weather_info.change += diff * dice (1, 4) + dice (2, 6) - dice (2, 6);
-  weather_info.change = std::max (weather_info.change, -12);
-  weather_info.change = std::min (weather_info.change, 12);
-
-  weather_info.mmhg += weather_info.change;
-  weather_info.mmhg = std::max (weather_info.mmhg, 960);
-  weather_info.mmhg = std::min (weather_info.mmhg, 1040);
-
-  switch (weather_info.sky) {
-  default:
-    bug_printf ("Weather_update: bad sky %d.", weather_info.sky);
-    weather_info.sky = SKY_CLOUDLESS;
-    break;
-
-  case SKY_CLOUDLESS:
-    if (weather_info.mmhg < 990
-      || (weather_info.mmhg < 1010 && number_percent() <= 25)) {
-      buf.append("The sky is getting cloudy.\r\n");
-      weather_info.sky = SKY_CLOUDY;
-    }
-    break;
-
-  case SKY_CLOUDY:
-    if (weather_info.mmhg < 970
-      || (weather_info.mmhg < 990 && number_percent() <= 25)) {
-      buf.append("It starts to rain.\r\n");
-      weather_info.sky = SKY_RAINING;
-    }
-
-    if (weather_info.mmhg > 1030 && number_percent() <= 25) {
-      buf.append("The clouds disappear.\r\n");
-      weather_info.sky = SKY_CLOUDLESS;
-    }
-    break;
-
-  case SKY_RAINING:
-    if (weather_info.mmhg < 970 && number_percent() <= 25) {
-      buf.append("Lightning flashes in the sky.\r\n");
-      weather_info.sky = SKY_LIGHTNING;
-    }
-
-    if (weather_info.mmhg > 1030
-      || (weather_info.mmhg > 1010 && number_percent() <= 25)) {
-      buf.append("The rain stopped.\r\n");
-      weather_info.sky = SKY_CLOUDY;
-    }
-    break;
-
-  case SKY_LIGHTNING:
-    if (weather_info.mmhg > 1010
-      || (weather_info.mmhg > 990 && number_percent() <= 25)) {
-      buf.append("The lightning has stopped.\r\n");
-      weather_info.sky = SKY_RAINING;
-      break;
-    }
-    break;
-  }
+  std::string buf = g_world->weather_update();
 
   if (!buf.empty()) {
     for (DescIter d = descriptor_list.begin();
@@ -3168,7 +3003,7 @@ void char_update (void)
   time_t save_time;
 
 try {
-  save_time = current_time;
+  save_time = g_world->get_current_time();
   ch_save = NULL;
   ch_quit = NULL;
   CharIter c;
@@ -3556,7 +3391,7 @@ void update_handler (void)
 try {
   if (--pulse_area <= 0) {
     pulse_area = number_range (PULSE_AREA / 2, 3 * PULSE_AREA / 2);
-    area_update ();
+    g_world->area_update ();
   }
 
   if (--pulse_violence <= 0) {
@@ -3624,12 +3459,12 @@ Character *find_keeper (Character * ch)
   /*
    * Shop hours.
    */
-  if (time_info.hour < pShop->open_hour) {
+  if (g_world->hour() < pShop->open_hour) {
     (*keeper)->do_say ("Sorry, come back later.");
     return NULL;
   }
 
-  if (time_info.hour > pShop->close_hour) {
+  if (g_world->hour() > pShop->close_hour) {
     (*keeper)->do_say ("Sorry, come back tomorrow.");
     return NULL;
   }
@@ -5590,13 +5425,13 @@ bool spec_mayor (Character * ch)
   static bool move;
 
   if (!move) {
-    if (time_info.hour == 6) {
+    if (g_world->hour() == 6) {
       path = open_path;
       move = true;
       pos = 0;
     }
 
-    if (time_info.hour == 20) {
+    if (g_world->hour() == 20) {
       path = close_path;
       move = true;
       pos = 0;
@@ -6447,7 +6282,7 @@ void game_loop (SOCKET control)
   signal (SIGPIPE, SIG_IGN);
 #endif
   gettimeofday (&last_time, NULL);
-  current_time = (time_t) last_time.tv_sec;
+  g_world->set_current_time(last_time.tv_sec);
 
   /* Main loop */
   while (!merc_down) {
@@ -6610,7 +6445,7 @@ void game_loop (SOCKET control)
     }
 
     gettimeofday (&last_time, NULL);
-    current_time = (time_t) last_time.tv_sec;
+    g_world->set_current_time(last_time.tv_sec);
   }
 
   return;
@@ -6706,15 +6541,12 @@ int init_server_socket (int port)
 
 int main (int argc, char **argv)
 {
-  struct timeval now_time;
-  Database* db = Database::instance();
+  g_world = World::instance();
+  g_db = Database::instance();
 
-  // Init time.
-  gettimeofday (&now_time, NULL);
-  current_time = (time_t) now_time.tv_sec;
-  str_boot_time = ctime (&current_time);
+  str_boot_time = g_world->get_time_text();
 
-  db->initialize("murk.db");
+  g_db->initialize("murk.db");
 
   // Get the port number.
   int port = 1234;
@@ -6730,7 +6562,9 @@ int main (int argc, char **argv)
 
   // Run the game.
   SOCKET control = init_server_socket (port);
-  db->boot();
+  g_db->boot();
+  g_world->area_update();
+
   log_printf ("Merc is ready to rock on port %d.", port);
   game_loop (control);
 
@@ -6738,6 +6572,6 @@ int main (int argc, char **argv)
   closesocket (control);
   log_printf ("Normal termination of game.");
   WIN32CLEANUP
-  db->shutdown();
+  g_db->shutdown();
   return 0;
 }

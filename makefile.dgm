@@ -56,16 +56,16 @@ MURK_UTIL_OBJ = loadhelps.obj
 MURK_SRC = murk.cpp os.cpp descriptor.cpp utils.cpp commands.cpp io.cpp \
 	room.cpp object.cpp character.cpp spells.cpp objproto.cpp mobproto.cpp \
 	affect.cpp exit.cpp area.cpp reset.cpp extra.cpp shop.cpp pcdata.cpp \
-	symbols.cpp database.cpp
+	symbols.cpp database.cpp world.cpp
 MURK_OBJ = murk.obj os.obj descriptor.obj utils.obj commands.obj io.obj \
 	room.obj object.obj character.obj spells.obj objproto.obj mobproto.obj \
 	affect.obj exit.obj area.obj reset.obj extra.obj shop.obj pcdata.obj \
-	symbols.obj database.obj
+	symbols.obj database.obj world.obj
 MURK_HDR = os.hpp config.hpp descriptor.hpp character.hpp pcdata.hpp utils.hpp \
 	globals.hpp object.hpp note.hpp room.hpp area.hpp mobproto.hpp \
 	objproto.hpp affect.hpp exit.hpp extra.hpp ban.hpp shop.hpp reset.hpp \
 	io.hpp symbols.hpp database.hpp spell_list.hpp cmd_list.hpp \
-	baseobject.hpp 
+	baseobject.hpp world.hpp
 
 
 # Data files Areas, Mobprogs and Players
@@ -98,7 +98,7 @@ $(SQLITE_PRG): $(SQLITE_PRG_OBJ) $(SQLITE_LIB)
 murk.exe: $(MURK_OBJ) $(SQLITE_LIB)
 	$(LD) $(LFLAGS) $**, $@,, $(LIBS)
 
-loadhelps.exe: $(MURK_UTIL_OBJ) io.obj utils.obj $(SQLITE_LIB) 
+loadhelps.exe: $(MURK_UTIL_OBJ) io.obj $(SQLITE_LIB) 
 	$(LD) $(LFLAGS) $**, $@,, $(LIBS) 
 
 database: $(SQLITE_PRG) loadhelps.exe
