@@ -9,7 +9,7 @@ Merc Diku Mud is a Diku Mud with many enhancements and contributions.
 Murk++ was compiled and tested on...
 
 * Microsoft Windows XP Service Pack 2 
-  CYGWIN_NT-5.1 1.5.21(0.156/4/2) using g++ (GCC) 3.4.4 (cygming special)
+  CYGWIN_NT-5.1 1.5.23(0.156/4/2) using g++ (GCC) 3.4.4 (cygming special)
   Borland C++ 5.5.1 for Win32 (free compiler release)
   Microsoft Visual C/C++ v7.1 (Visual C++ Toolkit 2003)
   Digital Mars Compiler Version 8.49c (with STLPort 4.5.3)
@@ -17,13 +17,37 @@ Murk++ was compiled and tested on...
 * FreeBSD 5.3-BETA4 
   g++ (GCC) version 3.4.2 [FreeBSD] 20040728
 
-* Debian Linux 2.6.8-1-38  
+* Debian Linux 2.4.27-2-386
   g++ (GCC) version 4.0.2 (Debian 4.0.2-2)
 
 * SuSE Linux 2.6.4-52
   g++ (GCC) 3.3.3 (SuSE Linux)
 
 === Release Information
+
+Version 1.5
+
+* Added macros and dual use include files for commands and spells.
+* Created singleton Database class and moved storage routines to it.
+* Removed gsn and slot references in skill table.
+* Converted slot references in area files to strings. 
+* Removed namespace in loadhelps for consistency.
+* Added SymbolTable class, a bidirectional mapping.
+* Added new source files to all makefiles.
+* Added startup script for bash shell and for windows cmd shell.
+* Fixed bug with instance database variable in Database.
+* Added compile defines to exclude uneccessary parts of Sqlite.
+* Refactored time, weather and area list to World class.
+* Added BaseObject as common root of several classes
+* Altered makefiles to omit TCL variable interface in SQLite
+
+Version 1.4
+
+* Migrated helps to database.
+* Refactored and split out classes into individual files.
+* Split out OS dependencies into os.hpp and os.cpp.
+* Fix makefile presumed existence of murk.db in database target.
+* Corrected many warnings for Borland compiler in murk.cpp
 
 Version 1.3
 
@@ -88,7 +112,7 @@ See license.crypt and license.murk++ for terms.
 First, group with your highest level Unix guru, and have him or her tank.
 Merc is easier to install than other muds, but every site is different.
 
-(1) Get the release murk++-rNN.tar.gz from the ftp site:
+(1) Get the release murk++-1.NrNN.tar.gz from the ftp site:
 
 	ftp:://sourcery.dyndns.org/pub/mud/murk++ 
 
