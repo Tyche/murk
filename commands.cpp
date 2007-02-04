@@ -5771,20 +5771,9 @@ void Character::do_mwhere (std::string argument)
   return;
 }
 
-void Character::do_reboo (std::string argument)
+void Character::do_hotboo (std::string argument)
 {
-  send_to_char ("If you want to REBOOT, spell it out.\r\n");
-  return;
-}
-
-void Character::do_reboot (std::string argument)
-{
-  std::string buf("Reboot by ");
-
-  buf.append(name);
-  buf.append(".\r\n");
-  do_echo (buf);
-  merc_down = true;
+  send_to_char ("If you want to HOTBOOT, spell it out.\r\n");
   return;
 }
 
