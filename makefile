@@ -106,6 +106,8 @@ $(SQLITE_PRG): $(SQLITE_PRG_OBJ) $(SQLITE_LIB)
 	$(CC) $(LFLAGS) -o $@ $^
 
 murk$(EXE): $(MURK_OBJ) $(SQLITE_LIB) 
+	@-rm murkold$(EXE)
+	@-mv murk$(EXE) murkold$(EXE)
 	$(CPP) $(LFLAGS) -o $@ $^ $(LIBS)
 
 loadhelps$(EXE): loadhelps.o io.o $(SQLITE_LIB) 

@@ -89,6 +89,8 @@ $(SQLITE_PRG): $(SQLITE_PRG_OBJ) $(SQLITE_LIB)
 	$(AR) -OUT:$@ $**
 
 murk.exe: $(MURK_OBJ) $(SQLITE_LIB)
+	@-del murkold.exe 
+	@-ren murk.exe murkold.exe 
 	$(LD) $** $(LIBS) /Fe$@ $(LFLAGS)
 
 loadhelps.exe: $(MURK_UTIL_OBJ) io.obj $(SQLITE_LIB) 
