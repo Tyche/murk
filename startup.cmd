@@ -17,6 +17,7 @@ rem Set the port number.
 set port=4000
 if not "%1"=="" set port=%1
 if exist shutdown.txt erase shutdown.txt
+if exist hotboot.$$$ erase hotboot.$$$
 
 :loop
     set /a index=1000
@@ -34,13 +35,18 @@ if exist shutdown.txt erase shutdown.txt
     echo Starting MURK on port %port% using log %logfile%
     >> %logfile% murk.exe %port% 2>&1 
 
-    rem Restart, giving old connections a chance to die.
+    if not exist hotboot.$$$ goto chkshut
+    erase hotboot.$$$
+    goto done
+    
+    :chkshut
     if not exist shutdown.txt goto sleep
     erase shutdown.txt
-    exit 0
+    goto done
 
     :sleep
     ping 1.1.1.1 -n 15 -w 1000 >NUL
 goto loop
 
+:done
 endlocal

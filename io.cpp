@@ -116,6 +116,18 @@ void fatal_printf (const char * str, ...)
   return;
 }
 
+#ifdef WIN32
+void win_errprint (const char * str)
+{
+  void* errmsg;
+  FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
+    FORMAT_MESSAGE_IGNORE_INSERTS, NULL, GetLastError(),
+    MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (char*) &errmsg, 0, NULL);
+  bug_printf ("%s : %s.", str, (char*) errmsg);
+  LocalFree(errmsg);
+}
+#endif
+
 /*
  * Read and allocate space for a string from a file.
  */

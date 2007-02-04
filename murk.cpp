@@ -77,6 +77,8 @@ bool merc_down;                 /* Shutdown         */
 bool wizlock;                   /* Game is wizlocked        */
 std::string str_boot_time;
 std::string help_greeting;
+short g_port;
+SOCKET g_listen;
 
 /*
  * The kludgy global is for spells who want more stuff from command line.
@@ -379,6 +381,8 @@ struct cmd_type cmd_table[] = {
   {"'", &Character::do_say, POS_RESTING, 0},
   {"shout", &Character::do_shout, POS_RESTING, 3},
   {"yell", &Character::do_yell, POS_RESTING, 0},
+  {"gag", &Character::do_gag, POS_DEAD, 0},
+  {"ignore", &Character::do_gag, POS_DEAD, 0},
 
   /*
    * Object manipulation commands.
@@ -453,6 +457,7 @@ struct cmd_type cmd_table[] = {
   {"deny", &Character::do_deny, POS_DEAD, L_SUP},
   {"disconnect", &Character::do_disconnect, POS_DEAD, L_SUP},
   {"freeze", &Character::do_freeze, POS_DEAD, L_SUP},
+  {"hotboot", &Character::do_hotboot, POS_DEAD, L_SUP},
   {"reboo", &Character::do_reboo, POS_DEAD, L_SUP},
   {"reboot", &Character::do_reboot, POS_DEAD, L_SUP},
   {"shutdow", &Character::do_shutdow, POS_DEAD, L_SUP},
@@ -487,7 +492,6 @@ struct cmd_type cmd_table[] = {
   {"echo", &Character::do_echo, POS_DEAD, L_ANG},
   {"goto", &Character::do_goto, POS_DEAD, L_ANG},
   {"holylight", &Character::do_holylight, POS_DEAD, L_ANG},
-  {"invis", &Character::do_invis, POS_DEAD, L_ANG},
   {"memory", &Character::do_memory, POS_DEAD, L_ANG},
   {"mfind", &Character::do_mfind, POS_DEAD, L_ANG},
   {"mstat", &Character::do_mstat, POS_DEAD, L_ANG},
@@ -817,25 +821,6 @@ struct skill_type skill_table[MAX_SKILL] = {
 ///////////////////
 
 /*
- * This function is here to aid in debugging.
- * If the last expression in a function is another function call,
- *   gcc likes to generate a JMP instead of a CALL.
- * This is called "tail chaining."
- * It hoses the debugger call stack for that call.
- * So I make this the last call in certain critical functions,
- *   where I really need the call stack to be right for debugging!
- *
- * If you don't understand this, then LEAVE IT ALONE.
- * Don't remove any calls to tail_chain anywhere.
- *
- * -- Furey
- */
-void tail_chain (void)
-{
-  return;
-}
-
-/*
  * Lowest level output function.
  * Write a block of text to the file descriptor.
  * If this gives errors on very long blocks (like 'ofind all'),
@@ -1087,71 +1072,6 @@ Room *get_room_index (int vnum)
   }
 
   return NULL;
-}
-
-/*
- * Load a char and inventory into a new ch structure.
- */
-bool Descriptor::load_char_obj (const std::string & name)
-{
-  Character* ch = new Character();
-  ch->pcdata = new PCData();
-  character = ch;
-  ch->desc = this;
-  ch->name = name;
-  ch->prompt = "<%hhp %mm %vmv> ";
-  ch->last_note = 0;
-  ch->actflags = PLR_BLANK | PLR_COMBINE | PLR_PROMPT;
-  ch->pcdata->condition[COND_THIRST] = 48;
-  ch->pcdata->condition[COND_FULL] = 48;
-
-  bool found = false;
-
-  char strsave[MAX_INPUT_LENGTH];
-  std::ifstream fp;
-
-  snprintf (strsave, sizeof strsave, "%s%s", PLAYER_DIR, capitalize (name).c_str());
-  fp.open (strsave, std::ifstream::in | std::ifstream::binary);
-  if (fp.is_open()) {
-    for (int iNest = 0; iNest < MAX_NEST; iNest++)
-      rgObjNest[iNest] = NULL;
-
-    found = true;
-    for (;;) {
-      char letter;
-      std::string word;
-
-      letter = fread_letter (fp);
-      if (letter == '*') {
-        fread_to_eol (fp);
-        continue;
-      }
-
-      if (letter != '#') {
-        bug_printf ("Load_char_obj: # not found.");
-        break;
-      }
-
-      word = fread_word (fp);
-      if (!str_cmp (word, "PLAYER"))
-        ch->fread_char (fp);
-      else if (!str_cmp (word, "OBJECT")) {
-        Object* obj = new Object;
-        if (!obj->fread_obj (ch, fp)) {
-          delete obj;
-          bug_printf ("fread_obj: bad object.");
-        }
-      } else if (!str_cmp (word, "END"))
-        break;
-      else {
-        bug_printf ("Load_char_obj: bad section.");
-        break;
-      }
-    }
-    fp.close();
-  }
-
-  return found;
 }
 
 std::string get_title (int klass, int level, int sex)
@@ -3412,7 +3332,6 @@ try {
   }
 
   aggr_update ();
-  tail_chain ();
 } catch (...) {
   fatal_printf("update_handler() exception");
 }
@@ -4336,7 +4255,6 @@ void damage (Character * ch, Character * victim, int dam, int dt)
     && victim->hit > 0 && victim->hit <= victim->wimpy && victim->wait == 0)
     victim->do_flee ("");
 
-  tail_chain ();
   return;
 }
 
@@ -4391,7 +4309,6 @@ void one_hit (Character * ch, Character * victim, int dt)
   if (diceroll == 0 || (diceroll != 19 && diceroll < thac0 - victim_ac)) {
     /* Miss. */
     damage (ch, victim, 0, dt);
-    tail_chain ();
     return;
   }
 
@@ -4426,7 +4343,6 @@ void one_hit (Character * ch, Character * victim, int dt)
     dam = 1;
 
   damage (ch, victim, dam, dt);
-  tail_chain ();
   return;
 }
 
@@ -6182,8 +6098,7 @@ void Character::do_mpforce (std::string argument)
   return;
 }
 
-
-void new_descriptor (SOCKET control)
+void new_descriptor (void)
 {
   char buf[MAX_STRING_LENGTH];
   Descriptor *dnew;
@@ -6198,8 +6113,8 @@ void new_descriptor (SOCKET control)
 #endif
 
   size = sizeof (sock);
-  getsockname (control, (struct sockaddr *) &sock, &size);
-  if ((desc = accept (control, (struct sockaddr *) &sock, &size)) == INVALID_SOCKET) {
+  getsockname (g_listen, (struct sockaddr *) &sock, &size);
+  if ((desc = accept (g_listen, (struct sockaddr *) &sock, &size)) == INVALID_SOCKET) {
     perror ("New_descriptor: accept");
     return;
   }
@@ -6220,27 +6135,7 @@ void new_descriptor (SOCKET control)
    * Cons a new descriptor.
    */
   dnew = new Descriptor(desc);
-
-  size = sizeof (sock);
-  if (getpeername (desc, (struct sockaddr *) &sock, &size) < 0) {
-    perror ("New_descriptor: getpeername");
-    dnew->host = "(unknown)";
-  } else {
-    /*
-     * Would be nice to use inet_ntoa here but it takes a struct arg,
-     * which ain't very compatible between gcc and system libraries.
-     */
-    int addr;
-
-    addr = ntohl (sock.sin_addr.s_addr);
-    snprintf (buf, sizeof buf, "%d.%d.%d.%d",
-      (addr >> 24) & 0xFF, (addr >> 16) & 0xFF,
-      (addr >> 8) & 0xFF, (addr) & 0xFF);
-    log_printf ("Sock.sinaddr:  %s", buf);
-    from = gethostbyaddr ((char *) &sock.sin_addr,
-      sizeof (sock.sin_addr), AF_INET);
-    dnew->host = from ? from->h_name : buf;
-  }
+  dnew->assign_hostname();
 
   /*
    * Swiftest: I added the following to ban sites.  I don't
@@ -6261,9 +6156,6 @@ void new_descriptor (SOCKET control)
     }
   }
 
-  /*
-   * Init descriptor data.
-   */
   descriptor_list.push_back(dnew);
 
   /*
@@ -6273,7 +6165,7 @@ void new_descriptor (SOCKET control)
   return;
 }
 
-void game_loop (SOCKET control)
+void game_loop (void)
 {
   static struct timeval null_time;
   struct timeval last_time;
@@ -6300,12 +6192,12 @@ void game_loop (SOCKET control)
     FD_ZERO (&in_set);
     FD_ZERO (&out_set);
     FD_ZERO (&exc_set);
-    FD_SET (control, &in_set);
+    FD_SET (g_listen, &in_set);
 #ifdef WIN32
     FD_ZERO (&dummy_set);
-    FD_SET (control, &dummy_set);
+    FD_SET (g_listen, &dummy_set);
 #endif
-    maxdesc = control;
+    maxdesc = g_listen;
     DescIter d;
     for (d = descriptor_list.begin(); d != descriptor_list.end(); d++) {
       maxdesc = std::max (maxdesc, (*d)->descriptor);
@@ -6321,8 +6213,8 @@ void game_loop (SOCKET control)
     /*
      * New connection?
      */
-    if (FD_ISSET (control, &in_set))
-      new_descriptor (control);
+    if (FD_ISSET (g_listen, &in_set))
+      new_descriptor ();
 
     /*
      * Kick out the freaky folks.
@@ -6496,7 +6388,7 @@ bool check_parse_name (const std::string & name)
   return true;
 }
 
-int init_server_socket (int port)
+int init_server_socket (void)
 {
   SOCKET fd;
 
@@ -6524,7 +6416,7 @@ int init_server_socket (int port)
   struct sockaddr_in sa;
   sa = sa_zero;
   sa.sin_family = AF_INET;
-  sa.sin_port = htons (port);
+  sa.sin_port = htons (g_port);
 
   if (bind (fd, (struct sockaddr *) &sa, sizeof (sa)) < 0) {
     closesocket (fd);
@@ -6539,6 +6431,106 @@ int init_server_socket (int port)
   return fd;
 }
 
+#ifdef WIN32
+void hotboot(void) {
+  WSAPROTOCOL_INFO proto_info;
+  int count_users = 0;
+  FILE* fp;
+  void* errmsg;
+
+  // Open events created by parent server
+  void * file_event = OpenEvent(SYNCHRONIZE, FALSE, "file_created");
+  if (file_event == NULL) {
+    win_errprint("Error opening event, file_created");
+    return;
+  }
+
+  void * shutdown_event = OpenEvent(EVENT_MODIFY_STATE, FALSE, "ok_to_shutdown");
+  if (shutdown_event == NULL) {
+    win_errprint("Error opening event, ok_to_shutdown");
+    CloseHandle(file_event);
+    return;
+  }
+
+  // Wait for parent server to build copyover file
+  if (WaitForSingleObject(file_event, INFINITE) == WAIT_FAILED) {
+    win_errprint("Error waiting on file_event");
+    CloseHandle(file_event);
+    CloseHandle(shutdown_event);
+    return;
+  }
+
+  if ((fp = fopen ("hotboot.$$$", "r+b")) == NULL) {
+    win_errprint("Error opening hotboot file");
+    CloseHandle(file_event);
+    CloseHandle(shutdown_event);
+    return;
+  }
+
+  fread(&count_users, sizeof(int),1,fp); // how many users?
+  // read in info about listening socket and build it
+  fread(&proto_info,sizeof(WSAPROTOCOL_INFO),1,fp);
+  g_listen = WSASocket(FROM_PROTOCOL_INFO, FROM_PROTOCOL_INFO, FROM_PROTOCOL_INFO,
+    &proto_info, 0, 0);
+  if (g_listen == INVALID_SOCKET) {
+    bug_printf ("Error opening listening socket : %d.", WSAGetLastError());
+  }
+
+  // read in info about users and build sockets for them
+  for (int i = 0; i < count_users; i++) {
+    char chname[25];
+    fread(&proto_info,sizeof(WSAPROTOCOL_INFO),1,fp);
+    fread(chname,sizeof(chname),1,fp);
+
+    SOCKET sock = WSASocket(FROM_PROTOCOL_INFO, FROM_PROTOCOL_INFO, FROM_PROTOCOL_INFO,
+      &proto_info, 0, 0);
+    if (sock == INVALID_SOCKET) {
+      bug_printf ("Error opening user socket : %d.", WSAGetLastError());
+      continue;
+    }
+    if (!write_to_descriptor (sock, "Returning from hotboot.\r\n", 0)) {
+      bug_printf ("Error writing user socket");
+      closesocket(sock);
+      continue;
+    }
+
+    Descriptor * d = new Descriptor(sock);
+    d->assign_hostname();
+    descriptor_list.push_back(d);
+    if (!d->load_char_obj (chname)) {
+      write_to_descriptor (sock, "Your character vanished during hotboot. Bye.\r\n", 0);
+      bug_printf ("Error loading character %s after hotboot", chname);
+      d->close_socket();
+      continue;
+    }
+    d->connected = CON_PLAYING;
+    char_list.push_back(d->character);
+
+    write_to_descriptor (sock, "Hotboot recovery complete.\r\n", 0);
+
+    if (!d->character->in_room)
+      d->character->in_room = get_room_index (ROOM_VNUM_TEMPLE);
+
+    d->character->char_to_room (d->character->in_room);
+    d->character->do_look("");
+    d->character->act ("$n materializes!", NULL, NULL, TO_ROOM);
+  }
+  fclose(fp);
+//  if (remove("hotboot.$$$")) {
+//    win_errprint("Error removing hotboot file");
+//  }
+
+  // tell parent its ok to go away
+  if (SetEvent(shutdown_event) == NULL) {
+    win_errprint("Error setting ok_to_shutdown event");
+  }
+
+  // cleanup event handles
+  CloseHandle(file_event);
+  CloseHandle(shutdown_event);
+}
+#endif
+
 int main (int argc, char **argv)
 {
   g_world = World::instance();
@@ -6549,11 +6541,11 @@ int main (int argc, char **argv)
   g_db->initialize("murk.db");
 
   // Get the port number.
-  int port = 1234;
+  g_port = 1234;
   if (argc > 1) {
     if (!is_number (argv[1])) {
       fatal_printf ("Usage: %s [port #]");
-    } else if ((port = atoi (argv[1])) <= 1024) {
+    } else if ((g_port = atoi (argv[1])) <= 1024) {
       fatal_printf("Port number must be above 1024.");
     }
   }
@@ -6561,15 +6553,22 @@ int main (int argc, char **argv)
   WIN32STARTUP
 
   // Run the game.
-  SOCKET control = init_server_socket (port);
+#ifdef WIN32
+  if (argc < 3) g_listen = init_server_socket();
   g_db->boot();
+  if (argc > 2) hotboot();
+#else
+  g_listen = init_server_socket();
+  g_db->boot();
+#endif
+
   g_world->area_update();
 
-  log_printf ("Merc is ready to rock on port %d.", port);
-  game_loop (control);
+  log_printf ("Merc is ready to rock on port %d.", g_port);
+  game_loop ();
 
   // Normal exit
-  closesocket (control);
+  closesocket (g_listen);
   log_printf ("Normal termination of game.");
   WIN32CLEANUP
   g_db->shutdown();

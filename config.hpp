@@ -355,7 +355,6 @@ enum {POS_DEAD, POS_MORTAL, POS_INCAP, POS_STUNNED, POS_SLEEPING,
 #define PLR_PROMPT      1 << 10
 #define PLR_TELNET_GA   1 << 11
 #define PLR_HOLYLIGHT   1 << 12
-#define PLR_WIZINVIS    1 << 13
 
 #define PLR_SILENCE     1 << 15
 #define PLR_NO_EMOTE    1 << 16

@@ -472,16 +472,14 @@ bool Descriptor::process_output (bool fPrompt)
 
 void Descriptor::close_socket ()
 {
-  Character *ch;
-
   if (!outbuf.empty())
     process_output(false);
 
-  if ((ch = character) != NULL) {
-    log_printf ("Closing link to %s.", ch->name.c_str());
+  if (character != NULL) {
+    log_printf ("Closing link to %s.", character->name.c_str());
     if (connected == CON_PLAYING) {
-      ch->act ("$n has lost $s link.", NULL, NULL, TO_ROOM);
-      ch->desc = NULL;
+      character->act ("$n has lost $s link.", NULL, NULL, TO_ROOM);
+      character->desc = NULL;
     } else {
       delete character;
     }
@@ -820,5 +818,95 @@ void Descriptor::nanny (std::string argument)
   }
 
   return;
+}
+
+void Descriptor::assign_hostname (void)
+{
+  struct sockaddr_in sock;
+  char buf[MAX_STRING_LENGTH];
+  struct hostent *from;
+#ifndef WIN32
+  socklen_t size = sizeof (sock);
+#else
+  int size = sizeof (sock);
+#endif
+
+  if (getpeername (descriptor, (struct sockaddr *) &sock, &size) < 0) {
+    perror ("New_descriptor: getpeername");
+    host = "(unknown)";
+  } else {
+    int addr = ntohl (sock.sin_addr.s_addr);
+    snprintf (buf, sizeof buf, "%d.%d.%d.%d", (addr >> 24) & 0xFF, (addr >> 16) & 0xFF,
+      (addr >> 8) & 0xFF, (addr) & 0xFF);
+    log_printf ("Sock.sinaddr:  %s", buf);
+    from = gethostbyaddr ((char *) &sock.sin_addr, sizeof (sock.sin_addr), AF_INET);
+    host = from ? from->h_name : buf;
+  }
+
+}
+
+/*
+ * Load a char and inventory into a new ch structure.
+ */
+bool Descriptor::load_char_obj (const std::string & name)
+{
+  Character* ch = new Character();
+  ch->pcdata = new PCData();
+  character = ch;
+  ch->desc = this;
+  ch->name = name;
+  ch->prompt = "<%hhp %mm %vmv> ";
+  ch->last_note = 0;
+  ch->actflags = PLR_BLANK | PLR_COMBINE | PLR_PROMPT;
+  ch->pcdata->condition[COND_THIRST] = 48;
+  ch->pcdata->condition[COND_FULL] = 48;
+
+  bool found = false;
+
+  char strsave[MAX_INPUT_LENGTH];
+  std::ifstream fp;
+
+  snprintf (strsave, sizeof strsave, "%s%s", PLAYER_DIR, capitalize (name).c_str());
+  fp.open (strsave, std::ifstream::in | std::ifstream::binary);
+  if (fp.is_open()) {
+    for (int iNest = 0; iNest < MAX_NEST; iNest++)
+      rgObjNest[iNest] = NULL;
+
+    found = true;
+    for (;;) {
+      char letter;
+      std::string word;
+
+      letter = fread_letter (fp);
+      if (letter == '*') {
+        fread_to_eol (fp);
+        continue;
+      }
+
+      if (letter != '#') {
+        bug_printf ("Load_char_obj: # not found.");
+        break;
+      }
+
+      word = fread_word (fp);
+      if (!str_cmp (word, "PLAYER"))
+        ch->fread_char (fp);
+      else if (!str_cmp (word, "OBJECT")) {
+        Object* obj = new Object;
+        if (!obj->fread_obj (ch, fp)) {
+          delete obj;
+          bug_printf ("fread_obj: bad object.");
+        }
+      } else if (!str_cmp (word, "END"))
+        break;
+      else {
+        bug_printf ("Load_char_obj: bad section.");
+        break;
+      }
+    }
+    fp.close();
+  }
+
+  return found;
 }
 

@@ -53,7 +53,6 @@ extern void mprog_act_trigger (const std::string & buf, Character * mob, Charact
 extern void mprog_entry_trigger (Character * mob);
 extern void mprog_greet_trigger (Character * mob);
 extern std::string get_title (int klass, int level, int sex);
-extern void tail_chain (void);
 
 sh_int movement_loss[SECT_MAX] = {
   1, 2, 2, 3, 4, 6, 4, 1, 6, 10, 6
@@ -154,11 +153,6 @@ bool Character::can_see (Character * victim)
 {
   if (this == victim)
     return true;
-
-  if (!victim->is_npc ()
-    && IS_SET (victim->actflags, PLR_WIZINVIS)
-    && get_trust () < victim->get_trust ())
-    return false;
 
   if (!is_npc () && IS_SET (actflags, PLR_HOLYLIGHT))
     return true;
@@ -268,6 +262,8 @@ void Character::act (const std::string & format, const void *arg1, const void *a
       continue;
     if (type == TO_NOTVICT && (*to == this || *to == vch))
       continue;
+    if (!is_npc() && (*to)->is_gagged(name))
+      continue;
 
     std::string buf;
 
@@ -359,7 +355,7 @@ void Character::act (const std::string & format, const void *arg1, const void *a
   return;
 }
 
-int Character::is_npc() {
+bool Character::is_npc() {
   return actflags & ACT_IS_NPC;
 }
 
@@ -1049,6 +1045,10 @@ void Character::fwrite_char (std::ofstream & fp)
           skill_table[sn].name << "'\n";
       }
     }
+    for (std::list<std::string>::iterator gag = pcdata->gag_list.begin();
+      gag != pcdata->gag_list.end(); gag++) {
+      fp << "Gag          " << *gag << "~\n";
+    }
   }
 
   for (AffIter af = affected.begin(); af != affected.end(); af++) {
@@ -1188,6 +1188,11 @@ void Character::fread_char (std::ifstream & fp)
 
     case 'G':
       KEY ("Gold", gold, fread_number (fp));
+      if (!str_cmp (word, "Gag")) {
+        pcdata->gag_list.push_back(fread_string (fp));
+        fMatch = true;
+        break;
+      }
       break;
 
     case 'H':
@@ -2388,11 +2393,6 @@ void Character::show_char_to_char (std::list<Character *> & list)
     if (*rch == this)
       continue;
 
-    if (!(*rch)->is_npc ()
-      && IS_SET ((*rch)->actflags, PLR_WIZINVIS)
-      && get_trust () < (*rch)->get_trust ())
-      continue;
-
     if (can_see(*rch)) {
       show_char_to_char_0 (*rch);
     } else if (in_room->is_dark()
@@ -2495,14 +2495,12 @@ void Character::move_char (int door)
     move -= mv;
   }
 
-  if (!is_affected (AFF_SNEAK)
-    && (is_npc () || !IS_SET (actflags, PLR_WIZINVIS)))
+  if (!is_affected (AFF_SNEAK))
     act ("$n leaves $T.", NULL, dir_name[door].c_str(), TO_ROOM);
 
   char_from_room();
   char_to_room(to_room);
-  if (!is_affected (AFF_SNEAK)
-    && (is_npc () || !IS_SET (actflags, PLR_WIZINVIS)))
+  if (!is_affected (AFF_SNEAK))
     act ("$n has arrived.", NULL, NULL, TO_ROOM);
 
   do_look ("auto");
@@ -2747,8 +2745,17 @@ void Character::interpret (std::string argument)
    */
   (this->*(cmd_table[cmd].do_fun)) (argument);
 
-
-  tail_chain ();
   return;
 }
 
+bool Character::is_gagged(std::string & nm) {
+  if (is_npc ())
+    return false;
+
+  std::string gagname = capitalize(nm);
+  std::list<std::string>::iterator fnd;
+  fnd = find(pcdata->gag_list.begin(), pcdata->gag_list.end(), gagname);
+  if (fnd != pcdata->gag_list.end())
+    return true;
+  return false;
+}

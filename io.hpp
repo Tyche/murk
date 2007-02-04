@@ -34,6 +34,9 @@
 void log_printf (const char * str, ...);
 void bug_printf (const char * str, ...);
 void fatal_printf (const char * str, ...);
+#ifdef WIN32
+void win_errprint (const char * str);
+#endif
 std::string fread_string (std::ifstream & fp);
 char fread_letter (std::ifstream & fp);
 int fread_number (std::ifstream & fp);

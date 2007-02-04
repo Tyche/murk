@@ -113,7 +113,7 @@ public:
 #define SPELL_DECL
 #include "spell_list.hpp"
 
-  int is_npc();
+  bool is_npc();
   bool is_awake();
   bool is_good();
   bool is_evil();
@@ -195,7 +195,7 @@ public:
   void show_char_to_char_1 (Character * victim);
   void show_char_to_char (std::list<Character *> & list);
   void move_char (int door);
-
+  bool is_gagged(std::string & nm);
 
 };
 

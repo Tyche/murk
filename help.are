@@ -1173,19 +1173,12 @@ already present, or if it is SOLITARY and has one (or more) characters
 already present.
 ~
 
-37 HOLYLIGHT INVIS~
+37 HOLYLIGHT~
 Syntax: holylight
-Syntax: invis
 
 HOLYLIGHT is a toggle that allows you to see (almost) every character and
 mobile in the game.  With holy light, you can see what's in the game more
 easily.  Without holy light, you can see what mortal players see.
-
-INVIS is a toggle which makes you completely invisible to all player characters
-of lower level than you, and to all mobiles.
-
-HOLYLIGHT will not allow you to see immortal INVIS characters who are
-higher level than you.
 ~
 
 37 MEMORY~

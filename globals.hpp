@@ -73,6 +73,8 @@ extern std::string help_greeting;
 extern bool MOBtrigger;
 extern std::ifstream * fpArea;
 extern std::string strArea;
+extern short g_port;
+extern SOCKET g_listen;
 
 extern std::string target_name;
 extern std::string dir_name[];

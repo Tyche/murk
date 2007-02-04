@@ -55,6 +55,7 @@ public:
   sh_int condition[3];
   sh_int pagelen;
   sh_int learned[MAX_SKILL];
+  std::list<std::string> gag_list;
 
   PCData();
   void set_prime(sh_int prime);

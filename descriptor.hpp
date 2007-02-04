@@ -62,6 +62,7 @@ public:
   bool load_char_obj (const std::string & name);
   void write_to_buffer (const std::string & txt);
   bool process_output (bool fPrompt);
+  void assign_hostname ();
 };
 
 #endif // DESCRIPTOR_HPP

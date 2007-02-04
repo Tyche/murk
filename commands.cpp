@@ -1068,6 +1068,46 @@ void Character::do_save (std::string argument)
   return;
 }
 
+void Character::do_gag (std::string argument)
+{
+  if (is_npc ())
+    return;
+
+  std::string arg;
+  one_argument (argument, arg);
+
+  if (arg.empty()) {
+    if (pcdata->gag_list.empty()) {
+      send_to_char ("No gags set.\r\n");
+      return;
+    }
+    std::string buf("Gag list\r\n");
+    for (std::list<std::string>::iterator gag = pcdata->gag_list.begin();
+      gag != pcdata->gag_list.end(); gag++) {
+      buf.append((*gag) + "\r\n");
+    }
+    send_to_char (buf);
+    return;
+  }
+
+  std::string gagname = capitalize(arg);
+  if (!str_cmp(name, gagname)) {
+    send_to_char ("You can't gag yourself.\r\n");
+    return;
+  }
+
+  std::list<std::string>::iterator fnd;
+  fnd = find(pcdata->gag_list.begin(), pcdata->gag_list.end(), gagname);
+  if (fnd != pcdata->gag_list.end()) {
+    pcdata->gag_list.remove(gagname);
+    send_to_char ("Gag removed.\r\n");
+  } else {
+    pcdata->gag_list.push_back(gagname);
+    send_to_char ("Gag added.\r\n");
+  }
+  return;
+}
+
 void Character::do_follow (std::string argument)
 {
   std::string arg;
@@ -5324,20 +5364,16 @@ void Character::do_goto (std::string argument)
 
   if (fighting != NULL)
     stop_fighting (true);
-  if (!IS_SET (actflags, PLR_WIZINVIS)) {
-    act ("$n $T.", NULL,
-      (pcdata != NULL && !pcdata->bamfout.empty())
-      ? pcdata->bamfout.c_str() : "leaves in a swirling mist", TO_ROOM);
-  }
+  act ("$n $T.", NULL,
+    (pcdata != NULL && !pcdata->bamfout.empty())
+    ? pcdata->bamfout.c_str() : "leaves in a swirling mist", TO_ROOM);
 
   char_from_room();
   char_to_room(location);
 
-  if (!IS_SET (actflags, PLR_WIZINVIS)) {
-    act ("$n $T.", NULL,
-      (pcdata != NULL && !pcdata->bamfin.empty())
-      ? pcdata->bamfin.c_str() : "appears in a swirling mist", TO_ROOM);
-  }
+  act ("$n $T.", NULL,
+    (pcdata != NULL && !pcdata->bamfin.empty())
+    ? pcdata->bamfin.c_str() : "appears in a swirling mist", TO_ROOM);
 
   do_look ("auto");
   return;
@@ -5749,6 +5785,117 @@ void Character::do_reboot (std::string argument)
   buf.append(".\r\n");
   do_echo (buf);
   merc_down = true;
+  return;
+}
+
+void Character::do_hotboot (std::string argument)
+{
+#ifndef WIN32
+  send_to_char ("Hotboot not supported.\r\n");
+#else
+  extern bool write_to_descriptor (SOCKET desc, const char *txt, int length);
+
+  std::string usr_msg("Hotboot by ");
+  usr_msg.append(name);
+  usr_msg.append(". Stand by...\r\n");
+
+  int count_users = 0;
+  for (DescIter d = descriptor_list.begin(); d != descriptor_list.end(); d++) {
+    if (!(*d)->character || (*d)->connected > CON_PLAYING) {
+      write_to_descriptor ((*d)->descriptor, "The server is hotbooting.  Please recreate in a few minutes.\r\n", 0);
+      (*d)->close_socket();
+    } else {
+      count_users++;
+    }
+  }
+
+  char cmd[MAX_INPUT_LENGTH];
+  snprintf(cmd, sizeof cmd, "murk %d hotboot", g_port);
+
+  STARTUPINFO start_info;
+  PROCESS_INFORMATION proc_info;
+  WSAPROTOCOL_INFO proto_info;
+
+  // Get current console parameters
+  GetStartupInfo(&start_info);
+
+  // This event will be set when we are ready for copyover
+  void * file_event = CreateEvent(NULL, TRUE, FALSE, "file_created");
+  if (file_event == NULL) {
+    win_errprint("Error creating event, file_created");
+    return;
+  }
+
+  // We will wait on this event before shutting down
+  void * shutdown_event = CreateEvent(NULL, TRUE, FALSE, "ok_to_shutdown");
+  if (shutdown_event == NULL) {
+    win_errprint("Error creating event, ok_to_shutdown");
+    CloseHandle(file_event);
+    return;
+  }
+
+  // Start running a new server
+  if (CreateProcess(NULL, cmd, NULL, NULL, TRUE, NULL, NULL, NULL,
+      &start_info, &proc_info) == NULL) {
+    win_errprint("Error creating new process");
+    CloseHandle(file_event);
+    CloseHandle(shutdown_event);
+    return;
+  }
+
+  FILE* fp;
+  if ((fp = fopen ("hotboot.$$$", "w+b")) == NULL) {
+    send_to_char ("Hotboot aborted.\r\n");
+    win_errprint("Error creating hotboot file");
+    return;
+  }
+
+  fwrite(&count_users, sizeof(int),1,fp);  // write number of users
+  // duplicate and save the listening sockets info
+  if (WSADuplicateSocket(g_listen, proc_info.dwProcessId, &proto_info) == SOCKET_ERROR) {
+    bug_printf ("Error duplicating listening socket : %d.", WSAGetLastError());
+  }
+  fwrite(&proto_info,sizeof(WSAPROTOCOL_INFO),1,fp);
+  closesocket(g_listen);
+
+  for (DescIter d = descriptor_list.begin(); d != descriptor_list.end(); d++) {
+    if (WSADuplicateSocket((*d)->descriptor, proc_info.dwProcessId, &proto_info) == SOCKET_ERROR) {
+      bug_printf ("Error duplicating user socket : %d.", WSAGetLastError());
+    }
+    Character * ch = (*d)->original ? (*d)->original : (*d)->character;
+    if (ch->level == 1) {
+      ch->level += 1;
+      ch->advance_level();
+    }
+    ch->save_char_obj();
+    write_to_descriptor ((*d)->descriptor, usr_msg.c_str(), 0);
+    char chname[25];
+    strcpy(chname,ch->name.c_str());
+    fwrite(&proto_info,sizeof(WSAPROTOCOL_INFO),1,fp);
+    fwrite(chname,sizeof(chname),1,fp);
+    closesocket((*d)->descriptor);
+  }
+
+  fclose (fp);
+
+  // Indicate we are done with the copyover file
+  if (SetEvent(file_event) == NULL) {
+    win_errprint("Error setting file_event");
+  }
+
+  // Wait for child server to tell us its ok to shutdown
+  if (WaitForSingleObject(shutdown_event, INFINITE) == WAIT_FAILED) {
+    win_errprint("Error waiting on shutdown_event");
+  }
+
+  // cleanup event handles
+  CloseHandle(file_event);
+  CloseHandle(shutdown_event);
+  WIN32CLEANUP
+  g_db->shutdown();
+  exit(0);
+
+#endif
   return;
 }
 
@@ -7030,27 +7177,6 @@ void Character::do_force (std::string argument)
   }
 
   send_to_char ("Ok.\r\n");
-  return;
-}
-
-/*
- * New routines by Dionysos.
- */
-void Character::do_invis (std::string argument)
-{
-  if (is_npc ())
-    return;
-
-  if (IS_SET (actflags, PLR_WIZINVIS)) {
-    REMOVE_BIT (actflags, PLR_WIZINVIS);
-    act ("$n slowly fades into existence.", NULL, NULL, TO_ROOM);
-    send_to_char ("You slowly fade back into existence.\r\n");
-  } else {
-    SET_BIT (actflags, PLR_WIZINVIS);
-    act ("$n slowly fades into thin air.", NULL, NULL, TO_ROOM);
-    send_to_char ("You slowly vanish into thin air.\r\n");
-  }
-
   return;
 }
 

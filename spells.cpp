@@ -747,9 +747,6 @@ void Character::spell_faerie_fog (int sn, int lvl, void *vo)
 
   CharIter ich;
   for (ich = in_room->people.begin(); ich != in_room->people.end(); ich++) {
-    if (!(*ich)->is_npc () && IS_SET ((*ich)->actflags, PLR_WIZINVIS))
-      continue;
-
     if (*ich == this || (*ich)->saves_spell (lvl))
       continue;
 
