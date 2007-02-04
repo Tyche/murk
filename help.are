@@ -430,6 +430,20 @@ LOOK looks at something and sees what you can see.
 EXAMINE is short for 'LOOK container' followed by 'LOOK IN container'.
 ~
 
+0 GAG IGNORE~
+Syntax: gag
+Syntax: gag    <character>
+Syntax: ignore
+Syntax: ignore <character>
+
+GAG will add or remove a character from your gag list.  GAG will render 
+most communications and action displays from the character specified 
+invisible to you.  GAGs are saved in your player file.  Without a 
+parameter GAG lists those characters you have gags on.
+
+IGNORE is an alias for GAG. 
+~
+
 0 ORDER~
 Syntax: order <character> command
 Syntax: order all command
@@ -1002,14 +1016,14 @@ Site bans are not saved; every time the server is rebooted, the site
 ban list is cleared.  
 ~
 
-39 REBOOT SHUTDOWN WIZLOCK~
-Syntax: reboot
+39 HOTBOOT SHUTDOWN WIZLOCK~
+Syntax: hotboot
 Syntax: shutdown
 Syntax: wizlock
 
-REBOOT shuts down the server.  When the normal 'startup' script is used
-to control the server, a delay of sixty seconds will ensue (to allow
-old connections to die), followed by a reboot.
+HOTBOOT reboots the server, but saves and keeps players logged into the game.  
+Since the game world is reset all items not held by players, and mobiles will 
+vanish and/or return to their reset positions.  
 
 SHUTDOWN shuts down the server and prevents the normal 'startup' script
 from restarting it.
