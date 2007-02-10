@@ -12,7 +12,7 @@
 ** This header file defines the interface that the SQLite library
 ** presents to client programs.
 **
-** @(#) $Id: sqlite.h.in,v 1.187 2006/07/08 18:09:15 drh Exp $
+** @(#) $Id: sqlite.h.in,v 1.198 2007/01/26 00:51:44 drh Exp $
 */
 #ifndef _SQLITE3_H_
 #define _SQLITE3_H_
@@ -31,7 +31,7 @@ extern "C" {
 #ifdef SQLITE_VERSION
 # undef SQLITE_VERSION
 #endif
-#define SQLITE_VERSION         "3.3.7"
+#define SQLITE_VERSION         "3.3.12"
 
 /*
 ** The format of the version string is "X.Y.Z<trailing string>", where
@@ -39,16 +39,16 @@ extern "C" {
 ** is the release number. The trailing string is often "alpha" or "beta".
 ** For example "3.1.1beta".
 **
-** The SQLITE_VERSION_NUMBER is an integer with the value
-** (X*100000 + Y*1000 + Z). For example, for version "3.1.1beta",
-** SQLITE_VERSION_NUMBER is set to 3001001. To detect if they are using
-** version 3.1.1 or greater at compile time, programs may use the test
+** The SQLITE_VERSION_NUMBER is an integer with the value 
+** (X*100000 + Y*1000 + Z). For example, for version "3.1.1beta", 
+** SQLITE_VERSION_NUMBER is set to 3001001. To detect if they are using 
+** version 3.1.1 or greater at compile time, programs may use the test 
 ** (SQLITE_VERSION_NUMBER>=3001001).
 */
 #ifdef SQLITE_VERSION_NUMBER
 # undef SQLITE_VERSION_NUMBER
 #endif
-#define SQLITE_VERSION_NUMBER 3003007
+#define SQLITE_VERSION_NUMBER 3003012
 
 /*
 ** The version string is also compiled into the library so that a program
@@ -125,7 +125,7 @@ typedef int (*sqlite3_callback)(void*,int,char**, char**);
 ** value then the query is aborted, all subsequent SQL statements
 ** are skipped and the sqlite3_exec() function returns the SQLITE_ABORT.
 **
-** The 4th parameter is an arbitrary pointer that is passed
+** The 1st parameter is an arbitrary pointer that is passed
 ** to the callback function as its first parameter.
 **
 ** The 2nd parameter to the callback function is the number of
@@ -148,7 +148,7 @@ typedef int (*sqlite3_callback)(void*,int,char**, char**);
 **
 ** The return value is is SQLITE_OK if there are no errors and
 ** some other return code if there is an error.  The particular
-** return value depends on the type of error.
+** return value depends on the type of error. 
 **
 ** If the query could not be executed because a database file is
 ** locked or busy, then this function returns SQLITE_BUSY.  (This
@@ -197,6 +197,44 @@ int sqlite3_exec(
 #define SQLITE_ROW         100  /* sqlite3_step() has another row ready */
 #define SQLITE_DONE        101  /* sqlite3_step() has finished executing */
 /* end-of-error-codes */
+
+/*
+** Using the sqlite3_extended_result_codes() API, you can cause
+** SQLite to return result codes with additional information in
+** their upper bits.  The lower 8 bits will be the same as the
+** primary result codes above.  But the upper bits might contain
+** more specific error information.
+**
+** To extract the primary result code from an extended result code,
+** simply mask off the lower 8 bits.
+**
+**        primary = extended & 0xff;
+**
+** New result error codes may be added from time to time.  Software
+** that uses the extended result codes should plan accordingly and be
+** sure to always handle new unknown codes gracefully.
+**
+** The SQLITE_OK result code will never be extended.  It will always
+** be exactly zero.
+**
+** The extended result codes always have the primary result code
+** as a prefix.  Primary result codes only contain a single "_"
+** character.  Extended result codes contain two or more "_" characters.
+*/
+#define SQLITE_IOERR_READ          (SQLITE_IOERR | (1<<8))
+#define SQLITE_IOERR_SHORT_READ    (SQLITE_IOERR | (2<<8))
+#define SQLITE_IOERR_WRITE         (SQLITE_IOERR | (3<<8))
+#define SQLITE_IOERR_FSYNC         (SQLITE_IOERR | (4<<8))
+#define SQLITE_IOERR_DIR_FSYNC     (SQLITE_IOERR | (5<<8))
+#define SQLITE_IOERR_TRUNCATE      (SQLITE_IOERR | (6<<8))
+#define SQLITE_IOERR_FSTAT         (SQLITE_IOERR | (7<<8))
+#define SQLITE_IOERR_UNLOCK        (SQLITE_IOERR | (8<<8))
+#define SQLITE_IOERR_RDLOCK        (SQLITE_IOERR | (9<<8))
+
+/*
+** Enable or disable the extended result codes.
+*/
+int sqlite3_extended_result_codes(sqlite3*, int onoff);
 
 /*
 ** Each entry in an SQLite table has a unique integer key.  (The key is
@@ -277,27 +315,44 @@ int sqlite3_complete16(const void *sql);
 ** currently locked by another process or thread.  If the busy callback
 ** is NULL, then sqlite3_exec() returns SQLITE_BUSY immediately if
 ** it finds a locked table.  If the busy callback is not NULL, then
-** sqlite3_exec() invokes the callback with three arguments.  The
-** second argument is the name of the locked table and the third
-** argument is the number of times the table has been busy.  If the
+** sqlite3_exec() invokes the callback with two arguments.  The
+** first argument to the handler is a copy of the void* pointer which
+** is the third argument to this routine.  The second argument to
+** the handler is the number of times that the busy handler has
+** been invoked for this locking event.  If the
 ** busy callback returns 0, then sqlite3_exec() immediately returns
 ** SQLITE_BUSY.  If the callback returns non-zero, then sqlite3_exec()
 ** tries to open the table again and the cycle repeats.
 **
+** The presence of a busy handler does not guarantee that
+** it will be invoked when there is lock contention.
+** If SQLite determines that invoking the busy handler could result in
+** a deadlock, it will return SQLITE_BUSY instead.
+** Consider a scenario where one process is holding a read lock that
+** it is trying to promote to a reserved lock and
+** a second process is holding a reserved lock that it is trying
+** to promote to an exclusive lock.  The first process cannot proceed
+** because it is blocked by the second and the second process cannot
+** proceed because it is blocked by the first.  If both processes
+** invoke the busy handlers, neither will make any progress.  Therefore,
+** SQLite returns SQLITE_BUSY for the first process, hoping that this
+** will induce the first process to release its read lock and allow
+** the second process to proceed.
+**
 ** The default busy callback is NULL.
 **
-** Sqlite is re-entrant, so the busy handler may start a new query.
+** Sqlite is re-entrant, so the busy handler may start a new query. 
 ** (It is not clear why anyone would every want to do this, but it
 ** is allowed, in theory.)  But the busy handler may not close the
-** database.  Closing the database from a busy handler will delete
-** data structures out from under the executing query and will
+** database.  Closing the database from a busy handler will delete 
+** data structures out from under the executing query and will 
 ** probably result in a coredump.
 */
 int sqlite3_busy_handler(sqlite3*, int(*)(void*,int), void*);
 
 /*
 ** This routine sets a busy handler that sleeps for a while when a
-** table is locked.  The handler will sleep multiple times until
+** table is locked.  The handler will sleep multiple times until 
 ** at least "ms" milleseconds of sleeping have been done.  After
 ** "ms" milleseconds of sleeping, the handler returns 0 which
 ** causes sqlite3_exec() to return SQLITE_BUSY.
@@ -312,7 +367,7 @@ int sqlite3_busy_timeout(sqlite3*, int ms);
 ** Instead of invoking a user-supplied callback for each row of the
 ** result, this routine remembers each row of the result in memory
 ** obtained from malloc(), then returns all of the result after the
-** query has finished.
+** query has finished. 
 **
 ** As an example, suppose the query result where this table:
 **
@@ -339,11 +394,11 @@ int sqlite3_busy_timeout(sqlite3*, int ms);
 ** set to 2.  In general, the number of values inserted into azResult
 ** will be ((*nrow) + 1)*(*ncolumn).
 **
-** After the calling function has finished using the result, it should
-** pass the result data pointer to sqlite3_free_table() in order to
-** release the memory that was malloc-ed.  Because of the way the
-** malloc() happens, the calling function must not try to call
-** free() directly.  Only sqlite3_free_table() is able to release
+** After the calling function has finished using the result, it should 
+** pass the result data pointer to sqlite3_free_table() in order to 
+** release the memory that was malloc-ed.  Because of the way the 
+** malloc() happens, the calling function must not try to call 
+** free() directly.  Only sqlite3_free_table() is able to release 
 ** the memory properly and safely.
 **
 ** The return value of this routine is the same as from sqlite3_exec().
@@ -400,7 +455,7 @@ void sqlite3_free_table(char **result);
 **      INSERT INTO table1 VALUES('It's a happy day!');
 **
 ** This second example is an SQL syntax error.  As a general rule you
-** should always use %q instead of %s when inserting text into a string
+** should always use %q instead of %s when inserting text into a string 
 ** literal.
 */
 char *sqlite3_mprintf(const char*,...);
@@ -442,7 +497,7 @@ int sqlite3_set_authorizer(
 ** codes is used as the second parameter.  The 5th parameter is the name
 ** of the database ("main", "temp", etc.) if applicable.  The 6th parameter
 ** is the name of the inner-most trigger or view that is responsible for
-** the access attempt or NULL if this access attempt is directly from
+** the access attempt or NULL if this access attempt is directly from 
 ** input SQL code.
 **
 **                                          Arg-3           Arg-4
@@ -478,6 +533,7 @@ int sqlite3_set_authorizer(
 #define SQLITE_ANALYZE              28   /* Table Name      NULL            */
 #define SQLITE_CREATE_VTABLE        29   /* Table Name      Module Name     */
 #define SQLITE_DROP_VTABLE          30   /* Table Name      Module Name     */
+#define SQLITE_FUNCTION             31   /* Function Name   NULL            */
 
 /*
 ** The return value of the authorization function should be one of the
@@ -504,7 +560,7 @@ void *sqlite3_profile(sqlite3*,
 /*
 ** This routine configures a callback function - the progress callback - that
 ** is invoked periodically during long running calls to sqlite3_exec(),
-** sqlite3_step() and sqlite3_get_table(). An example use for this API is to
+** sqlite3_step() and sqlite3_get_table(). An example use for this API is to 
 ** keep a GUI updated during a large query.
 **
 ** The progress callback is invoked once for every N virtual machine opcodes,
@@ -513,17 +569,17 @@ void *sqlite3_profile(sqlite3*,
 ** argument to this function is a void pointer passed to the progress callback
 ** function each time it is invoked.
 **
-** If a call to sqlite3_exec(), sqlite3_step() or sqlite3_get_table() results
+** If a call to sqlite3_exec(), sqlite3_step() or sqlite3_get_table() results 
 ** in less than N opcodes being executed, then the progress callback is not
 ** invoked.
-**
+** 
 ** To remove the progress callback altogether, pass NULL as the third
 ** argument to this function.
 **
-** If the progress callback returns a result other than 0, then the current
+** If the progress callback returns a result other than 0, then the current 
 ** query is immediately terminated and any database changes rolled back. If the
 ** query was part of a larger transaction, then the transaction is not rolled
-** back and remains active. The sqlite3_exec() call returns SQLITE_ABORT.
+** back and remains active. The sqlite3_exec() call returns SQLITE_ABORT. 
 **
 ******* THIS IS AN EXPERIMENTAL API AND IS SUBJECT TO CHANGE ******
 */
@@ -572,7 +628,7 @@ int sqlite3_open16(
 
 /*
 ** Return the error code for the most recent sqlite3_* API call associated
-** with sqlite3 handle 'db'. SQLITE_OK is returned if the most recent
+** with sqlite3 handle 'db'. SQLITE_OK is returned if the most recent 
 ** API call was successful.
 **
 ** Calls to many sqlite3_* functions set the error code and string returned
@@ -654,6 +710,31 @@ int sqlite3_prepare16(
 );
 
 /*
+** Newer versions of the prepare API work just like the legacy versions
+** but with one exception:  The a copy of the SQL text is saved in the
+** sqlite3_stmt structure that is returned.  If this copy exists, it
+** modifieds the behavior of sqlite3_step() slightly.  First, sqlite3_step()
+** will no longer return an SQLITE_SCHEMA error but will instead automatically
+** rerun the compiler to rebuild the prepared statement.  Secondly, 
+** sqlite3_step() now turns a full result code - the result code that
+** use used to have to call sqlite3_reset() to get.
+*/
+int sqlite3_prepare_v2(
+  sqlite3 *db,            /* Database handle */
+  const char *zSql,       /* SQL statement, UTF-8 encoded */
+  int nBytes,             /* Length of zSql in bytes. */
+  sqlite3_stmt **ppStmt,  /* OUT: Statement handle */
+  const char **pzTail     /* OUT: Pointer to unused portion of zSql */
+);
+int sqlite3_prepare16_v2(
+  sqlite3 *db,            /* Database handle */
+  const void *zSql,       /* SQL statement, UTF-16 encoded */
+  int nBytes,             /* Length of zSql in bytes. */
+  sqlite3_stmt **ppStmt,  /* OUT: Statement handle */
+  const void **pzTail     /* OUT: Pointer to unused portion of zSql */
+);
+
+/*
 ** Pointers to the following two opaque structures are used to communicate
 ** with the implementations of user-defined functions.
 */
@@ -671,7 +752,7 @@ typedef struct Mem sqlite3_value;
 ** In every case, the first parameter is a pointer to the sqlite3_stmt
 ** structure returned from sqlite3_prepare().  The second parameter is the
 ** index of the parameter.  The first parameter as an index of 1.  For
-** named parameters (":AAA" or "$VVV") you can use
+** named parameters (":AAA" or "$VVV") you can use 
 ** sqlite3_bind_parameter_index() to get the correct index value given
 ** the parameters name.  If the same named parameter occurs more than
 ** once, it is assigned the same index each time.
@@ -741,11 +822,11 @@ const void *sqlite3_column_name16(sqlite3_stmt*,int);
 
 /*
 ** The first parameter to the following calls is a compiled SQL statement.
-** These functions return information about the Nth column returned by
+** These functions return information about the Nth column returned by 
 ** the statement, where N is the second function argument.
 **
 ** If the Nth column returned by the statement is not a column value,
-** then all of the functions return NULL. Otherwise, the return the
+** then all of the functions return NULL. Otherwise, the return the 
 ** name of the attached database, table and column that the expression
 ** extracts a value from.
 **
@@ -753,7 +834,7 @@ const void *sqlite3_column_name16(sqlite3_stmt*,int);
 ** encoded strings, the other functions return UTF-8. The memory containing
 ** the returned strings is valid until the statement handle is finalized().
 **
-** These APIs are only available if the library was compiled with the
+** These APIs are only available if the library was compiled with the 
 ** SQLITE_ENABLE_COLUMN_METADATA preprocessor symbol defined.
 */
 const char *sqlite3_column_database_name(sqlite3_stmt*,int);
@@ -765,7 +846,7 @@ const void *sqlite3_column_origin_name16(sqlite3_stmt*,int);
 
 /*
 ** The first parameter is a compiled SQL statement. If this statement
-** is a SELECT statement, the Nth column of the returned result set
+** is a SELECT statement, the Nth column of the returned result set 
 ** of the SELECT is a table column then the declared type of the table
 ** column is returned. If the Nth column of the result set is not at table
 ** column, then a NULL pointer is returned. The returned string is always
@@ -785,7 +866,7 @@ const char *sqlite3_column_decltype(sqlite3_stmt *, int i);
 
 /*
 ** The first parameter is a compiled SQL statement. If this statement
-** is a SELECT statement, the Nth column of the returned result set
+** is a SELECT statement, the Nth column of the returned result set 
 ** of the SELECT is a table column then the declared type of the table
 ** column is returned. If the Nth column of the result set is not at table
 ** column, then a NULL pointer is returned. The returned string is always
@@ -803,12 +884,12 @@ const char *sqlite3_column_decltype(sqlite3_stmt *, int i);
 */
 const void *sqlite3_column_decltype16(sqlite3_stmt*,int);
 
-/*
+/* 
 ** After an SQL query has been compiled with a call to either
 ** sqlite3_prepare() or sqlite3_prepare16(), then this function must be
 ** called one or more times to execute the statement.
 **
-** The return value will be either SQLITE_BUSY, SQLITE_DONE,
+** The return value will be either SQLITE_BUSY, SQLITE_DONE, 
 ** SQLITE_ROW, SQLITE_ERROR, or SQLITE_MISUSE.
 **
 ** SQLITE_BUSY means that the database engine attempted to open
@@ -819,12 +900,12 @@ const void *sqlite3_column_decltype16(sqlite3_stmt*,int);
 ** successfully.  sqlite3_step() should not be called again on this virtual
 ** machine.
 **
-** If the SQL statement being executed returns any data, then
+** If the SQL statement being executed returns any data, then 
 ** SQLITE_ROW is returned each time a new row of data is ready
 ** for processing by the caller. The values may be accessed using
 ** the sqlite3_column_*() functions described below. sqlite3_step()
 ** is called again to retrieve the next row of data.
-**
+** 
 ** SQLITE_ERROR means that a run-time error (such as a constraint
 ** violation) has occurred.  sqlite3_step() should not be called again on
 ** the VM. More information may be found by calling sqlite3_errmsg().
@@ -843,7 +924,7 @@ int sqlite3_step(sqlite3_stmt*);
 ** After a call to sqlite3_step() that returns SQLITE_ROW, this routine
 ** will return the same value as the sqlite3_column_count() function.
 ** After sqlite3_step() has returned an SQLITE_DONE, SQLITE_BUSY or
-** error code, or before sqlite3_step() has been called on a
+** error code, or before sqlite3_step() has been called on a 
 ** compiled SQL statement, this routine returns zero.
 */
 int sqlite3_data_count(sqlite3_stmt *pStmt);
@@ -875,7 +956,7 @@ int sqlite3_data_count(sqlite3_stmt *pStmt);
 ** in a single column of the current result row of a query.  In every
 ** case the first parameter is a pointer to the SQL statement that is being
 ** executed (the sqlite_stmt* that was returned from sqlite3_prepare()) and
-** the second argument is the index of the column for which information
+** the second argument is the index of the column for which information 
 ** should be returned.  iCol is zero-indexed.  The left-most column as an
 ** index of 0.
 **
@@ -944,7 +1025,7 @@ sqlite3_value *sqlite3_column_value(sqlite3_stmt*, int iCol);
 ** SQL statement obtained by a previous call to sqlite3_prepare()
 ** or sqlite3_prepare16(). If the statement was executed successfully, or
 ** not executed at all, then SQLITE_OK is returned. If execution of the
-** statement failed then an error code is returned.
+** statement failed then an error code is returned. 
 **
 ** This routine can be called at any point during the execution of the
 ** virtual machine.  If the virtual machine has not completed execution
@@ -973,7 +1054,7 @@ int sqlite3_reset(sqlite3_stmt *pStmt);
 **
 ** The first argument is the database handle that the new function or
 ** aggregate is to be added to. If a single program uses more than one
-** database handle internally, then user functions or aggregates must
+** database handle internally, then user functions or aggregates must 
 ** be added individually to each database handle with which they will be
 ** used.
 **
@@ -1100,13 +1181,17 @@ void sqlite3_set_auxdata(sqlite3_context*, int, void*, void (*)(void*));
 ** These are special value for the destructor that is passed in as the
 ** final argument to routines like sqlite3_result_blob().  If the destructor
 ** argument is SQLITE_STATIC, it means that the content pointer is constant
-** and will never change.  It does not need to be destroyed.  The
+** and will never change.  It does not need to be destroyed.  The 
 ** SQLITE_TRANSIENT value means that the content will likely change in
 ** the near future and that SQLite should make its own private copy of
 ** the content before returning.
+**
+** The typedef is necessary to work around problems in certain
+** C++ compilers.  See ticket #2191.
 */
-#define SQLITE_STATIC      ((void(*)(void *))0)
-#define SQLITE_TRANSIENT   ((void(*)(void *))-1)
+typedef void (*sqlite3_destructor_type)(void*);
+#define SQLITE_STATIC      ((sqlite3_destructor_type)0)
+#define SQLITE_TRANSIENT   ((sqlite3_destructor_type)-1)
 
 /*
 ** User-defined functions invoke the following routines in order to
@@ -1138,7 +1223,7 @@ void sqlite3_result_value(sqlite3_context*, sqlite3_value*);
 
 /*
 ** These two functions are used to add new collation sequences to the
-** sqlite3 handle specified as the first argument.
+** sqlite3 handle specified as the first argument. 
 **
 ** The name of the new collation sequence is specified as a UTF-8 string
 ** for sqlite3_create_collation() and a UTF-16 string for
@@ -1165,16 +1250,16 @@ void sqlite3_result_value(sqlite3_context*, sqlite3_value*);
 ** string. i.e. (STRING1 - STRING2).
 */
 int sqlite3_create_collation(
-  sqlite3*,
-  const char *zName,
-  int eTextRep,
+  sqlite3*, 
+  const char *zName, 
+  int eTextRep, 
   void*,
   int(*xCompare)(void*,int,const void*,int,const void*)
 );
 int sqlite3_create_collation16(
-  sqlite3*,
-  const char *zName,
-  int eTextRep,
+  sqlite3*, 
+  const char *zName, 
+  int eTextRep, 
   void*,
   int(*xCompare)(void*,int,const void*,int,const void*)
 );
@@ -1204,12 +1289,12 @@ int sqlite3_create_collation16(
 ** sqlite3_create_collation16() APIs, described above.
 */
 int sqlite3_collation_needed(
-  sqlite3*,
-  void*,
+  sqlite3*, 
+  void*, 
   void(*)(void*,sqlite3*,int eTextRep,const char*)
 );
 int sqlite3_collation_needed16(
-  sqlite3*,
+  sqlite3*, 
   void*,
   void(*)(void*,sqlite3*,int eTextRep,const void*)
 );
@@ -1241,11 +1326,11 @@ int sqlite3_rekey(
 
 /*
 ** Sleep for a little while. The second parameter is the number of
-** miliseconds to sleep for.
+** miliseconds to sleep for. 
 **
-** If the operating system does not support sleep requests with
-** milisecond time resolution, then the time will be rounded up to
-** the nearest second. The number of miliseconds of sleep actually
+** If the operating system does not support sleep requests with 
+** milisecond time resolution, then the time will be rounded up to 
+** the nearest second. The number of miliseconds of sleep actually 
 ** requested from the operating system is returned.
 */
 int sqlite3_sleep(int);
@@ -1284,21 +1369,21 @@ extern char *sqlite3_temp_directory;
 
 /*
 ** This function is called to recover from a malloc() failure that occured
-** within the SQLite library. Normally, after a single malloc() fails the
+** within the SQLite library. Normally, after a single malloc() fails the 
 ** library refuses to function (all major calls return SQLITE_NOMEM).
 ** This function restores the library state so that it can be used again.
 **
 ** All existing statements (sqlite3_stmt pointers) must be finalized or
 ** reset before this call is made. Otherwise, SQLITE_BUSY is returned.
 ** If any in-memory databases are in use, either as a main or TEMP
-** database, SQLITE_ERROR is returned. In either of these cases, the
+** database, SQLITE_ERROR is returned. In either of these cases, the 
 ** library is not reset and remains unusable.
 **
 ** This function is *not* threadsafe. Calling this from within a threaded
 ** application when threads other than the caller have used SQLite is
 ** dangerous and will almost certainly result in malfunctions.
 **
-** This functionality can be omitted from a build by defining the
+** This functionality can be omitted from a build by defining the 
 ** SQLITE_OMIT_GLOBALRECOVER at compile time.
 */
 int sqlite3_global_recover(void);
@@ -1320,19 +1405,19 @@ int sqlite3_get_autocommit(sqlite3*);
 sqlite3 *sqlite3_db_handle(sqlite3_stmt*);
 
 /*
-** Register a callback function with the database connection identified by the
+** Register a callback function with the database connection identified by the 
 ** first argument to be invoked whenever a row is updated, inserted or deleted.
-** Any callback set by a previous call to this function for the same
+** Any callback set by a previous call to this function for the same 
 ** database connection is overridden.
 **
-** The second argument is a pointer to the function to invoke when a
+** The second argument is a pointer to the function to invoke when a 
 ** row is updated, inserted or deleted. The first argument to the callback is
-** a copy of the third argument to sqlite3_update_hook. The second callback
+** a copy of the third argument to sqlite3_update_hook. The second callback 
 ** argument is one of SQLITE_INSERT, SQLITE_DELETE or SQLITE_UPDATE, depending
-** on the operation that caused the callback to be invoked. The third and
-** fourth arguments to the callback contain pointers to the database and
-** table name containing the affected row. The final callback parameter is
-** the rowid of the row. In the case of an update, this is the rowid after
+** on the operation that caused the callback to be invoked. The third and 
+** fourth arguments to the callback contain pointers to the database and 
+** table name containing the affected row. The final callback parameter is 
+** the rowid of the row. In the case of an update, this is the rowid after 
 ** the update takes place.
 **
 ** The update hook is not invoked when internal system tables are
@@ -1342,23 +1427,23 @@ sqlite3 *sqlite3_db_handle(sqlite3_stmt*);
 ** Otherwise NULL is returned.
 */
 void *sqlite3_update_hook(
-  sqlite3*,
+  sqlite3*, 
   void(*)(void *,int ,char const *,char const *,sqlite_int64),
   void*
 );
 
 /*
 ** Register a callback to be invoked whenever a transaction is rolled
-** back.
+** back. 
 **
 ** The new callback function overrides any existing rollback-hook
-** callback. If there was an existing callback, then it's pArg value
-** (the third argument to sqlite3_rollback_hook() when it was registered)
+** callback. If there was an existing callback, then it's pArg value 
+** (the third argument to sqlite3_rollback_hook() when it was registered) 
 ** is returned. Otherwise, NULL is returned.
 **
-** For the purposes of this API, a transaction is said to have been
+** For the purposes of this API, a transaction is said to have been 
 ** rolled back if an explicit "ROLLBACK" statement is executed, or
-** an error or constraint causes an implicit rollback to occur. The
+** an error or constraint causes an implicit rollback to occur. The 
 ** callback is not invoked if a transaction is automatically rolled
 ** back because the database connection is closed.
 */
@@ -1367,14 +1452,14 @@ void *sqlite3_rollback_hook(sqlite3*, void(*)(void *), void*);
 /*
 ** This function is only available if the library is compiled without
 ** the SQLITE_OMIT_SHARED_CACHE macro defined. It is used to enable or
-** disable (if the argument is true or false, respectively) the
+** disable (if the argument is true or false, respectively) the 
 ** "shared pager" feature.
 */
 int sqlite3_enable_shared_cache(int);
 
 /*
 ** Attempt to free N bytes of heap memory by deallocating non-essential
-** memory allocations held by the database library (example: memory
+** memory allocations held by the database library (example: memory 
 ** used to cache database pages to improve performance).
 **
 ** This function is not a part of standard builds.  It is only created
@@ -1384,7 +1469,7 @@ int sqlite3_release_memory(int);
 
 /*
 ** Place a "soft" limit on the amount of heap memory that may be allocated by
-** SQLite within the current thread. If an internal allocation is requested
+** SQLite within the current thread. If an internal allocation is requested 
 ** that would exceed the specified limit, sqlite3_release_memory() is invoked
 ** one or more times to free up some space before the allocation is made.
 **
@@ -1392,7 +1477,7 @@ int sqlite3_release_memory(int);
 ** sufficient memory to prevent the limit from being exceeded, the memory is
 ** allocated anyway and the current operation proceeds.
 **
-** This function is only available if the library was compiled with the
+** This function is only available if the library was compiled with the 
 ** SQLITE_ENABLE_MEMORY_MANAGEMENT option set.
 ** memory-management has been enabled.
 */
@@ -1413,45 +1498,45 @@ void sqlite3_thread_cleanup(void);
 
 /*
 ** Return meta information about a specific column of a specific database
-** table accessible using the connection handle passed as the first function
+** table accessible using the connection handle passed as the first function 
 ** argument.
 **
-** The column is identified by the second, third and fourth parameters to
+** The column is identified by the second, third and fourth parameters to 
 ** this function. The second parameter is either the name of the database
 ** (i.e. "main", "temp" or an attached database) containing the specified
 ** table or NULL. If it is NULL, then all attached databases are searched
-** for the table using the same algorithm as the database engine uses to
+** for the table using the same algorithm as the database engine uses to 
 ** resolve unqualified table references.
 **
-** The third and fourth parameters to this function are the table and column
-** name of the desired column, respectively. Neither of these parameters
+** The third and fourth parameters to this function are the table and column 
+** name of the desired column, respectively. Neither of these parameters 
 ** may be NULL.
 **
 ** Meta information is returned by writing to the memory locations passed as
-** the 5th and subsequent parameters to this function. Any of these
-** arguments may be NULL, in which case the corresponding element of meta
+** the 5th and subsequent parameters to this function. Any of these 
+** arguments may be NULL, in which case the corresponding element of meta 
 ** information is ommitted.
 **
 ** Parameter     Output Type      Description
 ** -----------------------------------
 **
 **   5th         const char*      Data type
-**   6th         const char*      Name of the default collation sequence
+**   6th         const char*      Name of the default collation sequence 
 **   7th         int              True if the column has a NOT NULL constraint
 **   8th         int              True if the column is part of the PRIMARY KEY
 **   9th         int              True if the column is AUTOINCREMENT
 **
 **
-** The memory pointed to by the character pointers returned for the
-** declaration type and collation sequence is valid only until the next
+** The memory pointed to by the character pointers returned for the 
+** declaration type and collation sequence is valid only until the next 
 ** call to any sqlite API function.
 **
 ** If the specified table is actually a view, then an error is returned.
 **
-** If the specified column is "rowid", "oid" or "_rowid_" and an
-** INTEGER PRIMARY KEY column has been explicitly declared, then the output
+** If the specified column is "rowid", "oid" or "_rowid_" and an 
+** INTEGER PRIMARY KEY column has been explicitly declared, then the output 
 ** parameters are set for the explicitly declared column. If there is no
-** explicitly declared IPK column, then the output parameters are set as
+** explicitly declared IPK column, then the output parameters are set as 
 ** follows:
 **
 **     data type: "INTEGER"
@@ -1489,7 +1574,7 @@ int sqlite3_table_column_metadata(
 **
 ** Return SQLITE_OK on success and SQLITE_ERROR if something goes wrong.
 **
-** If an error occurs and pzErrMsg is not 0, then fill *pzErrMsg with
+** If an error occurs and pzErrMsg is not 0, then fill *pzErrMsg with 
 ** error message text.  The calling function should free this memory
 ** by calling sqlite3_free().
 **
@@ -1520,6 +1605,42 @@ int sqlite3_enable_load_extension(sqlite3 *db, int onoff);
 /*
 ****** EXPERIMENTAL - subject to change without notice **************
 **
+** Register an extension entry point that is automatically invoked
+** whenever a new database connection is opened.
+**
+** This API can be invoked at program startup in order to register
+** one or more statically linked extensions that will be available
+** to all new database connections.
+**
+** Duplicate extensions are detected so calling this routine multiple
+** times with the same extension is harmless.
+**
+** This routine stores a pointer to the extension in an array
+** that is obtained from malloc().  If you run a memory leak
+** checker on your program and it reports a leak because of this
+** array, then invoke sqlite3_automatic_extension_reset() prior
+** to shutdown to free the memory.
+**
+** Automatic extensions apply across all threads.
+*/
+int sqlite3_auto_extension(void *xEntryPoint);
+
+
+/*
+****** EXPERIMENTAL - subject to change without notice **************
+**
+** Disable all previously registered automatic extensions.  This
+** routine undoes the effect of all prior sqlite3_automatic_extension()
+** calls.
+**
+** This call disabled automatic extensions in all threads.
+*/
+void sqlite3_reset_auto_extension(void);
+
+
+/*
+****** EXPERIMENTAL - subject to change without notice **************
+**
 ** The interface to the virtual-table mechanism is currently considered
 ** to be experimental.  The interface might change in incompatible ways.
 ** If this is a problem for you, do not use the interface at this time.
@@ -1544,11 +1665,11 @@ typedef struct sqlite3_module sqlite3_module;
 struct sqlite3_module {
   int iVersion;
   int (*xCreate)(sqlite3*, void *pAux,
-               int argc, char **argv,
-               sqlite3_vtab **ppVTab);
+               int argc, const char *const*argv,
+               sqlite3_vtab **ppVTab, char**);
   int (*xConnect)(sqlite3*, void *pAux,
-               int argc, char **argv,
-               sqlite3_vtab **ppVTab);
+               int argc, const char *const*argv,
+               sqlite3_vtab **ppVTab, char**);
   int (*xBestIndex)(sqlite3_vtab *pVTab, sqlite3_index_info*);
   int (*xDisconnect)(sqlite3_vtab *pVTab);
   int (*xDestroy)(sqlite3_vtab *pVTab);
@@ -1583,7 +1704,7 @@ struct sqlite3_module {
 **         column OP expr
 **
 ** Where OP is =, <, <=, >, or >=.  The particular operator is stored
-** in aConstraint[].op.  The index of the column is stored in
+** in aConstraint[].op.  The index of the column is stored in 
 ** aConstraint[].iColumn.  aConstraint[].usable is TRUE if the
 ** expr on the right-hand side can be evaluated (and thus the constraint
 ** is usable) and false if it cannot.
@@ -1618,24 +1739,24 @@ struct sqlite3_module {
 */
 struct sqlite3_index_info {
   /* Inputs */
-  int nConstraint;     /* Number of entries in aConstraint */
-  struct sqlite3_index_constraint {
+  const int nConstraint;     /* Number of entries in aConstraint */
+  const struct sqlite3_index_constraint {
      int iColumn;              /* Column on left-hand side of constraint */
      unsigned char op;         /* Constraint operator */
      unsigned char usable;     /* True if this constraint is usable */
      int iTermOffset;          /* Used internally - xBestIndex should ignore */
-  } *aConstraint;      /* Table of WHERE clause constraints */
-  int nOrderBy;        /* Number of terms in the ORDER BY clause */
-  struct sqlite3_index_orderby {
+  } *const aConstraint;      /* Table of WHERE clause constraints */
+  const int nOrderBy;        /* Number of terms in the ORDER BY clause */
+  const struct sqlite3_index_orderby {
      int iColumn;              /* Column number */
      unsigned char desc;       /* True for DESC.  False for ASC. */
-  } *aOrderBy;         /* The ORDER BY clause */
+  } *const aOrderBy;         /* The ORDER BY clause */
 
   /* Outputs */
   struct sqlite3_index_constraint_usage {
     int argvIndex;           /* if >0, constraint is part of argv to xFilter */
     unsigned char omit;      /* Do not code a test for this constraint */
-  } *aConstraintUsage;
+  } *const aConstraintUsage;
   int idxNum;                /* Number used to identify the index */
   char *idxStr;              /* String, possibly obtained from sqlite3_malloc */
   int needToFreeIdxStr;      /* Free idxStr using sqlite3_free() if true */
@@ -1668,10 +1789,21 @@ int sqlite3_create_module(
 ** be taylored to the specific needs of the module implementation.   The
 ** purpose of this superclass is to define certain fields that are common
 ** to all module implementations.
+**
+** Virtual tables methods can set an error message by assigning a
+** string obtained from sqlite3_mprintf() to zErrMsg.  The method should
+** take care that any prior string is freed by a call to sqlite3_free()
+** prior to assigning a new string to zErrMsg.  After the error message
+** is delivered up to the client application, the string will be automatically
+** freed by sqlite3_free() and the zErrMsg field will be zeroed.  Note
+** that sqlite3_mprintf() and sqlite3_free() are used on the zErrMsg field
+** since virtual tables are commonly implemented in loadable extensions which
+** do not have access to sqlite3MPrintf() or sqlite3Free().
 */
 struct sqlite3_vtab {
   const sqlite3_module *pModule;  /* The module for this virtual table */
   int nRef;                       /* Used internally */
+  char *zErrMsg;                  /* Error message from sqlite3_mprintf() */
   /* Virtual table implementations will typically add additional fields */
 };
 
@@ -1695,6 +1827,24 @@ struct sqlite3_vtab_cursor {
 ** the virtual tables they implement.
 */
 int sqlite3_declare_vtab(sqlite3*, const char *zCreateTable);
+
+/*
+** Virtual tables can provide alternative implementations of functions
+** using the xFindFunction method.  But global versions of those functions
+** must exist in order to be overloaded.
+**
+** This API makes sure a global version of a function with a particular
+** name and number of parameters exists.  If no such function exists
+** before this API is called, a new function is created.  The implementation
+** of the new function always causes an exception to be thrown.  So
+** the new function is not good for anything by itself.  Its only
+** purpose is to be a place-holder function that can be overloaded
+** by virtual tables.
+**
+** This API should be considered part of the virtual table interface,
+** which is experimental and subject to change.
+*/
+int sqlite3_overload_function(sqlite3*, const char *zFuncName, int nArg);
 
 /*
 ** The interface to the virtual-table mechanism defined above (back up
