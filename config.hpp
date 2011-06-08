@@ -124,6 +124,7 @@ enum {TO_ROOM, TO_NOTVICT, TO_VICT, TO_CHAR };
 #define ACT_PET         1 << 8 /* Auto set for pets    */
 #define ACT_TRAIN       1 << 9 /* Can train PC's   */
 #define ACT_PRACTICE    1 << 10     /* Can practice PC's    */
+#define ACT_EXTRACT     1 << 11    /* Mob dead...wating for extraction */
 
 /*
  * Bits for 'affected_by'.
@@ -363,6 +364,7 @@ enum {POS_DEAD, POS_MORTAL, POS_INCAP, POS_STUNNED, POS_SLEEPING,
 #define PLR_FREEZE      1 << 21
 #define PLR_THIEF       1 << 22
 #define PLR_KILLER      1 << 23
+#define PLR_EXTRACT     1 << 24
 
 /*
  * Channel bits.

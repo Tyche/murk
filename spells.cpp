@@ -988,7 +988,7 @@ void Character::spell_invis (int sn, int lvl, void *vo)
 void Character::spell_know_alignment (int sn, int lvl, void *vo)
 {
   Character *victim = (Character *) vo;
-  char *msg;
+  const char *msg;
 
   int ap = victim->alignment;
 
@@ -1045,7 +1045,7 @@ void Character::spell_locate_object (int sn, int lvl, void *vo)
 
     found = true;
 
-    for (in_obj = *o; in_obj->in_obj != NULL; in_obj = in_obj->in_obj);
+    for (in_obj = *o; in_obj->in_obj != NULL; in_obj = in_obj->in_obj) ;
 
     if (in_obj->carried_by != NULL) {
       buf += (*o)->short_descr + " carried by " + in_obj->carried_by->describe_to(this) + "\r\n";
@@ -1458,7 +1458,7 @@ void Character::spell_fire_breath (int sn, int lvl, void *vo)
     for (o = victim->carrying.begin(); o != victim->carrying.end(); o = onext) {
       obj_lose = *o;
       onext = ++o;
-      char *msg;
+      const char *msg;
 
       if (number_percent() <= 75)
         continue;
@@ -1512,7 +1512,7 @@ void Character::spell_frost_breath (int sn, int lvl, void *vo)
     for (o = victim->carrying.begin(); o != victim->carrying.end(); o = onext) {
       obj_lose = *o;
       onext = ++o;
-      char *msg;
+      const char *msg;
 
       if (number_percent() <= 75)
         continue;

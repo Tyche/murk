@@ -8,8 +8,8 @@ AR = lib
 WINZIP = C:\apps\Winzip\wzzip
 
 MSGS= -w2 -w7
-DEFS= -DWIN32 -DWIN32_LEAN_AND_MEAN -DNDEBUG -DSQLITE_OMIT_UTF16 -DSQLITE_OMIT_AUTHORIZATION -DSQLITE_OMIT_TCL_VARIABLE
-OPTIM = -o -Ae # -$(PROCESSOR_LEVEL) 
+DEFS = -DWIN32 -DWIN32_LEAN_AND_MEAN -DSQLITE_THREADSAFE=0
+OPTIM = -o -5
 CFLAGS= $(OPTIM) $(MSGS) $(DEFS)
 
 # Need DMC STLport version too.
@@ -17,39 +17,15 @@ INCS = -Isqlite3 -IC:\apps\dm\stlport\stlport
 LIBS   = wsock32.lib
 LFLAGS = 
 
-SQLITE_SRC = sqlite3\alter.c sqlite3\analyze.c sqlite3\attach.c \
-	sqlite3\auth.c sqlite3\btree.c sqlite3\build.c sqlite3\callback.c \
-	sqlite3\complete.c sqlite3\date.c sqlite3\delete.c sqlite3\expr.c \
-	sqlite3\func.c sqlite3\hash.c sqlite3\insert.c sqlite3\legacy.c \
-	sqlite3\loadext.c sqlite3\main.c sqlite3\opcodes.c sqlite3\os.c \
-	sqlite3\os_unix.c sqlite3\os_win.c sqlite3\pager.c sqlite3\parse.c \
-	sqlite3\pragma.c sqlite3\prepare.c sqlite3\printf.c sqlite3\random.c \
-	sqlite3\select.c sqlite3\table.c sqlite3\tokenize.c sqlite3\trigger.c \
-	sqlite3\update.c sqlite3\utf.c sqlite3\util.c sqlite3\vacuum.c \
-	sqlite3\vdbe.c sqlite3\vdbeapi.c sqlite3\vdbeaux.c sqlite3\vdbefifo.c \
-	sqlite3\vdbemem.c sqlite3\vtab.c sqlite3\where.c
-SQLITE_OBJ = sqlite3\alter.obj sqlite3\analyze.obj sqlite3\attach.obj \
-	sqlite3\auth.obj sqlite3\btree.obj sqlite3\build.obj sqlite3\callback.obj \
-	sqlite3\complete.obj sqlite3\date.obj sqlite3\delete.obj sqlite3\expr.obj \
-	sqlite3\func.obj sqlite3\hash.obj sqlite3\insert.obj sqlite3\legacy.obj \
-	sqlite3\loadext.obj sqlite3\main.obj sqlite3\opcodes.obj sqlite3\os.obj \
-	sqlite3\os_unix.obj sqlite3\os_win.obj sqlite3\pager.obj sqlite3\parse.obj \
-	sqlite3\pragma.obj sqlite3\prepare.obj sqlite3\printf.obj sqlite3\random.obj \
-	sqlite3\select.obj sqlite3\table.obj sqlite3\tokenize.obj sqlite3\trigger.obj \
-	sqlite3\update.obj sqlite3\utf.obj sqlite3\util.obj sqlite3\vacuum.obj \
-	sqlite3\vdbe.obj sqlite3\vdbeapi.obj sqlite3\vdbeaux.obj sqlite3\vdbefifo.obj \
-	sqlite3\vdbemem.obj sqlite3\vtab.obj sqlite3\where.obj
+SQLITE_SRC = sqlite3\sqlite3.c 
+SQLITE_OBJ = sqlite3\sqlite3.obj 
 SQLITE_LIB = sqlite3\sqlite3.lib
 
 SQLITE_PRG_SRC = sqlite3\shell.c 
 SQLITE_PRG_OBJ = sqlite3\shell.obj
 SQLITE_PRG = sqlite3\sqlite3.exe 
 
-SQLITE_XTRA = sqlite3\sqlite3.def sqlite3\btree.h \
-	sqlite3\os.h sqlite3\sqlite3.h sqlite3\vdbeInt.h sqlite3\hash.h \
-	sqlite3\os_common.h sqlite3\sqlite3ext.h sqlite3\keywordhash.h \
-	sqlite3\pager.h sqlite3\sqliteInt.h sqlite3\opcodes.h sqlite3\parse.h \
-	sqlite3\vdbe.h
+SQLITE_XTRA = sqlite3\sqlite3.h sqlite3\sqlite3ext.h 
 
 MURK_UTIL_SRC = loadhelps.cpp
 MURK_UTIL_OBJ = loadhelps.obj             
@@ -66,7 +42,6 @@ MURK_HDR = os.hpp config.hpp descriptor.hpp character.hpp pcdata.hpp utils.hpp \
 	objproto.hpp affect.hpp exit.hpp extra.hpp ban.hpp shop.hpp reset.hpp \
 	io.hpp symbols.hpp database.hpp spell_list.hpp cmd_list.hpp \
 	baseobject.hpp world.hpp
-
 
 # Data files Areas, Mobprogs and Players
 DATAFILES = area.lst limbo.are mid_cit.prg midgaard.are school.are help.are \

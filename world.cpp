@@ -220,7 +220,7 @@ int World::hour(void) {
 std::string World::world_time(void) {
   std::string buf;
 
-  char *suf;
+  const char *suf;
 
   int day = time_info.day + 1;
 
@@ -254,7 +254,7 @@ std::string World::world_time(void) {
 }
 
 std::string World::world_weather(void) {
-  static char *const sky_look[4] = {
+  static const char * sky_look[4] = {
     "cloudless",
     "cloudy",
     "rainy",
@@ -340,7 +340,7 @@ std::string World::list_areas(void) {
   iAreaHalf = (Area::top_area + 1) / 2;
   pArea1 = pArea2 = area_list.begin();
 
-  for (iArea = 0; iArea < iAreaHalf; iArea++, pArea2++);
+  for (iArea = 0; iArea < iAreaHalf; iArea++, pArea2++) ;
 
   for (iArea = 0; iArea < iAreaHalf; iArea++, pArea1++, pArea2++) {
     snprintf (buf, sizeof buf, "%-39s%-39s\r\n",

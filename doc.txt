@@ -8,6 +8,16 @@ Merc Diku Mud is a Diku Mud with many enhancements and contributions.
 
 Murk++ was compiled and tested on...
 
+* Microsoft Windows 7 Service Pack 1
+  Microsoft Visual C/C++ v6.0 
+  Microsoft Visual C/C++ v10.0 (Visual C++ 2010 Express)
+  Embarcadero C++ 6.30 for Win32
+  Borland C++ 5.5.1 for Win32 (free compiler release)
+  Digital Mars C/C++ Compiler Version 8.42n
+  CYGWIN_NT-6.1-WOW64 1.7.9(0.237/5/3) using gcc 4.3.4
+
+Murk++ was previously compiled and tested on...
+
 * Microsoft Windows XP Service Pack 2 
   CYGWIN_NT-5.1 1.5.23(0.156/4/2) using g++ (GCC) 3.4.4 (cygming special)
   Borland C++ 5.5.1 for Win32 (free compiler release)
@@ -27,6 +37,14 @@ Murk++ was compiled and tested on...
 
 Version 1.6
 
+* Updated to sqlite 3.7.6.3
+* Delayed extraction of characters by moving it to update routine. 
+
+Version 1.6
+
+* Added schemas for areas, rooms, objects, affects, extra descriptions (unused)
+* Updated to sqlite 3.3.12
+* Updated documentation and help files
 * Added gag/ignore command and support for lists in player files.
 * Hotboot command and capability added (Windows only).
 * Removed invis and reboot commands.

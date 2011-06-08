@@ -2089,7 +2089,7 @@ void Character::do_compare (std::string argument)
     }
   }
 
-  char* msg = NULL;
+  const char* msg = NULL;
   int value1 = 0;
   int value2 = 0;
 
@@ -3604,7 +3604,7 @@ void Character::do_train (std::string argument)
 
   std::string buf;
   sh_int ability;
-  char *pOutput;
+  const char *pOutput;
 
   /*
    * Check for trainer.
@@ -4902,7 +4902,7 @@ void Character::do_list (std::string argument)
     std::string arg;
     Character *keeper;
     Object *obj;
-    int cost;
+    int cost = 0;
     bool found;
 
     one_argument (argument, arg);
@@ -7239,7 +7239,7 @@ void Character::do_owhere (std::string argument)
 
       found = true;
 
-      for (in_obj = *o; in_obj->in_obj != NULL; in_obj = in_obj->in_obj);
+      for (in_obj = *o; in_obj->in_obj != NULL; in_obj = in_obj->in_obj) ;
 
       if (in_obj->carried_by != NULL) {
         snprintf (buf, sizeof buf, "[%2d] %s carried by %s.\r\n", obj_counter,

@@ -127,7 +127,7 @@ void Character::send_to_char (const std::string & txt)
 /*
  * Append a string to a file.
  */
-void Character::append_file (char *file, const std::string & str)
+void Character::append_file (const char *file, const std::string & str)
 {
   if (is_npc () || str.empty())
     return;
@@ -222,9 +222,9 @@ bool Character::can_drop_obj (Object * obj)
  */
 void Character::act (const std::string & format, const void *arg1, const void *arg2, int type)
 {
-  static char *const he_she[] = { "it", "he", "she" };
-  static char *const him_her[] = { "it", "him", "her" };
-  static char *const his_her[] = { "its", "his", "her" };
+  static const char * he_she[] = { "it", "he", "she" };
+  static const char * him_her[] = { "it", "him", "her" };
+  static const char * his_her[] = { "its", "his", "her" };
 
   Character *vch = (Character *) arg2;
   Object *obj1 = (Object *) arg1;
@@ -1844,9 +1844,22 @@ void Character::get_obj (Object * obj, Object * container)
 }
 
 /*
- * Extract a char from the world.
+ * Flag a character as extractable
  */
 void Character::extract_char (bool fPull)
+{
+  if (is_npc())
+    SET_BIT(actflags, ACT_EXTRACT);
+  else
+    SET_BIT(actflags, PLR_EXTRACT);
+
+  extract_chars = true;
+}
+
+/*
+ * Extract a char from the world.
+ */
+void Character::extract_char_old (bool fPull)
 {
   Object *obj;
 

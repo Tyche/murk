@@ -9,33 +9,24 @@ WINZIP = C:\apps\Winzip\wzzip
 
 # Compiler directives for debugging
 !ifdef DEBUG
-DEBUG_CFLAGS = /MLd /ZI /Od /FD /GZ /D "DEBUG" 
+DEBUG_CFLAGS = /MTd /ZI /Od /DDEBUG 
 DEBUG_LFLAGS = /DEBUG /PDBTYPE:SEPT 
-LIBS= libcd.lib kernel32.lib ws2_32.lib libcpd.lib 
+LIBS= libcmtd.lib kernel32.lib ws2_32.lib 
 !else
-DEBUG_CFLAGS = /ML /O2 /D "NDEBUG" 
+DEBUG_CFLAGS = /MT /Ot /Oy /Ob2 /Gs /GF /Gy /DNDEBUG   
 DEBUG_LFLAGS = 
-LIBS= libc.lib kernel32.lib ws2_32.lib libcp.lib
+LIBS= libcmt.lib kernel32.lib ws2_32.lib 
 !endif
 
-DEFS= /D "WIN32" /D "WIN32_LEAN_AND_MEAN" /D "_CONSOLE" /D "_MBCS" /D "SQLITE_OMIT_UTF16" /D "SQLITE_OMIT_AUTHORIZATION"  /D "DSQLITE_OMIT_TCL_VARIABLE"
-OPTIM= /nologo /GX /W1 $(DEBUG_CFLAGS) # /G$(PROCESSOR_LEVEL) 
+DEFS= /DWIN32 /DWIN32_LEAN_AND_MEAN /D_CONSOLE /D_MBCS /D_CRT_SECURE_NO_DEPRECATE /D_CRT_NONSTDC_NO_DEPRECATE /D_USE_32BIT_TIME_T
+OPTIM= /nologo /W1 $(DEBUG_CFLAGS) 
+
 CFLAGS= $(OPTIM) $(DEFS)
 LFLAGS = /link /NOLOGO /NODEFAULTLIB /SUBSYSTEM:CONSOLE $(DEBUG_LFLAGS) 
 
 INCS = /Isqlite3
 
-SQLITE_SRC = sqlite3\alter.c sqlite3\analyze.c sqlite3\attach.c \
-	sqlite3\auth.c sqlite3\btree.c sqlite3\build.c sqlite3\callback.c \
-	sqlite3\complete.c sqlite3\date.c sqlite3\delete.c sqlite3\expr.c \
-	sqlite3\func.c sqlite3\hash.c sqlite3\insert.c sqlite3\legacy.c \
-	sqlite3\loadext.c sqlite3\main.c sqlite3\opcodes.c sqlite3\os.c \
-	sqlite3\os_unix.c sqlite3\os_win.c sqlite3\pager.c sqlite3\parse.c \
-	sqlite3\pragma.c sqlite3\prepare.c sqlite3\printf.c sqlite3\random.c \
-	sqlite3\select.c sqlite3\table.c sqlite3\tokenize.c sqlite3\trigger.c \
-	sqlite3\update.c sqlite3\utf.c sqlite3\util.c sqlite3\vacuum.c \
-	sqlite3\vdbe.c sqlite3\vdbeapi.c sqlite3\vdbeaux.c sqlite3\vdbefifo.c \
-	sqlite3\vdbemem.c sqlite3\vtab.c sqlite3\where.c
+SQLITE_SRC = sqlite3\sqlite3.c
 SQLITE_OBJ = $(SQLITE_SRC:.c=.obj)
 SQLITE_LIB = sqlite3\sqlite3.lib
 
@@ -43,11 +34,7 @@ SQLITE_PRG_SRC = sqlite3\shell.c
 SQLITE_PRG_OBJ = $(SQLITE_PRG_SRC:.c=.obj)
 SQLITE_PRG = sqlite3\sqlite3.exe 
 
-SQLITE_XTRA = sqlite3\sqlite3.def sqlite3\btree.h \
-	sqlite3\os.h sqlite3\sqlite3.h sqlite3\vdbeInt.h sqlite3\hash.h \
-	sqlite3\os_common.h sqlite3\sqlite3ext.h sqlite3\keywordhash.h \
-	sqlite3\pager.h sqlite3\sqliteInt.h sqlite3\opcodes.h sqlite3\parse.h \
-	sqlite3\vdbe.h
+SQLITE_XTRA = sqlite3\sqlite3.h sqlite3\sqlite3ext.h
 
 MURK_UTIL_SRC = loadhelps.cpp
 MURK_UTIL_OBJ = $(MURK_UTIL_SRC:.cpp=.obj)

@@ -75,6 +75,7 @@ extern std::ifstream * fpArea;
 extern std::string strArea;
 extern short g_port;
 extern SOCKET g_listen;
+extern bool extract_chars;
 
 extern std::string target_name;
 extern std::string dir_name[];

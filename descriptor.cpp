@@ -257,7 +257,7 @@ void Descriptor::show_string (const std::string & input) {
       write_to_buffer (buffer);
 
       /* See if this is the end (or near the end) of the string */
-      for (chk = showstr_point; isspace (*chk); chk++);
+      for (chk = showstr_point; isspace (*chk); chk++) ;
       if (!*chk) {
         if (showstr_head) {
           free(showstr_head);
@@ -421,7 +421,7 @@ void Descriptor::read_from_buffer ()
    */
   while (inbuf[i] == '\n' || inbuf[i] == '\r')
     i++;
-  for (j = 0; (inbuf[j] = inbuf[i + j]) != '\0'; j++);
+  for (j = 0; (inbuf[j] = inbuf[i + j]) != '\0'; j++) ;
   return;
 }
 

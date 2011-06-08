@@ -89,8 +89,8 @@ public:
   MobProgramActList *mpact;        /* Used by MOBprogram */
   int mpactnum;                 /* Used by MOBprogram */
 
-  Character::Character();
-  Character::~Character();
+  Character();
+  ~Character();
 
 #define CMD_DECL
 #include "cmd_list.hpp"
@@ -177,7 +177,7 @@ public:
   Object * get_obj_carry (const std::string & argument);
   Object * get_obj_here (const std::string & argument);
   void fwrite_char (std::ofstream & fp);
-  void append_file (char *file, const std::string & str);
+  void append_file (const char *file, const std::string & str);
   Character * get_char_room (const std::string & argument);
   Character * get_char_world (const std::string & argument);
   Object * get_obj_list (const std::string & argument, std::list<Object *> & list);
@@ -189,6 +189,7 @@ public:
   int find_door (const std::string & arg);
   void get_obj (Object * obj, Object * container);
   void extract_char (bool fPull);
+  void extract_char_old (bool fPull);
   void stop_idling ();
   void show_list_to_char (std::list<Object *> & list, bool fShort, bool fShowNothing);
   void show_char_to_char_0 (Character * victim);

@@ -79,6 +79,7 @@ std::string str_boot_time;
 std::string help_greeting;
 short g_port;
 SOCKET g_listen;
+bool extract_chars;
 
 /*
  * The kludgy global is for spells who want more stuff from command line.
@@ -1451,9 +1452,9 @@ void note_remove (Character * ch, Note * pnote)
 void mprog_translate (char ch, std::string & t, Character * mob, Character * actor,
   Object * obj, void *vo, Character * rndm)
 {
-  static char *he_she[] = { "it", "he", "she" };
-  static char *him_her[] = { "it", "him", "her" };
-  static char *his_her[] = { "its", "his", "her" };
+  static const char *he_she[] = { "it", "he", "she" };
+  static const char *him_her[] = { "it", "him", "her" };
+  static const char *his_her[] = { "its", "his", "her" };
   Character *vict = (Character *) vo;
   Object *v_obj = (Object *) vo;
 
@@ -3058,7 +3059,7 @@ void obj_update (void)
 
 try {
   for (o = object_list.begin(); o != object_list.end(); o = deepobnext) {
-    char *message;
+    const char *message;
     obj = *o;
     deepobnext = ++o;
 
@@ -3295,6 +3296,29 @@ try {
   return;
 }
 
+
+void extract_dead_characters()
+{
+  Character *curr;
+  CharIter c, next;
+  for (c = char_list.begin(); c != char_list.end(); c = next) {
+	curr = *c;
+    next = ++c;
+    if (curr->is_npc()) {
+      if (IS_SET(curr->actflags, ACT_EXTRACT)) {
+		  REMOVE_BIT(curr->actflags, ACT_EXTRACT);
+		  curr->extract_char_old(true);
+	  }
+    } else {
+      if (IS_SET(curr->actflags, PLR_EXTRACT)) {
+		  REMOVE_BIT(curr->actflags, PLR_EXTRACT);
+		  curr->extract_char_old(false);
+ 	  }
+	}
+  }
+}
+
+
 /*
  * Handle all kinds of updates.
  * Called once per pulse from game loop.
@@ -3331,6 +3355,11 @@ try {
   }
 
   aggr_update ();
+  if (extract_chars) {
+	  extract_dead_characters();
+	  extract_chars = false;
+  }
+
 } catch (...) {
   fatal_printf("update_handler() exception");
 }
@@ -3693,7 +3722,7 @@ void make_corpse (Character * ch)
 void death_cry (Character * ch)
 {
   Room *was_in_room;
-  char *msg;
+  const char *msg;
   int door;
   int vnum;
 
@@ -3911,7 +3940,7 @@ void group_gain (Character * ch, Character * victim)
 
 void dam_message (Character * ch, Character * victim, int dam, int dt)
 {
-  static char *const attack_table[] = {
+  static const char * attack_table[] = {
     "hit",
     "slice", "stab", "slash", "whip", "claw",
     "blast", "pound", "crush", "grep", "bite",
@@ -4390,8 +4419,8 @@ void say_spell (Character * ch, int sn)
   int length;
 
   struct syl_type {
-    char *old;
-    char *newsyl;
+    const char *old;
+    const char *newsyl;
   };
 
   static const struct syl_type syl_table[] = {
@@ -4559,7 +4588,7 @@ void load_mobprogs (std::ifstream & fp)
       }
 
       if ((original = iMob->mobprogs) != NULL)
-        for (; original->next != NULL; original = original->next);
+        for ( ; original->next != NULL; original = original->next) ;
       working = new MobProgram();
       if (original)
         original->next = working;
@@ -4796,7 +4825,7 @@ void mprog_speech_trigger (const std::string & txt, Character * mob)
 /*
  * Core procedure for dragons.
  */
-bool dragon (Character * ch, char *spell_name)
+bool dragon (Character * ch, const char *spell_name)
 {
   Character *victim = NULL;
   int sn;
@@ -4939,7 +4968,7 @@ bool spec_cast_adept (Character * ch)
 bool spec_cast_cleric (Character * ch)
 {
   Character *victim = NULL;
-  char *spell;
+  const char *spell;
   int sn;
 
   if (ch->position != POS_FIGHTING)
@@ -5017,7 +5046,7 @@ bool spec_cast_cleric (Character * ch)
 bool spec_cast_judge (Character * ch)
 {
   Character *victim = NULL;
-  char *spell;
+  const char *spell;
   int sn;
 
   if (ch->position != POS_FIGHTING)
@@ -5044,7 +5073,7 @@ bool spec_cast_judge (Character * ch)
 bool spec_cast_mage (Character * ch)
 {
   Character *victim = NULL;
-  char *spell;
+  const char *spell;
   int sn;
 
   if (ch->position != POS_FIGHTING)
@@ -5118,7 +5147,7 @@ bool spec_cast_mage (Character * ch)
 bool spec_cast_undead (Character * ch)
 {
   Character *victim = NULL;
-  char *spell;
+  const char *spell;
   int sn;
 
   if (ch->position != POS_FIGHTING)
@@ -5193,7 +5222,7 @@ bool spec_executioner (Character * ch)
     return false;
 
   Character *victim = NULL;
-  char *crime = "";
+  const char *crime = "";
   CharIter rch;
   for (rch = ch->in_room->people.begin(); rch != ch->in_room->people.end(); rch++) {
 
@@ -5260,7 +5289,7 @@ bool spec_guard (Character * ch)
   Character *victim = NULL;
   int max_evil = 300;
   Character* ech = NULL;
-  char* crime = "";
+  const char* crime = "";
   CharIter rch;
   for (rch = ch->in_room->people.begin(); rch != ch->in_room->people.end(); rch++) {
 
@@ -5472,7 +5501,7 @@ bool spec_thief (Character * ch)
  *  mob_prog bitvector types. It allows the words to show up in mpstat to
  *  make it just a hair bit easier to see what a mob should be doing.
  */
-char *mprog_type_to_name (int type)
+const char *mprog_type_to_name (int type)
 {
   switch (type) {
   case IN_FILE_PROG:
@@ -5625,7 +5654,7 @@ void Character::do_mpkill (std::string argument)
   }
 
   if (victim == this) {
-    bug_printf ("MpKill - Bad victim to attack from vnum %d.", pIndexData->vnum);
+    bug_printf ("MpKill - Victim is self from vnum %d.", pIndexData->vnum);
     return;
   }
 

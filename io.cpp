@@ -68,7 +68,7 @@ void bug_printf (const char * str, ...)
     iChar = fpArea->tellg();
     fpArea->seekg(0);
     for (iLine = 0; fpArea->tellg() < iChar; iLine++) {
-      while (fpArea->get() != '\n');
+      while (fpArea->get() != '\n') ;
     }
     fpArea->seekg(iChar);
 
