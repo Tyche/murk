@@ -44,7 +44,7 @@ World* World::instance() {
 }
 
 World::World() {
-  current_time = time(NULL);
+  current_time = std::time(NULL);
   /*
    * Set time and weather.
    */
@@ -98,7 +98,7 @@ void World::set_current_time(time_t tsecs) {
 }
 
 char* World::get_time_text(void) {
-  char * strtime = ctime (&current_time);
+  char * strtime = std::ctime (&current_time);
   strtime[strlen (strtime) - 1] = '\0';
   return strtime;
 }

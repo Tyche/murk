@@ -9,13 +9,21 @@ Merc Diku Mud is a Diku Mud with many enhancements and contributions.
 Murk++ was compiled and tested on...
 
 * Microsoft Windows 7 Service Pack 1
-  Microsoft Visual C/C++ v6.0 
   Microsoft Visual C/C++ v10.0 (Visual C++ 2010 Express)
   Embarcadero C++ 6.30 for Win32
   Borland C++ 5.5.1 for Win32 (free compiler release)
-  Digital Mars C/C++ Compiler Version 8.42n
+  Digital Mars C/C++ Compiler Version 8.52c (with STLPort 4.5.3)
   CYGWIN_NT-6.1-WOW64 1.7.9(0.237/5/3) using gcc 4.3.4
 
+* FreeBSD 8.1 amd64
+  g++ version 4.2.1 [FreeBSD] 
+
+* Ubuntu 10.04 amd64 
+  g++ (Ubuntu 4.4.3-4ubuntu5) 4.4.3 
+ 
+* Red Hat Fedora 12 i386 
+  gcc version 4.2.2
+ 
 Murk++ was previously compiled and tested on...
 
 * Microsoft Windows XP Service Pack 2 
@@ -39,6 +47,7 @@ Version 1.6
 
 * Updated to sqlite 3.7.6.3
 * Delayed extraction of characters by moving it to update routine. 
+* Support for Visual C++ 6.0 dropped.
 
 Version 1.6
 
@@ -146,6 +155,8 @@ SQLite is in the public domain.
 (2) Compile the mud:
 
   * For Linux and Cygwin - type 'make'.   
+    - You will need to edit the makefile to make sure the EXE suffix parameter 
+      is set correctly for Cygwin. 
 
   * For FreeBSD - type 'gmake'.
 

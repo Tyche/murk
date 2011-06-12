@@ -685,7 +685,7 @@ void Character::do_note (std::string argument)
       return;
     } else if (is_number (argument)) {
       fAll = false;
-      anum = atoi (argument.c_str());
+      anum = std::atoi (argument.c_str());
     } else {
       send_to_char ("Note read which number?\r\n");
       return;
@@ -789,7 +789,7 @@ void Character::do_note (std::string argument)
 
     notefile.open (NOTE_FILE, std::ofstream::out | std::ofstream::app | std::ofstream::binary);
     if (!notefile.is_open()) {
-      perror (NOTE_FILE);
+      std::perror (NOTE_FILE);
     } else {
       notefile << "Sender  " << pnote->sender << "~\n";
       notefile << "Date    " << pnote->date << "~\n";
@@ -811,7 +811,7 @@ void Character::do_note (std::string argument)
       return;
     }
 
-    anum = atoi (argument.c_str());
+    anum = std::atoi (argument.c_str());
     vnum = 0;
     std::list<Note*>::iterator next;
     for (std::list<Note*>::iterator p = note_list.begin();
@@ -1097,7 +1097,7 @@ void Character::do_gag (std::string argument)
   }
 
   std::list<std::string>::iterator fnd;
-  fnd = find(pcdata->gag_list.begin(), pcdata->gag_list.end(), gagname);
+  fnd = std::find(pcdata->gag_list.begin(), pcdata->gag_list.end(), gagname);
   if (fnd != pcdata->gag_list.end()) {
     pcdata->gag_list.remove(gagname);
     send_to_char ("Gag removed.\r\n");
@@ -1293,7 +1293,7 @@ void Character::do_split (std::string argument)
     return;
   }
 
-  int amount = atoi (arg.c_str());
+  int amount = std::atoi (arg.c_str());
 
   if (amount < 0) {
     send_to_char ("Your group wouldn't like that.\r\n");
@@ -1910,10 +1910,10 @@ void Character::do_who (std::string argument)
     if (is_number (arg)) {
       switch (++nNumber) {
       case 1:
-        iLevelLower = atoi (arg.c_str());
+        iLevelLower = std::atoi (arg.c_str());
         break;
       case 2:
-        iLevelUpper = atoi (arg.c_str());
+        iLevelUpper = std::atoi (arg.c_str());
         break;
       default:
         send_to_char ("Only two level numbers allowed.\r\n");
@@ -2424,7 +2424,7 @@ void Character::do_wimpy (std::string argument)
   if (arg.empty())
     wpy = max_hit / 5;
   else
-    wpy = atoi (arg.c_str());
+    wpy = std::atoi (arg.c_str());
 
   if (wpy < 0) {
     send_to_char ("Your courage exceeds your wisdom.\r\n");
@@ -2904,7 +2904,7 @@ void Character::do_pagelen (std::string argument)
   if (arg.empty())
     lines = 20;
   else
-    lines = atoi (arg.c_str());
+    lines = std::atoi (arg.c_str());
 
   if (lines < 1) {
     send_to_char
@@ -3938,7 +3938,7 @@ void Character::do_drop (std::string argument)
     /* 'drop NNNN coins' */
     int amount;
 
-    amount = atoi (arg.c_str());
+    amount = std::atoi (arg.c_str());
     argument = one_argument (argument, arg);
     if (amount <= 0 || (str_cmp (arg, "coins") && str_cmp (arg, "coin"))) {
       send_to_char ("Sorry, you can't do that.\r\n");
@@ -4041,7 +4041,7 @@ void Character::do_give (std::string argument)
     /* 'give NNNN coins victim' */
     int amount;
 
-    amount = atoi (arg1.c_str());
+    amount = std::atoi (arg1.c_str());
     if (amount <= 0 || (str_cmp (arg2, "coins") && str_cmp (arg2, "coin"))) {
       send_to_char ("Sorry, you can't do that.\r\n");
       return;
@@ -5140,7 +5140,7 @@ void Character::do_disconnect (std::string argument)
     return;
   }
 
-  DescIter d = find(descriptor_list.begin(),descriptor_list.end(),victim->desc);
+  DescIter d = std::find(descriptor_list.begin(),descriptor_list.end(),victim->desc);
   if (d != descriptor_list.end()) {
     (*d)->close_socket();
     send_to_char ("Ok.\r\n");
@@ -5779,7 +5779,7 @@ void Character::do_hotboo (std::string argument)
 
 void Character::do_hotboot (std::string argument)
 {
-#ifndef WIN32
+#if !defined(WIN32) || defined(__DMC__)
   send_to_char ("Hotboot not supported.\r\n");
 #else
   extern bool write_to_descriptor (SOCKET desc, const char *txt, int length);
@@ -5832,8 +5832,8 @@ void Character::do_hotboot (std::string argument)
     return;
   }
 
-  FILE* fp;
-  if ((fp = fopen ("hotboot.$$$", "w+b")) == NULL) {
+  std::FILE* fp;
+  if ((fp = std::fopen ("hotboot.$$$", "w+b")) == NULL) {
     send_to_char ("Hotboot aborted.\r\n");
     win_errprint("Error creating hotboot file");
     return;
@@ -5882,8 +5882,7 @@ void Character::do_hotboot (std::string argument)
   CloseHandle(shutdown_event);
   WIN32CLEANUP
   g_db->shutdown();
-  exit(0);
-
+  std::exit(0);
 #endif
   return;
 }
@@ -5989,7 +5988,7 @@ void Character::do_mload (std::string argument)
     return;
   }
 
-  if ((pMobIndex = get_mob_index (atoi (arg.c_str()))) == NULL) {
+  if ((pMobIndex = get_mob_index (std::atoi (arg.c_str()))) == NULL) {
     send_to_char ("No mob has that vnum.\r\n");
     return;
   }
@@ -6024,7 +6023,7 @@ void Character::do_oload (std::string argument)
       send_to_char ("Syntax: oload <vnum> <level>.\r\n");
       return;
     }
-    lvl = atoi (arg2.c_str());
+    lvl = std::atoi (arg2.c_str());
     if (lvl < 0 || lvl > get_trust ()) {
       send_to_char ("Limited to your trust level.\r\n");
       return;
@@ -6032,7 +6031,7 @@ void Character::do_oload (std::string argument)
   }
 
   ObjectPrototype *pObjIndex;
-  if ((pObjIndex = get_obj_index (atoi (arg1.c_str()))) == NULL) {
+  if ((pObjIndex = get_obj_index (std::atoi (arg1.c_str()))) == NULL) {
     send_to_char ("No object has that vnum.\r\n");
     return;
   }
@@ -6118,7 +6117,7 @@ void Character::do_advance (std::string argument)
     return;
   }
 
-  if ((lvl = atoi (arg2.c_str())) < 1 || lvl > 40) {
+  if ((lvl = std::atoi (arg2.c_str())) < 1 || lvl > 40) {
     send_to_char ("Level must be 1 to 40.\r\n");
     return;
   }
@@ -6186,7 +6185,7 @@ void Character::do_trust (std::string argument)
     return;
   }
 
-  if ((lvl = atoi (arg2.c_str())) < 0 || lvl > 40) {
+  if ((lvl = std::atoi (arg2.c_str())) < 0 || lvl > 40) {
     send_to_char ("Level must be 0 (reset) or 1 to 40.\r\n");
     return;
   }
@@ -6552,7 +6551,7 @@ void Character::do_sset (std::string argument)
     return;
   }
 
-  value = atoi (arg3.c_str());
+  value = std::atoi (arg3.c_str());
   if (value < 0 || value > 100) {
     send_to_char ("Value range is 0 to 100.\r\n");
     return;
@@ -6604,7 +6603,7 @@ void Character::do_mset (std::string argument)
   /*
    * Snarf the value (which need not be numeric).
    */
-  value = is_number (arg3) ? atoi (arg3.c_str()) : -1;
+  value = is_number (arg3) ? std::atoi (arg3.c_str()) : -1;
 
   /*
    * Set something.
@@ -6927,7 +6926,7 @@ void Character::do_oset (std::string argument)
   /*
    * Snarf the value (which need not be numeric).
    */
-  value = atoi (arg3.c_str());
+  value = std::atoi (arg3.c_str());
 
   /*
    * Set something.
@@ -7052,7 +7051,7 @@ void Character::do_rset (std::string argument)
     send_to_char ("Value must be numeric.\r\n");
     return;
   }
-  value = atoi (arg3.c_str());
+  value = std::atoi (arg3.c_str());
 
   /*
    * Set something.

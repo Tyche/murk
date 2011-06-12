@@ -9,16 +9,16 @@ WINZIP = C:\apps\Winzip\wzzip
 
 # Compiler directives for debugging
 !ifdef DEBUG
-DEBUG_CFLAGS = /MTd /ZI /Od /DDEBUG 
+DEBUG_CFLAGS = /MTd /ZI /Od /EHsc /DDEBUG 
 DEBUG_LFLAGS = /DEBUG /PDBTYPE:SEPT 
-LIBS= libcmtd.lib kernel32.lib ws2_32.lib 
+LIBS= libcmtd.lib kernel32.lib ws2_32.lib libcpmtd.lib
 !else
-DEBUG_CFLAGS = /MT /Ot /Oy /Ob2 /Gs /GF /Gy /DNDEBUG   
+DEBUG_CFLAGS = /MT /Ot /Oy /Ob2 /Gs /GF /Gy /EHsc /DNDEBUG   
 DEBUG_LFLAGS = 
-LIBS= libcmt.lib kernel32.lib ws2_32.lib 
+LIBS= libcmt.lib kernel32.lib ws2_32.lib libcpmt.lib
 !endif
 
-DEFS= /DWIN32 /DWIN32_LEAN_AND_MEAN /D_CONSOLE /D_MBCS /D_CRT_SECURE_NO_DEPRECATE /D_CRT_NONSTDC_NO_DEPRECATE /D_USE_32BIT_TIME_T
+DEFS= -DWIN32 -DWIN32_LEAN_AND_MEAN -D_CONSOLE -D_MBCS -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE -D_USE_32BIT_TIME_T 
 OPTIM= /nologo /W1 $(DEBUG_CFLAGS) 
 
 CFLAGS= $(OPTIM) $(DEFS)

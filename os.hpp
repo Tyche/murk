@@ -17,18 +17,20 @@
 /*-----------------------------------------------------------------------*/
 /* OS DEPENDENT INCLUDES AND DEFINITIONS                                 */
 /*-----------------------------------------------------------------------*/
+// c++ standard library
 #include <cstdlib>
-#include <stdio.h>
-#include <string.h>
-#include <ctype.h>
-#include <errno.h>
-#include <signal.h>
+#include <cstdio>
+#include <cstring>
+#include <cstdarg>
+#include <cctype>
+#include <cerrno>
+#include <csignal>
+#include <ctime>
+
 #include <fcntl.h>
-#include <time.h>
 #include <sys/types.h>
 #include "sqlite3/sqlite3.h"
 
-#include <cstdarg>
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -45,6 +47,12 @@ std::string itoa(int value, int base);
 /* WINDOWS DEFINITIONS SECTION                                           */
 /*-----------------------------------------------------------------------*/
 #ifdef WIN32                    /* Windows portability */
+
+#ifdef __BORLANDC__
+using std::snprintf;
+using std::vsnprintf;
+#endif
+
 #if defined _MSC_VER || defined __DMC__
 #define NOMINMAX
 #endif
@@ -61,14 +69,17 @@ std::string itoa(int value, int base);
     }
 #define WIN32CLEANUP WSACleanup();
 
+#undef EWOULDBLOCK
 #define EWOULDBLOCK       WSAEWOULDBLOCK
 
-#define OS_RAND rand
-#define OS_SRAND srand
+#define OS_RAND std::rand
+#define OS_SRAND std::srand
+
 #if defined _MSC_VER
 #define snprintf _snprintf
 #define vsnprintf _vsnprintf
 #endif
+
 #if defined __DMC__
 #define snprintf _snprintf
 #endif

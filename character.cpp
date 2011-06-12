@@ -117,7 +117,7 @@ void Character::send_to_char (const std::string & txt)
 {
   if (txt.empty() || desc == NULL)
     return;
-  desc->showstr_head = (char*)malloc(txt.size()+1);
+  desc->showstr_head = (char*)std::malloc(txt.size()+1);
   strncpy (desc->showstr_head, txt.c_str(), txt.size()+1);
   desc->showstr_point = desc->showstr_head;
   desc->show_string ("");
@@ -140,7 +140,7 @@ void Character::append_file (const char *file, const std::string & str)
       "] " << name << ": " << str << std::endl;
     outfile.close();
   } else {
-    perror (file);
+    std::perror (file);
     send_to_char ("Could not open the file!\r\n");
   }
   return;
@@ -1085,7 +1085,7 @@ void Character::save_char_obj ()
   fp.open (strsave, std::ofstream::out | std::ofstream::binary);
   if (!fp.is_open()) {
     bug_printf ("Save_char_obj: fopen");
-    perror (strsave);
+    std::perror (strsave);
   } else {
     ch->fwrite_char (fp);
     std::list<Object*>::reverse_iterator o;

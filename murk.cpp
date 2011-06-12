@@ -213,7 +213,7 @@ struct liq_type liq_table[LIQ_MAX] = {
 void multi_hit(Character *ch, Character *victim, int dt);
 void damage(Character *ch, Character *victim, int dam, int dt);
 
-bool dragon(Character *ch, char *spell_name);
+bool dragon(Character *ch, const char *spell_name);
 
 void mprog_act_trigger(const std::string & buf, Character *mob, Character *ch, Object *obj, void *vo);
 void mprog_bribe_trigger(Character *mob, Character *ch, int amount);
@@ -838,7 +838,7 @@ bool write_to_descriptor (SOCKET desc, const char *txt, int length)
   for (iStart = 0; iStart < length; iStart += nWrite) {
     nBlock = std::min (length - iStart, 4096);
     if ((nWrite = send (desc, txt + iStart, nBlock, 0)) == SOCKET_ERROR) {
-      perror ("Write_to_descriptor");
+      std::perror ("Write_to_descriptor");
       return false;
     }
   }
@@ -1412,7 +1412,7 @@ void note_remove (Character * ch, Note * pnote)
   /*
    * Remove note from linked list.
    */
-  note_list.erase(find(note_list.begin(),note_list.end(),pnote));
+  note_list.erase(std::find(note_list.begin(),note_list.end(),pnote));
   delete pnote;
 
   /*
@@ -1422,7 +1422,7 @@ void note_remove (Character * ch, Note * pnote)
 
   notefile.open (NOTE_FILE, std::ofstream::out | std::ofstream::binary);
   if (!notefile.is_open()) {
-    perror (NOTE_FILE);
+    std::perror (NOTE_FILE);
   } else {
     for (std::list<Note*>::iterator p = note_list.begin();
       p != note_list.end(); p++) {
@@ -1807,7 +1807,7 @@ bool mprog_veval (int lhs, const std::string & opr, int rhs)
  * to reduce the redundancy of the mammoth if statement list.
  * If there are errors, then return -1 otherwise return boolean 1,0
  */
-bool mprog_do_ifchck (const std::string & ifchck, Character * mob,
+int mprog_do_ifchck (const std::string & ifchck, Character * mob,
   Character * actor, Object * obj, void *vo, Character * rndm)
 {
 
@@ -1902,7 +1902,7 @@ bool mprog_do_ifchck (const std::string & ifchck, Character * mob,
    */
 
   if (!str_cmp (buf, "rand")) {
-    return (number_percent () <= atoi (arg));
+    return (number_percent () <= std::atoi (arg));
   }
 
   if (!str_cmp (buf, "ispc")) {
@@ -2086,20 +2086,20 @@ bool mprog_do_ifchck (const std::string & ifchck, Character * mob,
   if (!str_cmp (buf, "isaffected")) {
     switch (arg[1]) {           /* arg should be "$*" so just get the letter */
     case 'i':
-      return (mob->affected_by & atoi (arg));
+      return (mob->affected_by & std::atoi (arg));
     case 'n':
       if (actor)
-        return (actor->affected_by & atoi (arg));
+        return (actor->affected_by & std::atoi (arg));
       else
         return -1;
     case 't':
       if (vict)
-        return (vict->affected_by & atoi (arg));
+        return (vict->affected_by & std::atoi (arg));
       else
         return -1;
     case 'r':
       if (rndm)
-        return (rndm->affected_by & atoi (arg));
+        return (rndm->affected_by & std::atoi (arg));
       else
         return -1;
     default:
@@ -2112,26 +2112,26 @@ bool mprog_do_ifchck (const std::string & ifchck, Character * mob,
     switch (arg[1]) {           /* arg should be "$*" so just get the letter */
     case 'i':
       lhsvl = mob->hit / mob->max_hit;
-      rhsvl = atoi (val);
+      rhsvl = std::atoi (val);
       return mprog_veval (lhsvl, opr, rhsvl);
     case 'n':
       if (actor) {
         lhsvl = actor->hit / actor->max_hit;
-        rhsvl = atoi (val);
+        rhsvl = std::atoi (val);
         return mprog_veval (lhsvl, opr, rhsvl);
       } else
         return -1;
     case 't':
       if (vict) {
         lhsvl = vict->hit / vict->max_hit;
-        rhsvl = atoi (val);
+        rhsvl = std::atoi (val);
         return mprog_veval (lhsvl, opr, rhsvl);
       } else
         return -1;
     case 'r':
       if (rndm) {
         lhsvl = rndm->hit / rndm->max_hit;
-        rhsvl = atoi (val);
+        rhsvl = std::atoi (val);
         return mprog_veval (lhsvl, opr, rhsvl);
       } else
         return -1;
@@ -2145,26 +2145,26 @@ bool mprog_do_ifchck (const std::string & ifchck, Character * mob,
     switch (arg[1]) {           /* arg should be "$*" so just get the letter */
     case 'i':
       lhsvl = mob->in_room->vnum;
-      rhsvl = atoi (val);
+      rhsvl = std::atoi (val);
       return mprog_veval (lhsvl, opr, rhsvl);
     case 'n':
       if (actor) {
         lhsvl = actor->in_room->vnum;
-        rhsvl = atoi (val);
+        rhsvl = std::atoi (val);
         return mprog_veval (lhsvl, opr, rhsvl);
       } else
         return -1;
     case 't':
       if (vict) {
         lhsvl = vict->in_room->vnum;
-        rhsvl = atoi (val);
+        rhsvl = std::atoi (val);
         return mprog_veval (lhsvl, opr, rhsvl);
       } else
         return -1;
     case 'r':
       if (rndm) {
         lhsvl = rndm->in_room->vnum;
-        rhsvl = atoi (val);
+        rhsvl = std::atoi (val);
         return mprog_veval (lhsvl, opr, rhsvl);
       } else
         return -1;
@@ -2178,26 +2178,26 @@ bool mprog_do_ifchck (const std::string & ifchck, Character * mob,
     switch (arg[1]) {           /* arg should be "$*" so just get the letter */
     case 'i':
       lhsvl = mob->sex;
-      rhsvl = atoi (val);
+      rhsvl = std::atoi (val);
       return mprog_veval (lhsvl, opr, rhsvl);
     case 'n':
       if (actor) {
         lhsvl = actor->sex;
-        rhsvl = atoi (val);
+        rhsvl = std::atoi (val);
         return mprog_veval (lhsvl, opr, rhsvl);
       } else
         return -1;
     case 't':
       if (vict) {
         lhsvl = vict->sex;
-        rhsvl = atoi (val);
+        rhsvl = std::atoi (val);
         return mprog_veval (lhsvl, opr, rhsvl);
       } else
         return -1;
     case 'r':
       if (rndm) {
         lhsvl = rndm->sex;
-        rhsvl = atoi (val);
+        rhsvl = std::atoi (val);
         return mprog_veval (lhsvl, opr, rhsvl);
       } else
         return -1;
@@ -2211,26 +2211,26 @@ bool mprog_do_ifchck (const std::string & ifchck, Character * mob,
     switch (arg[1]) {           /* arg should be "$*" so just get the letter */
     case 'i':
       lhsvl = mob->position;
-      rhsvl = atoi (val);
+      rhsvl = std::atoi (val);
       return mprog_veval (lhsvl, opr, rhsvl);
     case 'n':
       if (actor) {
         lhsvl = actor->position;
-        rhsvl = atoi (val);
+        rhsvl = std::atoi (val);
         return mprog_veval (lhsvl, opr, rhsvl);
       } else
         return -1;
     case 't':
       if (vict) {
         lhsvl = vict->position;
-        rhsvl = atoi (val);
+        rhsvl = std::atoi (val);
         return mprog_veval (lhsvl, opr, rhsvl);
       } else
         return -1;
     case 'r':
       if (rndm) {
         lhsvl = rndm->position;
-        rhsvl = atoi (val);
+        rhsvl = std::atoi (val);
         return mprog_veval (lhsvl, opr, rhsvl);
       } else
         return -1;
@@ -2244,26 +2244,26 @@ bool mprog_do_ifchck (const std::string & ifchck, Character * mob,
     switch (arg[1]) {           /* arg should be "$*" so just get the letter */
     case 'i':
       lhsvl = mob->get_trust ();
-      rhsvl = atoi (val);
+      rhsvl = std::atoi (val);
       return mprog_veval (lhsvl, opr, rhsvl);
     case 'n':
       if (actor) {
         lhsvl = actor->get_trust ();
-        rhsvl = atoi (val);
+        rhsvl = std::atoi (val);
         return mprog_veval (lhsvl, opr, rhsvl);
       } else
         return -1;
     case 't':
       if (vict) {
         lhsvl = vict->get_trust ();
-        rhsvl = atoi (val);
+        rhsvl = std::atoi (val);
         return mprog_veval (lhsvl, opr, rhsvl);
       } else
         return -1;
     case 'r':
       if (rndm) {
         lhsvl = rndm->get_trust ();
-        rhsvl = atoi (val);
+        rhsvl = std::atoi (val);
         return mprog_veval (lhsvl, opr, rhsvl);
       } else
         return -1;
@@ -2277,26 +2277,26 @@ bool mprog_do_ifchck (const std::string & ifchck, Character * mob,
     switch (arg[1]) {           /* arg should be "$*" so just get the letter */
     case 'i':
       lhsvl = mob->klass;
-      rhsvl = atoi (val);
+      rhsvl = std::atoi (val);
       return mprog_veval (lhsvl, opr, rhsvl);
     case 'n':
       if (actor) {
         lhsvl = actor->klass;
-        rhsvl = atoi (val);
+        rhsvl = std::atoi (val);
         return mprog_veval (lhsvl, opr, rhsvl);
       } else
         return -1;
     case 't':
       if (vict) {
         lhsvl = vict->klass;
-        rhsvl = atoi (val);
+        rhsvl = std::atoi (val);
         return mprog_veval (lhsvl, opr, rhsvl);
       } else
         return -1;
     case 'r':
       if (rndm) {
         lhsvl = rndm->klass;
-        rhsvl = atoi (val);
+        rhsvl = std::atoi (val);
         return mprog_veval (lhsvl, opr, rhsvl);
       } else
         return -1;
@@ -2310,26 +2310,26 @@ bool mprog_do_ifchck (const std::string & ifchck, Character * mob,
     switch (arg[1]) {           /* arg should be "$*" so just get the letter */
     case 'i':
       lhsvl = mob->gold;
-      rhsvl = atoi (val);
+      rhsvl = std::atoi (val);
       return mprog_veval (lhsvl, opr, rhsvl);
     case 'n':
       if (actor) {
         lhsvl = actor->gold;
-        rhsvl = atoi (val);
+        rhsvl = std::atoi (val);
         return mprog_veval (lhsvl, opr, rhsvl);
       } else
         return -1;
     case 't':
       if (vict) {
         lhsvl = vict->gold;
-        rhsvl = atoi (val);
+        rhsvl = std::atoi (val);
         return mprog_veval (lhsvl, opr, rhsvl);
       } else
         return -1;
     case 'r':
       if (rndm) {
         lhsvl = rndm->gold;
-        rhsvl = atoi (val);
+        rhsvl = std::atoi (val);
         return mprog_veval (lhsvl, opr, rhsvl);
       } else
         return -1;
@@ -2344,14 +2344,14 @@ bool mprog_do_ifchck (const std::string & ifchck, Character * mob,
     case 'o':
       if (obj) {
         lhsvl = obj->item_type;
-        rhsvl = atoi (val);
+        rhsvl = std::atoi (val);
         return mprog_veval (lhsvl, opr, rhsvl);
       } else
         return -1;
     case 'p':
       if (v_obj) {
         lhsvl = v_obj->item_type;
-        rhsvl = atoi (val);
+        rhsvl = std::atoi (val);
         return mprog_veval (lhsvl, opr, rhsvl);
       } else
         return -1;
@@ -2366,14 +2366,14 @@ bool mprog_do_ifchck (const std::string & ifchck, Character * mob,
     case 'o':
       if (obj) {
         lhsvl = obj->value[0];
-        rhsvl = atoi (val);
+        rhsvl = std::atoi (val);
         return mprog_veval (lhsvl, opr, rhsvl);
       } else
         return -1;
     case 'p':
       if (v_obj) {
         lhsvl = v_obj->value[0];
-        rhsvl = atoi (val);
+        rhsvl = std::atoi (val);
         return mprog_veval (lhsvl, opr, rhsvl);
       } else
         return -1;
@@ -2388,14 +2388,14 @@ bool mprog_do_ifchck (const std::string & ifchck, Character * mob,
     case 'o':
       if (obj) {
         lhsvl = obj->value[1];
-        rhsvl = atoi (val);
+        rhsvl = std::atoi (val);
         return mprog_veval (lhsvl, opr, rhsvl);
       } else
         return -1;
     case 'p':
       if (v_obj) {
         lhsvl = v_obj->value[1];
-        rhsvl = atoi (val);
+        rhsvl = std::atoi (val);
         return mprog_veval (lhsvl, opr, rhsvl);
       } else
         return -1;
@@ -2410,14 +2410,14 @@ bool mprog_do_ifchck (const std::string & ifchck, Character * mob,
     case 'o':
       if (obj) {
         lhsvl = obj->value[2];
-        rhsvl = atoi (val);
+        rhsvl = std::atoi (val);
         return mprog_veval (lhsvl, opr, rhsvl);
       } else
         return -1;
     case 'p':
       if (v_obj) {
         lhsvl = v_obj->value[2];
-        rhsvl = atoi (val);
+        rhsvl = std::atoi (val);
         return mprog_veval (lhsvl, opr, rhsvl);
       } else
         return -1;
@@ -2432,14 +2432,14 @@ bool mprog_do_ifchck (const std::string & ifchck, Character * mob,
     case 'o':
       if (obj) {
         lhsvl = obj->value[3];
-        rhsvl = atoi (val);
+        rhsvl = std::atoi (val);
         return mprog_veval (lhsvl, opr, rhsvl);
       } else
         return -1;
     case 'p':
       if (v_obj) {
         lhsvl = v_obj->value[3];
-        rhsvl = atoi (val);
+        rhsvl = std::atoi (val);
         return mprog_veval (lhsvl, opr, rhsvl);
       } else
         return -1;
@@ -2453,13 +2453,13 @@ bool mprog_do_ifchck (const std::string & ifchck, Character * mob,
     switch (arg[1]) {           /* arg should be "$*" so just get the letter */
     case 'i':
       lhsvl = mob->gold;
-      rhsvl = atoi (val);
+      rhsvl = std::atoi (val);
       return mprog_veval (lhsvl, opr, rhsvl);
     case 'n':
       if (actor) {
         if (actor->is_npc ()) {
           lhsvl = actor->pIndexData->vnum;
-          rhsvl = atoi (val);
+          rhsvl = std::atoi (val);
           return mprog_veval (lhsvl, opr, rhsvl);
           }
       } else
@@ -2468,7 +2468,7 @@ bool mprog_do_ifchck (const std::string & ifchck, Character * mob,
       if (vict) {
         if (actor->is_npc ()) {
           lhsvl = vict->pIndexData->vnum;
-          rhsvl = atoi (val);
+          rhsvl = std::atoi (val);
           return mprog_veval (lhsvl, opr, rhsvl);
           }
       } else
@@ -2477,7 +2477,7 @@ bool mprog_do_ifchck (const std::string & ifchck, Character * mob,
       if (rndm) {
         if (actor->is_npc ()) {
           lhsvl = rndm->pIndexData->vnum;
-          rhsvl = atoi (val);
+          rhsvl = std::atoi (val);
           return mprog_veval (lhsvl, opr, rhsvl);
           }
       } else
@@ -2485,14 +2485,14 @@ bool mprog_do_ifchck (const std::string & ifchck, Character * mob,
     case 'o':
       if (obj) {
         lhsvl = obj->pIndexData->vnum;
-        rhsvl = atoi (val);
+        rhsvl = std::atoi (val);
         return mprog_veval (lhsvl, opr, rhsvl);
       } else
         return -1;
     case 'p':
       if (v_obj) {
         lhsvl = v_obj->pIndexData->vnum;
-        rhsvl = atoi (val);
+        rhsvl = std::atoi (val);
         return mprog_veval (lhsvl, opr, rhsvl);
       } else
         return -1;
@@ -3532,7 +3532,7 @@ Room *find_location (Character * ch, const std::string & arg)
   Object *obj;
 
   if (is_number (arg))
-    return get_room_index (atoi (arg.c_str()));
+    return get_room_index (std::atoi (arg.c_str()));
 
   if ((victim = ch->get_char_world (arg)) != NULL)
     return victim->in_room;
@@ -4608,7 +4608,7 @@ void mprog_percent_check (Character * mob, Character * actor, Object * obj,
 
   for (mprg = mob->pIndexData->mobprogs; mprg != NULL; mprg = mprg->next)
     if ((mprg->type & type)
-      && (number_percent () < atoi (mprg->arglist.c_str()))) {
+      && (number_percent () < std::atoi (mprg->arglist.c_str()))) {
       mprog_driver (mprg->comlist, mob, actor, obj, vo);
       if (type != GREET_PROG && type != ALL_GREET_PROG)
         break;
@@ -4674,7 +4674,7 @@ void mprog_bribe_trigger (Character * mob, Character * ch, int amount)
 
     for (mprg = mob->pIndexData->mobprogs; mprg != NULL; mprg = mprg->next)
       if ((mprg->type & BRIBE_PROG)
-        && (amount >= atoi (mprg->arglist.c_str()))) {
+        && (amount >= std::atoi (mprg->arglist.c_str()))) {
         mprog_driver (mprg->comlist, mob, ch, obj, NULL);
         break;
       }
@@ -4783,7 +4783,7 @@ void mprog_hitprcnt_trigger (Character * mob, Character * ch)
     && (mob->pIndexData->progtypes & HITPRCNT_PROG))
     for (mprg = mob->pIndexData->mobprogs; mprg != NULL; mprg = mprg->next)
       if ((mprg->type & HITPRCNT_PROG)
-        && ((100 * mob->hit / mob->max_hit) < atoi (mprg->arglist.c_str()))) {
+        && ((100 * mob->hit / mob->max_hit) < std::atoi (mprg->arglist.c_str()))) {
         mprog_driver (mprg->comlist, mob, ch, NULL, NULL);
         break;
       }
@@ -5814,7 +5814,7 @@ void Character::do_mpmload (std::string argument)
     return;
   }
 
-  if ((pMobIndex = get_mob_index (atoi (arg.c_str()))) == NULL) {
+  if ((pMobIndex = get_mob_index (std::atoi (arg.c_str()))) == NULL) {
     bug_printf ("Mpmload - Bad mob vnum from vnum %d.", pIndexData->vnum);
     return;
   }
@@ -5854,14 +5854,14 @@ void Character::do_mpoload (std::string argument)
       bug_printf ("Mpoload - Bad syntax from vnum %d.", pIndexData->vnum);
       return;
     }
-    lvl = atoi (arg2.c_str());
+    lvl = std::atoi (arg2.c_str());
     if (lvl < 0 || lvl > get_trust ()) {
       bug_printf ("Mpoload - Bad level from vnum %d.", pIndexData->vnum);
       return;
     }
   }
 
-  if ((pObjIndex = get_obj_index (atoi (arg1.c_str()))) == NULL) {
+  if ((pObjIndex = get_obj_index (std::atoi (arg1.c_str()))) == NULL) {
     bug_printf ("Mpoload - Bad vnum arg from vnum %d.", pIndexData->vnum);
     return;
   }
@@ -6143,7 +6143,7 @@ void new_descriptor (void)
   size = sizeof (sock);
   getsockname (g_listen, (struct sockaddr *) &sock, &size);
   if ((desc = accept (g_listen, (struct sockaddr *) &sock, &size)) == INVALID_SOCKET) {
-    perror ("New_descriptor: accept");
+    std::perror ("New_descriptor: accept");
     return;
   }
 #if !defined(FNDELAY)
@@ -6155,7 +6155,7 @@ void new_descriptor (void)
 #else
   if (fcntl (desc, F_SETFL, FNDELAY) == -1) {
 #endif
-    perror ("New_descriptor: fcntl: FNDELAY");
+    std::perror ("New_descriptor: fcntl: FNDELAY");
     return;
   }
 
@@ -6459,11 +6459,11 @@ int init_server_socket (void)
   return fd;
 }
 
-#ifdef WIN32
+#if defined(WIN32) && !defined(__DMC__)
 void hotboot(void) {
   WSAPROTOCOL_INFO proto_info;
   int count_users = 0;
-  FILE* fp;
+  std::FILE* fp;
   void* errmsg;
 
   // Open events created by parent server
@@ -6488,7 +6488,7 @@ void hotboot(void) {
     return;
   }
 
-  if ((fp = fopen ("hotboot.$$$", "r+b")) == NULL) {
+  if ((fp = std::fopen ("hotboot.$$$", "r+b")) == NULL) {
     win_errprint("Error opening hotboot file");
     CloseHandle(file_event);
     CloseHandle(shutdown_event);
@@ -6573,7 +6573,7 @@ int main (int argc, char **argv)
   if (argc > 1) {
     if (!is_number (argv[1])) {
       fatal_printf ("Usage: %s [port #]");
-    } else if ((g_port = atoi (argv[1])) <= 1024) {
+    } else if ((g_port = std::atoi (argv[1])) <= 1024) {
       fatal_printf("Port number must be above 1024.");
     }
   }
@@ -6581,7 +6581,7 @@ int main (int argc, char **argv)
   WIN32STARTUP
 
   // Run the game.
-#ifdef WIN32
+#if defined(WIN32) && !defined(__DMC__)
   if (argc < 3) g_listen = init_server_socket();
   g_db->boot();
   if (argc > 2) hotboot();

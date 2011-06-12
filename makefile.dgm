@@ -9,11 +9,11 @@ WINZIP = C:\apps\Winzip\wzzip
 
 MSGS= -w2 -w7
 DEFS = -DWIN32 -DWIN32_LEAN_AND_MEAN -DSQLITE_THREADSAFE=0
-OPTIM = -o -5
+OPTIM = -o -5 -Ae
 CFLAGS= $(OPTIM) $(MSGS) $(DEFS)
 
 # Need DMC STLport version too.
-INCS = -Isqlite3 -IC:\apps\dm\stlport\stlport
+INCS = -Isqlite3 -IC:\devtools\dm\stlport\stlport
 LIBS   = wsock32.lib
 LFLAGS = 
 

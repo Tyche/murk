@@ -45,8 +45,8 @@ void log_printf (const char * str, ...) {
   vsnprintf (buf, sizeof buf, str, args);
   va_end (args);
 
-  time_t tm = time(NULL);
-  char * strtime = ctime (&tm);
+  time_t tm = std::time(NULL);
+  char * strtime = std::ctime (&tm);
   strtime[strlen (strtime) - 1] = '\0';
   std::cerr << strtime << " :: " << buf << std::endl;
   return;
@@ -112,7 +112,7 @@ void fatal_printf (const char * str, ...)
   bug_printf (buf);
   WIN32CLEANUP
 //  g_db->shutdown();
-  abort();
+  std::abort();
   return;
 }
 

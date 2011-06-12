@@ -44,7 +44,7 @@ std::string itoa(int value, int base) {
  */
 void gettimeofday (struct timeval *tp, struct timezone *tzp)
 {
-  tp->tv_sec = time (NULL);
+  tp->tv_sec = std::time (NULL);
   tp->tv_usec = (GetTickCount () % 1000) * 1000;
 }
 

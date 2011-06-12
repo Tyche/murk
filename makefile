@@ -18,8 +18,8 @@ CC = gcc
 AR = ar
 
 # The suffix appended to executables.  
-# This should be set for Cygwin and Windows.
-EXE = .exe
+# This should be set for Cygwin.
+#EXE = .exe
 #EXE =
 
 OPTIM = -O2 -pipe 
@@ -31,7 +31,7 @@ CFLAGS = $(OPTIM) $(DEFS) $(WARN) -fno-strict-aliasing
 LFLAGS = $(OPTIM) $(PROF) 
 
 INCS = -Isqlite3 
-LIBS = -lcrypt 
+LIBS = -lcrypt -ldl -lpthread
 
 SQLITE_SRC = sqlite3/sqlite3.c
 SQLITE_OBJ = $(SQLITE_SRC:.c=.o)
@@ -81,7 +81,7 @@ $(SQLITE_LIB): $(SQLITE_OBJ)
 	$(AR) rsc $@ $^
 
 $(SQLITE_PRG): $(SQLITE_PRG_OBJ) $(SQLITE_LIB)
-	$(CC) $(LFLAGS) -o $@ $^ -dl
+	$(CC) $(LFLAGS) -o $@ $^ $(LIBS)
 
 murk$(EXE): $(MURK_OBJ) $(SQLITE_LIB) 
 	@-rm murkold$(EXE)

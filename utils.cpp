@@ -232,7 +232,7 @@ int number_argument (const std::string & argument, std::string & arg)
   arg.erase();
   if ((pos = argument.find(".")) != std::string::npos) {
     arg = argument.substr(pos+1);
-    return atoi (argument.substr(0, pos).c_str());
+    return std::atoi (argument.substr(0, pos).c_str());
   }
   arg = argument;
   return 1;

@@ -222,7 +222,7 @@ void Descriptor::show_string (const std::string & input) {
 
     default:                     /*otherwise, stop the text viewing */
       if (showstr_head) {
-        free(showstr_head);
+        std::free(showstr_head);
         showstr_head = NULL;
       }
       showstr_point = 0;
@@ -260,7 +260,7 @@ void Descriptor::show_string (const std::string & input) {
       for (chk = showstr_point; isspace (*chk); chk++) ;
       if (!*chk) {
         if (showstr_head) {
-          free(showstr_head);
+          std::free(showstr_head);
           showstr_head = NULL;
         }
         showstr_point = 0;
@@ -486,7 +486,7 @@ void Descriptor::close_socket ()
   }
 
   deepdenext = descriptor_list.erase(
-     find(descriptor_list.begin(),descriptor_list.end(),this));
+     std::find(descriptor_list.begin(),descriptor_list.end(),this));
   closesocket (descriptor);
   delete this;
   return;
@@ -525,7 +525,7 @@ bool Descriptor::read_from_descriptor ()
     } else if (GETERROR == EWOULDBLOCK)
       break;
     else {
-      perror ("Read_from_descriptor");
+      std::perror ("Read_from_descriptor");
       return false;
     }
   }
@@ -832,7 +832,7 @@ void Descriptor::assign_hostname (void)
 #endif
 
   if (getpeername (descriptor, (struct sockaddr *) &sock, &size) < 0) {
-    perror ("New_descriptor: getpeername");
+    std::perror ("New_descriptor: getpeername");
     host = "(unknown)";
   } else {
     int addr = ntohl (sock.sin_addr.s_addr);
