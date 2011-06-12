@@ -43,11 +43,13 @@ Murk++ was previously compiled and tested on...
 
 === Release Information
 
-Version 1.6
+Version 1.7
 
 * Updated to sqlite 3.7.6.3
 * Delayed extraction of characters by moving it to update routine. 
 * Support for Visual C++ 6.0 dropped.
+* Fixed many g++ 4.x errors 
+* Switched headers to point to C++ standard library and std namespace. 
 
 Version 1.6
 
