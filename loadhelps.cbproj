@@ -1,4 +1,4 @@
-	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 		<PropertyGroup>
 			<ProjectGuid>{E911A9C5-0789-46E0-802F-EC011FCCE170}</ProjectGuid>
 			<ProjectVersion>12.2</ProjectVersion>
@@ -44,6 +44,8 @@
 			<ILINK_TranslatedLibraryPath>$(BDSLIB)\$(PLATFORM)\release\$(LANGDIR);$(ILINK_TranslatedLibraryPath)</ILINK_TranslatedLibraryPath>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1)'!=''">
+			<BCC_weff>false</BCC_weff>
+			<BCC_wpia>false</BCC_wpia>
 			<BCC_PCHUsage>None</BCC_PCHUsage>
 			<BCC_SmartPCHCache>false</BCC_SmartPCHCache>
 			<BCC_Defines>WIN32;WIN32_LEAN_AND_MEAN;$(BCC_Defines)</BCC_Defines>

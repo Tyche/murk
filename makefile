@@ -26,6 +26,7 @@ OPTIM = -O2 -pipe
 WARN = -Wall -Wno-parentheses -Wno-unused 
 PROF    = -g
 
+DEFS = -DSQLITE_ENABLE_FTS4 -DSQLITE_ENABLE_RTREE 
 CPPFLAGS = $(OPTIM) $(WARN) -W $(PROF) -fno-default-inline 
 CFLAGS = $(OPTIM) $(DEFS) $(WARN) -fno-strict-aliasing
 LFLAGS = $(OPTIM) $(PROF) 

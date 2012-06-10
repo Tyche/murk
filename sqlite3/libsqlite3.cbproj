@@ -1,4 +1,4 @@
-	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 		<PropertyGroup>
 			<ProjectGuid>{B3295AE6-CDCD-418A-BE2D-EE1925CCE723}</ProjectGuid>
 			<ProjectVersion>12.2</ProjectVersion>
@@ -40,6 +40,8 @@
 			<ILINK_TranslatedLibraryPath>$(BDSLIB)\$(PLATFORM)\release\$(LANGDIR);$(ILINK_TranslatedLibraryPath)</ILINK_TranslatedLibraryPath>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1)'!=''">
+			<BCC_weff>false</BCC_weff>
+			<BCC_wpia>false</BCC_wpia>
 			<BCC_SmartPCHCache>false</BCC_SmartPCHCache>
 			<BCC_PCHWithExternalTypeFiles>false</BCC_PCHWithExternalTypeFiles>
 			<BCC_PCHUsage>None</BCC_PCHUsage>
@@ -49,7 +51,7 @@
 			<BCC_DisableOptimizations>true</BCC_DisableOptimizations>
 			<DCC_Optimize>false</DCC_Optimize>
 			<DCC_DebugInfoInExe>true</DCC_DebugInfoInExe>
-			<Defines>_DEBUG;WIN32;WIN32_LEAN_AND_MEAN;$(Defines)</Defines>
+			<Defines>_DEBUG;WIN32;WIN32_LEAN_AND_MEAN;SQLITE_ENABLE_FTS4;SQLITE_ENABLE_RTREE;$(Defines)</Defines>
 			<BCC_InlineFunctionExpansion>false</BCC_InlineFunctionExpansion>
 			<BCC_UseRegisterVariables>None</BCC_UseRegisterVariables>
 			<DCC_Define>DEBUG</DCC_Define>

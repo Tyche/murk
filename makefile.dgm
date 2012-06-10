@@ -8,7 +8,7 @@ AR = lib
 WINZIP = C:\apps\Winzip\wzzip
 
 MSGS= -w2 -w7
-DEFS = -DWIN32 -DWIN32_LEAN_AND_MEAN -DSQLITE_THREADSAFE=0
+DEFS = -DWIN32 -DWIN32_LEAN_AND_MEAN -DSQLITE_ENABLE_FTS4 -DSQLITE_ENABLE_RTREE
 OPTIM = -o -5 -Ae
 CFLAGS= $(OPTIM) $(MSGS) $(DEFS)
 
@@ -63,7 +63,7 @@ TARGETS = $(SQLITE_LIB) $(SQLITE_PRG) murk.exe loadhelps.exe
 
 all: $(TARGETS)
 
-$(SQLITE_LIB): $(SQLITE_OBJ)
+$(SQLITE_LIB): $(SQLITE_OBJ) 
 	-@del $< 2>NUL
 	$(AR) -c $@ $**
 
