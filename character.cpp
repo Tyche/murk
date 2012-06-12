@@ -722,6 +722,10 @@ void Character::unequip_char (Object * obj)
     && obj->value[2] != 0 && in_room != NULL && in_room->light > 0)
     --in_room->light;
 
+  if (obj->item_type == ITEM_DARKNESS
+    && obj->value[2] != 0 && in_room != NULL && in_room->light < 1)
+    ++in_room->light;
+
   return;
 }
 
@@ -1347,6 +1351,10 @@ void Character::equip_char (Object * obj, int iWear)
     && obj->value[2] != 0 && in_room != NULL)
     ++in_room->light;
 
+  if (obj->item_type == ITEM_DARKNESS
+    && obj->value[2] != 0 && in_room != NULL)
+    --in_room->light;
+
   return;
 }
 
@@ -1369,6 +1377,11 @@ void Character::char_from_room ()
     && obj->item_type == ITEM_LIGHT
     && obj->value[2] != 0 && in_room->light > 0)
     --in_room->light;
+
+  if ((obj = get_eq_char (WEAR_LIGHT)) != NULL
+    && obj->item_type == ITEM_DARKNESS
+    && obj->value[2] != 0 && in_room->light < 1)
+    ++in_room->light;
 
   deeprmnext = in_room->people.erase(
     find(in_room->people.begin(), in_room->people.end(), this));
@@ -1397,6 +1410,10 @@ void Character::char_to_room (Room * pRoomIndex)
   if ((obj = get_eq_char (WEAR_LIGHT)) != NULL
     && obj->item_type == ITEM_LIGHT && obj->value[2] != 0)
     ++in_room->light;
+
+  if ((obj = get_eq_char (WEAR_LIGHT)) != NULL
+    && obj->item_type == ITEM_DARKNESS && obj->value[2] != 0)
+    --in_room->light;
 
   return;
 }
@@ -1967,6 +1984,15 @@ void Character::wear_obj (Object * obj, bool fReplace)
       return;
     act ("$n lights $p and holds it.", obj, NULL, TO_ROOM);
     act ("You light $p and hold it.", obj, NULL, TO_CHAR);
+    equip_char (obj, WEAR_LIGHT);
+    return;
+  }
+
+  if (obj->item_type == ITEM_DARKNESS) {
+    if (!remove_obj (WEAR_LIGHT, fReplace))
+      return;
+    act ("$n darkens $p and holds it.", obj, NULL, TO_ROOM);
+    act ("You darken $p and hold it.", obj, NULL, TO_CHAR);
     equip_char (obj, WEAR_LIGHT);
     return;
   }

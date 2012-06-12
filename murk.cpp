@@ -2969,6 +2969,16 @@ try {
         }
       }
 
+      if ((obj = ch->get_eq_char (WEAR_LIGHT)) != NULL
+        && obj->item_type == ITEM_DARKNESS && obj->value[2] > 0) {
+        if (--obj->value[2] == 0 && ch->in_room != NULL) {
+          ++ch->in_room->light;
+          ch->act ("$p disappears.", obj, NULL, TO_ROOM);
+          ch->act ("$p disappears.", obj, NULL, TO_CHAR);
+          obj->extract_obj ();
+        }
+      }
+
       if (++ch->timer >= 12) {
         if (ch->was_in_room == NULL && ch->in_room != NULL) {
           ch->was_in_room = ch->in_room;

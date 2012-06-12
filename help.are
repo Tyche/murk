@@ -555,8 +555,8 @@ Syntax: wear   all
 Syntax: wield  <object>
 
 Three of these commands will take an object from your inventory and start using
-it as equipment.  HOLD is for light sources, wands, and staves.  WEAR is for
-armor.  WIELD is for weapons.
+it as equipment.  HOLD is for light or darkness sources, wands, and staves.  
+WEAR is for armor.  WIELD is for weapons.
 
 WEAR ALL will attempt to HOLD, WEAR, or WIELD each suitable item in your
 inventory.

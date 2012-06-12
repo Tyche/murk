@@ -92,6 +92,8 @@ std::string Object::item_type_name ()
     return "fountain";
   case ITEM_PILL:
     return "pill";
+  case ITEM_DARKNESS:
+    return "darkness exuding";
   }
 
   bug_printf ("Item_type_name: unknown type %d.", item_type);

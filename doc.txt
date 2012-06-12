@@ -940,6 +940,12 @@ skill_list table.
    value[2]	spell name
    value[3]	spell name
 
+27 ITEM_DARKNESS
+   value[0]	unused
+   value[1]	unused
+   value[2]	hours of darkness available, 0 is dead, -1 is infinite
+   value[3]	unused
+
 === Booting and Testing Areas
 
 When the Merc server starts, it reads a file named 'area.lst' in the current

@@ -301,6 +301,11 @@ bool Descriptor::check_reconnect (const std::string & name, bool fConn)
           && obj->item_type == ITEM_LIGHT
           && obj->value[2] != 0 && (*c)->in_room != NULL)
           ++(*c)->in_room->light;
+
+        if ((obj = (*c)->get_eq_char (WEAR_LIGHT)) != NULL
+          && obj->item_type == ITEM_DARKNESS
+          && obj->value[2] != 0 && (*c)->in_room != NULL)
+          --(*c)->in_room->light;
       }
       return true;
     }

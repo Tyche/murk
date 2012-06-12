@@ -208,6 +208,7 @@ enum {SEX_NEUTRAL, SEX_MALE, SEX_FEMALE};
 #define ITEM_CORPSE_PC       24
 #define ITEM_FOUNTAIN        25
 #define ITEM_PILL            26
+#define ITEM_DARKNESS        27
 
 /*
  * Extra flags.

@@ -114,6 +114,7 @@ Object * ObjectPrototype::create_object (int lvl)
     break;
 
   case ITEM_LIGHT:
+  case ITEM_DARKNESS:
   case ITEM_TREASURE:
   case ITEM_FURNITURE:
   case ITEM_TRASH:
