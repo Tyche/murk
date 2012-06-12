@@ -42,7 +42,9 @@ SQLITE_PRG_SRC = sqlite3/shell.c
 SQLITE_PRG_OBJ = $(SQLITE_PRG_SRC:.c=.o)
 SQLITE_PRG = sqlite3/sqlite3$(EXE) 
 
-SQLITE_XTRA = sqlite3/sqlite3.h sqlite3/sqlite3ext.h 
+SQLITE_XTRA = sqlite3/sqlite3.h sqlite3/sqlite3ext.h \
+	sqlite3/libsqlite3.vcxproj sqlite3/sqlite3.vcxproj \
+	sqlite3/libsqlite3.cbproj sqlite3/sqlite3.cbproj
 
 MURK_UTIL_SRC = loadhelps.cpp
 MURK_UTIL_OBJ = $(MURK_UTIL_SRC:.cpp=.o)
@@ -69,7 +71,9 @@ DISTFILES = $(MURK_SRC) $(MURK_UTIL_SRC) $(MURK_HDR) $(DATAFILES) \
 	$(SQLITE_SRC) $(SQLITE_PRG_SRC) $(SQLITE_XTRA) \
 	makefile makefile.bor makefile.vc makefile.dgm \
 	doc.txt startup startup.bash startup.cmd \
-	license.crypt license.diku license.merc license.murk++ 
+	license.crypt license.diku license.merc license.murk++ \
+	loadhelps.vcxproj murk.vcxproj murk++.sln \
+	loadhelps.cbproj murk.cbproj murk++.groupproj
   
 PDIST= $(patsubst %,murk++/%,$(DISTFILES))
 RELEASE=dist
