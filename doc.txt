@@ -43,6 +43,13 @@ Murk++ was previously compiled and tested on...
 
 === Release Information
 
+Version 1.8
+
+* Updated to sqlite 3.7.12.1
+* Added solution and project files for Visual C++ 2010
+* Added group and project files for Embarcadero C++ 6.3
+* Added Wifidi's patch for Dark items.
+
 Version 1.7
 
 * Updated to sqlite 3.7.6.3
