@@ -3129,7 +3129,6 @@ void aggr_update (void)
 {
   Character *wch;
   Character *ch;
-  Character *vch;
   Character *victim;
 
 try {
@@ -6138,10 +6137,8 @@ void Character::do_mpforce (std::string argument)
 
 void new_descriptor (void)
 {
-  char buf[MAX_STRING_LENGTH];
   Descriptor *dnew;
   struct sockaddr_in sock;
-  struct hostent *from;
   SOCKET desc;
 #ifndef WIN32
   socklen_t size;
@@ -6474,7 +6471,6 @@ void hotboot(void) {
   WSAPROTOCOL_INFO proto_info;
   int count_users = 0;
   std::FILE* fp;
-  void* errmsg;
 
   // Open events created by parent server
   void * file_event = OpenEvent(SYNCHRONIZE, FALSE, "file_created");

@@ -2196,7 +2196,6 @@ void Character::show_list_to_char (std::list<Object *> & list, bool fShort,
   char buf[MAX_STRING_LENGTH];
   int nShow;
   int iShow;
-  int count;
   bool fCombine;
 
   if (desc == NULL)
@@ -2565,7 +2564,6 @@ bool Character::check_social (const std::string & command, const std::string & a
 {
   std::string arg;
   Character *victim;
-  int cmd;
   char *sql = sqlite3_mprintf(
     "SELECT name, char_no_arg, others_no_arg, char_found, others_found, vict_found, char_auto, others_auto FROM socials WHERE NAME LIKE '%q%%'",
     command.c_str());
