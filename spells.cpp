@@ -1048,9 +1048,9 @@ void Character::spell_locate_object (int sn, int lvl, void *vo)
     for (in_obj = *o; in_obj->in_obj != NULL; in_obj = in_obj->in_obj) ;
 
     if (in_obj->carried_by != NULL) {
-      buf += (*o)->short_descr + " carried by " + in_obj->carried_by->describe_to(this) + "\r\n";
+      buf = (*o)->short_descr + " carried by " + in_obj->carried_by->describe_to(this) + "\r\n";
     } else {
-      buf += (*o)->short_descr + " in " +
+      buf = (*o)->short_descr + " in " +
         (in_obj->in_room == NULL ? "somewhere" : in_obj->in_room->name.c_str()) +
         ".\r\n";
     }
