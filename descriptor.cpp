@@ -52,9 +52,9 @@
 #define GA  249     /* you may reverse the line */
 #define TELOPT_ECHO 1   /* echo */
 
-const char echo_off_str[] = { IAC, WILL, TELOPT_ECHO, '\0' };
-const char echo_on_str[] = { IAC, WONT, TELOPT_ECHO, '\0' };
-const char go_ahead_str[] = { IAC, GA, '\0' };
+const unsigned char echo_off_str[] = { IAC, WILL, TELOPT_ECHO, '\0' };
+const unsigned char echo_on_str[] = { IAC, WONT, TELOPT_ECHO, '\0' };
+const unsigned char go_ahead_str[] = { IAC, GA, '\0' };
 
 
 // Temporary externs
@@ -453,7 +453,7 @@ bool Descriptor::process_output (bool fPrompt)
         bust_a_prompt (ch);
 
       if (IS_SET (ch->actflags, PLR_TELNET_GA))
-        write_to_buffer (go_ahead_str);
+        write_to_buffer (reinterpret_cast<const char*>(go_ahead_str));
     }
   }
 
@@ -601,7 +601,7 @@ void Descriptor::nanny (std::string argument)
     if (fOld) {
       /* Old player */
       write_to_buffer ("Password: ");
-      write_to_buffer (echo_off_str);
+      write_to_buffer (reinterpret_cast<const char*>(echo_off_str));
       connected = CON_GET_OLD_PASSWORD;
     } else {
       /* New player */
@@ -624,7 +624,7 @@ void Descriptor::nanny (std::string argument)
       return;
     }
 
-    write_to_buffer (echo_on_str);
+    write_to_buffer (reinterpret_cast<const char*>(echo_on_str));
 
     if (check_reconnect (ch->name, true))
       return;
@@ -646,7 +646,7 @@ void Descriptor::nanny (std::string argument)
     switch (argument[0]) {
     case 'y':
     case 'Y':
-      buf = "New character.\r\nGive me a password for " + ch->name + ": " + echo_off_str;
+      buf = "New character.\r\nGive me a password for " + ch->name + ": " + reinterpret_cast<const char*>(echo_off_str);
       write_to_buffer (buf);
       connected = CON_GET_NEW_PASSWORD;
       break;
@@ -699,7 +699,7 @@ void Descriptor::nanny (std::string argument)
       return;
     }
 
-    write_to_buffer (echo_on_str);
+    write_to_buffer (reinterpret_cast<const char*>(echo_on_str));
     write_to_buffer ("What is your sex (M/F/N)? ");
     connected = CON_GET_NEW_SEX;
     break;
