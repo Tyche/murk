@@ -5429,7 +5429,7 @@ void Character::do_rstat (std::string argument)
   for (rch = location->people.begin(); rch != location->people.end(); rch++) {
     buf1.append(" ");
     one_argument ((*rch)->name, tmp);
-    buf1.append(buf);
+    buf1.append(tmp);
   }
 
   buf1.append(".\r\nObjects:   ");
@@ -5437,7 +5437,7 @@ void Character::do_rstat (std::string argument)
   for (o = location->contents.begin(); o != location->contents.end(); o++) {
     buf1.append(" ");
     one_argument ((*o)->name, tmp);
-    buf1.append(buf);
+    buf1.append(tmp);
   }
   buf1.append(".\r\n");
 
