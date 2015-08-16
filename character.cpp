@@ -1636,7 +1636,7 @@ void Character::gain_condition (int iCond, int value)
   return;
 }
 
-void Character::add_follower (Character * master)
+void Character::add_follower (Character * m)
 {
 
   if (master != NULL) {
@@ -1644,13 +1644,13 @@ void Character::add_follower (Character * master)
     return;
   }
 
-  master = master;
+  master = m;
   leader = NULL;
 
-  if (master->can_see(this))
-    act ("$n now follows you.", NULL, master, TO_VICT);
+  if (m->can_see(this))
+    act ("$n now follows you.", NULL, m, TO_VICT);
 
-  act ("You now follow $N.", NULL, master, TO_CHAR);
+  act ("You now follow $N.", NULL, m, TO_CHAR);
 
   return;
 }
