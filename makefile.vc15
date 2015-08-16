@@ -5,7 +5,7 @@ CPP = cl
 CC = cl
 AR = link
 LD = cl
-WINZIP = C:\apps\Winzip\wzzip
+WINZIP = D:\apps\Winzip\wzzip
 
 # Compiler directives for debugging
 !ifdef DEBUG
@@ -18,8 +18,8 @@ DEBUG_LFLAGS =
 LIBS= libcmt.lib kernel32.lib ws2_32.lib libcpmt.lib libucrt.lib libvcruntime.lib advapi32.lib
 !endif
 
-DEFS= -DWIN32 -DWIN32_LEAN_AND_MEAN -D_CONSOLE -D_MBCS -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE -D_USE_32BIT_TIME_T -DSQLITE_ENABLE_FTS4 -DSQLITE_ENABLE_RTREE 
-OPTIM= /nologo /W1 $(DEBUG_CFLAGS) 
+DEFS= -DWIN32 -DWIN32_LEAN_AND_MEAN -D_CONSOLE -D_MBCS -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE -DSQLITE_ENABLE_FTS4 -DSQLITE_ENABLE_RTREE 
+OPTIM= /nologo /W4 $(DEBUG_CFLAGS) 
 
 CFLAGS= $(OPTIM) $(DEFS)
 LFLAGS = /link /NOLOGO /NODEFAULTLIB /SUBSYSTEM:CONSOLE $(DEBUG_LFLAGS) 
@@ -59,7 +59,7 @@ DATAFILES = area.lst limbo.are mid_cit.prg midgaard.are school.are help.are \
 # Files in the standard distribution
 DISTFILES = $(MURK_SRC) $(MURK_UTIL_SRC) $(MURK_HDR) $(DATAFILES) \
 	$(SQLITE_SRC) $(SQLITE_PRG_SRC) $(SQLITE_XTRA) \
-	makefile makefile.bor makefile.vc makefile.dgm \
+	makefile makefile.bor makefile.vc makefile.dgm makefile.vc15 \
 	doc.txt startup startup.bash startup.cmd \
 	license.crypt license.diku license.merc license.murk++ \
 	loadhelps.vcxproj murk.vcxproj murk++.sln \
