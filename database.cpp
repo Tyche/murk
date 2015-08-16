@@ -89,7 +89,7 @@ void Database::boot(void) {
   /*
    * Seed random number generator.
    */
-  OS_SRAND (std::time (NULL));
+  OS_SRAND ((unsigned int)std::time (NULL));
 
   // Set welcome screen
   load_greeting();
