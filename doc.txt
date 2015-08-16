@@ -8,23 +8,23 @@ Merc Diku Mud is a Diku Mud with many enhancements and contributions.
 
 Murk++ was compiled and tested on...
 
+* Microsoft Windows 10
+  CYGWIN_NT-10.0 2.1.0(0.287/5/3) x86_64 Cygwin using g++ (GCC) 4.9.3
+  Microsoft Visual C/C++ v19.0 x64 (Visual C++ 2015 Community)
+  Microsoft Visual C/C++ v19.0 x86 (Visual C++ 2015 Community)
+  Microsoft Visual C/C++ v16.0 (Visual C++ 2010 Express)
+
+* Ubuntu 15.04 amd64 
+  g++ (Ubuntu 4.9.2-10ubuntu13) 4.9.2
+
+Murk++ was previously compiled and tested on...
+
 * Microsoft Windows 7 Service Pack 1
-  Microsoft Visual C/C++ v10.0 (Visual C++ 2010 Express)
+  Microsoft Visual C/C++ v16.0 (Visual C++ 2010 Express)
   Embarcadero C++ 6.30 for Win32
   Borland C++ 5.5.1 for Win32 (free compiler release)
   Digital Mars C/C++ Compiler Version 8.52c (with STLPort 4.5.3)
   CYGWIN_NT-6.1-WOW64 1.7.9(0.237/5/3) using gcc 4.3.4
-
-* FreeBSD 8.1 amd64
-  g++ version 4.2.1 [FreeBSD] 
-
-* Ubuntu 10.04 amd64 
-  g++ (Ubuntu 4.4.3-4ubuntu5) 4.4.3 
- 
-* Red Hat Fedora 12 i386 
-  gcc version 4.2.2
- 
-Murk++ was previously compiled and tested on...
 
 * Microsoft Windows XP Service Pack 2 
   CYGWIN_NT-5.1 1.5.23(0.156/4/2) using g++ (GCC) 3.4.4 (cygming special)
@@ -35,13 +35,32 @@ Murk++ was previously compiled and tested on...
 * FreeBSD 5.3-BETA4 
   g++ (GCC) version 3.4.2 [FreeBSD] 20040728
 
+* FreeBSD 8.1 amd64
+  g++ version 4.2.1 [FreeBSD] 
+
 * Debian Linux 2.4.27-2-386
   g++ (GCC) version 4.0.2 (Debian 4.0.2-2)
 
 * SuSE Linux 2.6.4-52
   g++ (GCC) 3.3.3 (SuSE Linux)
 
+* Ubuntu 10.04 amd64 
+  g++ (Ubuntu 4.4.3-4ubuntu5) 4.4.3 
+ 
+* Red Hat Fedora 12 i386 
+  gcc version 4.2.2
+
 === Release Information
+
+Version 1.9
+
+* Removed a number of unused variables
+* Fixed possible error in telnet strings
+* Added makefile for vc++ 2015
+* Fixed locate object spell - reported by wifidi
+* Fixed rstats command - reported by wifidi
+* Updated to SQLite3 3.8.11.1
+* Fixed variable hiding in add_follower
 
 Version 1.8
 
