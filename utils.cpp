@@ -252,7 +252,7 @@ std::string one_argument (const std::string & argument, std::string & arg_first)
     argp++;
 
   cEnd = ' ';
-  if (*argp == '\'' || *argp == '"')
+  if (argp != argument.end() && *argp == '\'' || *argp == '"')
     cEnd = *argp++;
 
   while (argp != argument.end()) {
