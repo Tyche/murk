@@ -713,7 +713,7 @@ void Character::do_note (std::string argument)
 
   if (!str_cmp (arg, "+")) {
     note_attach (this);
-    strncpy (buf, pnote->text.c_str(), sizeof buf);
+    strncpy (buf, pnote->text.c_str(), sizeof buf-1);
     if (strlen (buf) + argument.size() >= MAX_STRING_LENGTH - 200) {
       send_to_char ("Note too long.\r\n");
       return;
@@ -2074,7 +2074,7 @@ void Character::do_compare (std::string argument)
       obj2 = *o;
       if (obj2->wear_loc != WEAR_NONE && can_see_obj(obj2)
         && obj1->item_type == obj2->item_type
-        && (obj1->wear_flags & obj2->wear_flags & ~ITEM_TAKE) != 0)
+        && (obj1->wear_flags & obj2->wear_flags & ~(ITEM_TAKE)) != 0)
         break;
     }
 
@@ -2500,7 +2500,7 @@ void Character::do_password (std::string argument)
   }
 
   char buf[MAX_STRING_LENGTH];  // Needed for Windows crypt
-  strncpy(buf,arg1.c_str(), sizeof buf);
+  strncpy(buf,arg1.c_str(), sizeof buf-1);
   if (strcmp (crypt (buf, pcdata->pwd.c_str()), pcdata->pwd.c_str())) {
     wait_state (40);
     send_to_char ("Wrong password.  Wait 10 seconds.\r\n");
@@ -2515,7 +2515,7 @@ void Character::do_password (std::string argument)
   /*
    * No tilde allowed because of player file format.
    */
-  strncpy(buf,arg2.c_str(), sizeof buf);
+  strncpy(buf,arg2.c_str(), sizeof buf-1);
   pwdnew = crypt (buf, name.c_str());
   for (p = pwdnew; *p != '\0'; p++) {
     if (*p == '~') {

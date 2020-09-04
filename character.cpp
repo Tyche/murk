@@ -2553,10 +2553,8 @@ void Character::move_char (int door)
     }
   }
 
-  if (this)
-    mprog_entry_trigger (this);
-  if (this)
-    mprog_greet_trigger (this);
+  mprog_entry_trigger (this);
+  mprog_greet_trigger (this);
   return;
 }
 

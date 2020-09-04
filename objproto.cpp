@@ -80,10 +80,6 @@ Object * ObjectPrototype::create_object (int lvl)
 {
   Object *obj;
 
-  if (this == NULL) {
-    fatal_printf ("Create_object: NULL this.");
-  }
-
   obj = new Object();
 
   obj->pIndexData = this;

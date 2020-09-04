@@ -52,10 +52,6 @@ Character * MobPrototype::create_mobile ()
 {
   Character *mob;
 
-  if (this == NULL) {
-    fatal_printf ("Create_mobile: NULL this.");
-  }
-
   mob = new Character();
 
   mob->pIndexData = this;

@@ -617,7 +617,7 @@ void Descriptor::nanny (std::string argument)
   case CON_GET_OLD_PASSWORD:
     write_to_buffer ("\r\n");
 
-    strncpy(cbuf,argument.c_str(), sizeof cbuf);
+    strncpy(cbuf,argument.c_str(), sizeof cbuf-1);
     if (strcmp (crypt (cbuf, ch->pcdata->pwd.c_str()), ch->pcdata->pwd.c_str())) {
       write_to_buffer ("Wrong password.\r\n");
       close_socket();
@@ -674,7 +674,7 @@ void Descriptor::nanny (std::string argument)
       return;
     }
 
-    strncpy(cbuf,argument.c_str(), sizeof cbuf);
+    strncpy(cbuf,argument.c_str(), sizeof cbuf-1);
     pwdnew = crypt (cbuf, ch->name.c_str());
     for (p = pwdnew; *p != '\0'; p++) {
       if (*p == '~') {
@@ -692,7 +692,7 @@ void Descriptor::nanny (std::string argument)
   case CON_CONFIRM_NEW_PASSWORD:
     write_to_buffer ("\r\n");
 
-    strncpy(cbuf,argument.c_str(), sizeof cbuf);
+    strncpy(cbuf,argument.c_str(), sizeof cbuf-1);
     if (strcmp (crypt (cbuf, ch->pcdata->pwd.c_str()), ch->pcdata->pwd.c_str())) {
       write_to_buffer ("Passwords don't match.\r\nRetype password: ");
       connected = CON_GET_NEW_PASSWORD;

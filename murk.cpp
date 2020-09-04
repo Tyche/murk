@@ -2464,6 +2464,7 @@ int mprog_do_ifchck (const std::string & ifchck, Character * mob,
           }
       } else
         return -1;
+      break;  
     case 't':
       if (vict) {
         if (actor->is_npc ()) {
@@ -2473,6 +2474,7 @@ int mprog_do_ifchck (const std::string & ifchck, Character * mob,
           }
       } else
         return -1;
+      break;  
     case 'r':
       if (rndm) {
         if (actor->is_npc ()) {
@@ -2482,6 +2484,7 @@ int mprog_do_ifchck (const std::string & ifchck, Character * mob,
           }
       } else
         return -1;
+      break;  
     case 'o':
       if (obj) {
         lhsvl = obj->pIndexData->vnum;
@@ -2489,6 +2492,7 @@ int mprog_do_ifchck (const std::string & ifchck, Character * mob,
         return mprog_veval (lhsvl, opr, rhsvl);
       } else
         return -1;
+      break;  
     case 'p':
       if (v_obj) {
         lhsvl = v_obj->pIndexData->vnum;
@@ -2496,6 +2500,7 @@ int mprog_do_ifchck (const std::string & ifchck, Character * mob,
         return mprog_veval (lhsvl, opr, rhsvl);
       } else
         return -1;
+      break;  
     default:
       bug_printf ("Mob: %d bad argument to 'number'", mob->pIndexData->vnum);
       return -1;

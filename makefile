@@ -19,7 +19,7 @@ AR = ar
 
 # The suffix appended to executables.  
 # This should be set for Cygwin.
-#EXE = .exe
+EXE = .exe
 #EXE =
 
 OPTIM = -O2 -pipe 

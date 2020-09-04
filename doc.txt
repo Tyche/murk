@@ -9,15 +9,18 @@ Merc Diku Mud is a Diku Mud with many enhancements and contributions.
 Murk++ was compiled and tested on...
 
 * Microsoft Windows 10
-  CYGWIN_NT-10.0 2.1.0(0.287/5/3) x86_64 Cygwin using g++ (GCC) 4.9.3
-  Microsoft Visual C/C++ v19.0 x64 (Visual C++ 2015 Community)
-  Microsoft Visual C/C++ v19.0 x86 (Visual C++ 2015 Community)
-  Microsoft Visual C/C++ v16.0 (Visual C++ 2010 Express)
+  CYGWIN_NT-10.0 3.1.6(0.340/5/3) x86_64 Cygwin using g++ (GCC) 9.3.0
 
 * Ubuntu 15.04 amd64 
   g++ (Ubuntu 4.9.2-10ubuntu13) 4.9.2
 
 Murk++ was previously compiled and tested on...
+
+* Microsoft Windows 10
+  CYGWIN_NT-10.0 2.1.0(0.287/5/3) x86_64 Cygwin using g++ (GCC) 4.9.3
+  Microsoft Visual C/C++ v19.0 x64 (Visual C++ 2015 Community)
+  Microsoft Visual C/C++ v19.0 x86 (Visual C++ 2015 Community)
+  Microsoft Visual C/C++ v16.0 (Visual C++ 2010 Express)
 
 * Microsoft Windows 7 Service Pack 1
   Microsoft Visual C/C++ v16.0 (Visual C++ 2010 Express)

@@ -48,6 +48,12 @@
 #include "extra.hpp"
 #include "world.hpp"
 
+#ifdef WIN32                    /* Windows portability */
+#ifdef __BORLANDC__
+#pragma comment(lib, "libsqlite3")
+#endif
+#endif
+
 Database* Database::_instance = 0;
 
 Database* Database::instance() {
