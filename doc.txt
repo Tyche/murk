@@ -10,6 +10,9 @@ Murk++ was compiled and tested on...
 
 * Microsoft Windows 10
   CYGWIN_NT-10.0 3.1.6(0.340/5/3) x86_64 Cygwin using g++ (GCC) 9.3.0
+  Microsoft Visual C/C++ v19.25.28611 for x64 (Visual C++ 2019 Community) 
+  Microsoft Visual C/C++ v19.16.27038 for x86 (Visual C++ 2017 Community) 
+  Embarcadero C++ 7.40 for Win64
 
 * Ubuntu 15.04 amd64 
   g++ (Ubuntu 4.9.2-10ubuntu13) 4.9.2

@@ -193,7 +193,7 @@ void Descriptor::write_to_buffer (const std::string & txt) {
 void Descriptor::show_string (const std::string & input) {
   char buffer[MAX_STRING_LENGTH];
   std::string buf;
-  register char *scan, *chk;
+  char *scan, *chk;
   int lines = 0, toggle = 1;
 
   one_argument (input, buf);

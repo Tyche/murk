@@ -218,8 +218,8 @@ static void transpose (struct block *data, struct ordering *t, int n)
 
 static void rotate (struct block *key)
 {
-  register unsigned char *p = key->b_data;
-  register unsigned char *ep = &(key->b_data[55]);
+  unsigned char *p = key->b_data;
+  unsigned char *ep = &(key->b_data[55]);
   int data0 = key->b_data[0], data28 = key->b_data[28];
 
   while (p++ < ep)
@@ -234,7 +234,7 @@ static void f (int i, struct block *key, struct block *a, struct block *x)
 {
   struct block e, ikey, y;
   int k;
-  register unsigned char *p, *q, *r;
+  unsigned char *p, *q, *r;
 
   e = *a;
   transpose (&e, EP, 48);
@@ -250,7 +250,7 @@ static void f (int i, struct block *key, struct block *a, struct block *x)
   }
   q = x->b_data;
   for (k = 0; k < 8; k++) {
-    register int xb, r;
+    int xb, r;
 
     r = *p++ << 5;
     r += *p++ << 3;
@@ -278,13 +278,13 @@ void definekey (char *k)
 
 void encrypt (char *blck, int edflag)
 {
-  register struct block *p = (struct block *) blck;
-  register int i;
+  struct block *p = (struct block *) blck;
+  int i;
 
   transpose (p, &InitialTr, 64);
   for (i = 15; i >= 0; i--) {
     int j = edflag ? i : 15 - i;
-    register int k;
+    int k;
     struct block b, x;
 
     b = *p;
@@ -305,12 +305,12 @@ char *crypt (char *pw, const char *salt)
 
   char pwb[66];
   static char result[16];
-  register char *p = pwb;
+  char *p = pwb;
   struct ordering new_etr;
-  register int i;
+  int i;
 
   while (*pw && p < &pwb[64]) {
-    register int j = 7;
+    int j = 7;
 
     while (j--) {
       *p++ = (*pw >> j) & 01;
@@ -329,8 +329,8 @@ char *crypt (char *pw, const char *salt)
   new_etr = etr;
   EP = &new_etr;
   for (i = 0; i < 2; i++) {
-    register char c = *salt++;
-    register int j;
+    char c = *salt++;
+    int j;
 
     result[i] = c;
     if (c > 'Z')
@@ -360,8 +360,8 @@ char *crypt (char *pw, const char *salt)
   p = pwb;
   pw = result + 2;
   while (p < &pwb[66]) {
-    register int c = 0;
-    register int j = 6;
+    int c = 0;
+    int j = 6;
 
     while (j--) {
       c <<= 1;

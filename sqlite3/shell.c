@@ -102,6 +102,13 @@ typedef unsigned char u8;
 #  include <pwd.h>
 # endif
 #endif
+#if defined(__BORLANDC__)
+# include <dirent.h>
+# define DIRENT dirent
+# ifndef S_ISLNK
+#   define S_ISLNK(mode) (0)
+# endif
+#endif
 #if (!defined(_WIN32) && !defined(WIN32)) || defined(__MINGW32__)
 # include <unistd.h>
 # include <dirent.h>
@@ -160,20 +167,24 @@ typedef unsigned char u8;
 # else
 #  include <io.h>
 #  include <fcntl.h>
-#  define isatty(h) _isatty(h)
-#  ifndef access
-#   define access(f,m) _access((f),(m))
+#  if !defined(__BORLANDC__)   
+#   define isatty(h) _isatty(h)
+#   ifndef access
+#    define access(f,m) _access((f),(m))
+#   endif
+#   ifndef unlink
+#    define unlink _unlink
+#   endif
+#   ifndef strdup
+#    define strdup _strdup
+#   endif
+#  else
+#   define _setmode setmode 
 #  endif
-#  ifndef unlink
-#   define unlink _unlink
-#  endif
-#  ifndef strdup
-#   define strdup _strdup
-#  endif
-#  undef popen
-#  define popen _popen
-#  undef pclose
-#  define pclose _pclose
+#   undef popen
+#   define popen _popen
+#   undef pclose
+#   define pclose _pclose
 # endif
 #else
  /* Make sure isatty() has a prototype. */
@@ -1197,7 +1208,7 @@ extern INT closedir(LPDIR dirp);
 ** POSIX functions on Win32 using the MSVCRT.
 */
 
-#if defined(_WIN32) && defined(_MSC_VER)
+#if defined(_WIN32) && defined(_MSC_VER) 
 /* #include "test_windirent.h" */
 
 /*

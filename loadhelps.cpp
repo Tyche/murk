@@ -36,12 +36,6 @@
 
 #include "utils.hpp"
 
-#ifdef WIN32                    /* Windows portability */
-#ifdef __BORLANDC__
-#pragma comment(lib, "libsqlite3")
-#endif
-#endif
-
 sqlite3 *database;
 std::ifstream * fpArea;
 std::string strArea("help.are");
