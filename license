@@ -1,0 +1,19 @@
+=== Copyright and License
+
+Diku Mud is copyright (C) 1990, 1991 by Sebastian Hammer, Michael Seifert,
+Hans Henrik St{rfeldt, Tom Madsen, and Katja Nyboe.  Their license agreement
+is in the file 'license.diku'.
+
+Merc Diku Mud is a derivative of the original Diku Mud and is subject to their
+copyright and license agreement.  Merc Diku Mud contains substantial
+enhancements to Diku Mud.  These enhancements are copyright 1992, 1993 by
+Michael Chastain, Michael Quan, and Mitchell Tse.  Our license agreement is in
+'license.merc'.
+
+Murk++ is a derivative of Merc.  Copyright 2006, 2007 by Jon A. Lambert.  
+See 'license.murk++' for terms.
+
+The crypt function is copyright 1987,1997, Prentice Hall.  See 'license.crypt' 
+for more information. 
+
+SQLite is in the public domain.

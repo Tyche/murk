@@ -18,9 +18,9 @@ CC = gcc
 AR = ar
 
 # The suffix appended to executables.  
-# This should be set for Cygwin.
-EXE = .exe
-#EXE =
+# This should be set for Cygwin and Msys2.
+#EXE = .exe
+EXE =
 
 OPTIM = -O2 -pipe 
 WARN = -Wall -Wno-parentheses -Wno-unused 
@@ -32,7 +32,11 @@ CFLAGS = $(OPTIM) $(DEFS) $(WARN) -fno-strict-aliasing
 LFLAGS = $(OPTIM) $(PROF) 
 
 INCS = -Isqlite3 
-LIBS = -lcrypt -ldl -lpthread
+ifdef MSYSTEM
+LIBS = -ldl -lpthread -lws2_32
+else 
+LIBS = -ldl -lpthread -lcrypt
+endif
 
 SQLITE_SRC = sqlite3/sqlite3.c
 SQLITE_OBJ = $(SQLITE_SRC:.c=.o)

@@ -1,0 +1,93 @@
+=== Release Information
+
+Version 2.0
+* Updated to SQLite3 3.32.3
+* Made changes to sqlite3's shell.c to compile for Embarcadero C++
+* Added make file for Embarcadero C++
+* Compiled and tested on Msys2 mingw64
+* Added license file for github display.
+* Split doc.txt into license, release.txt, and install.txt
+
+Version 1.9
+
+* Removed a number of unused variables
+* Fixed possible error in telnet strings
+* Added makefile for vc++ 2015
+* Fixed locate object spell - reported by wifidi
+* Fixed rstats command - reported by wifidi
+* Updated to SQLite3 3.8.11.1
+* Fixed variable hiding in add_follower
+
+Version 1.8
+
+* Updated to sqlite 3.7.12.1
+* Added solution and project files for Visual C++ 2010
+* Added group and project files for Embarcadero C++ 6.3
+* Added Wifidi's patch for Dark items.
+
+Version 1.7
+
+* Updated to sqlite 3.7.6.3
+* Delayed extraction of characters by moving it to update routine. 
+* Support for Visual C++ 6.0 dropped.
+* Fixed many g++ 4.x errors 
+* Switched headers to point to C++ standard library and std namespace. 
+
+Version 1.6
+
+* Added schemas for areas, rooms, objects, affects, extra descriptions (unused)
+* Updated to sqlite 3.3.12
+* Updated documentation and help files
+* Added gag/ignore command and support for lists in player files.
+* Hotboot command and capability added (Windows only).
+* Removed invis and reboot commands.
+* Function tail_chain removed.
+* Made port and listening socket global variables.
+* Refactored hostname retrieval to separate function.
+* Added win_errprint() function to retrieve and format windows api errors.
+* Updated startup.cmd to exit when hotbooting.
+* Updated makefiles to allow linkage under windows while server running
+
+Version 1.5
+
+* Added macros and dual use include files for commands and spells.
+* Created singleton Database class and moved storage routines to it.
+* Removed gsn and slot references in skill table.
+* Converted slot references in area files to strings. 
+* Removed namespace in loadhelps for consistency.
+* Added SymbolTable class, a bidirectional mapping.
+* Added new source files to all makefiles.
+* Added startup script for bash shell and for windows cmd shell.
+* Fixed bug with instance database variable in Database.
+* Added compile defines to exclude uneccessary parts of Sqlite.
+* Refactored time, weather and area list to World class.
+* Added BaseObject as common root of several classes
+* Altered makefiles to omit TCL variable interface in SQLite
+
+Version 1.4
+
+* Migrated helps to database.
+* Refactored and split out classes into individual files.
+* Split out OS dependencies into os.hpp and os.cpp.
+* Fix makefile presumed existence of murk.db in database target.
+* Corrected many warnings for Borland compiler in murk.cpp
+
+Version 1.3
+
+* Makefile and patches for Digital Mars C++ compiler.
+* Commented out processor optimization switch in makefiles.
+* Migrated title_table to sqlite database.
+* Fixed bug with SO_DONTLINGER macro check.
+
+Version 1.2
+
+* Added schemas and data to load database.
+* Migrated social_table to sqlite database.
+* Removed and replaced use of number_bits() function.
+* Added sqlite3 library and updated makefiles.
+
+Version 1.1
+
+* Removed log, snoop and pose.
+* Removed old mob style code from DB read and updated area files.
+* Path to exe fixed.
