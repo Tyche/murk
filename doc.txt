@@ -13,9 +13,22 @@ Murk++ was compiled and tested on...
   Microsoft Visual C/C++ v19.25.28611 for x64 (Visual C++ 2019 Community) 
   Microsoft Visual C/C++ v19.16.27038 for x86 (Visual C++ 2017 Community) 
   Embarcadero C++ 7.40 for Win64
+  MINGW64_NT-10.0 x86_64 Msys using gcc version 8.2.0
 
-* Ubuntu 15.04 amd64 
-  g++ (Ubuntu 4.9.2-10ubuntu13) 4.9.2
+* Linux Mint 18.3 Sylvia 64-bit
+  g++ (Ubuntu 5.4.0-6ubuntu~16.04.12) 5.4.0
+
+* openSuse Leap 42.3
+  g++ (SUSE Linux) 4.8.5
+
+* Debian GNU/Linux 9.13 (stretch)
+  g++ (Debian 6.3.0-18+deb9u1) 6.3.0 20170516
+
+* Ubuntu 16.04.7 LTS
+  g++ (Ubuntu 5.4.0-6ubuntu1~16.04.12) 5.4.0 20160609
+
+* SUSE Linux Enterprise Server 12 SP3
+  g++ (SUSE Linux) 4.8.5
 
 Murk++ was previously compiled and tested on...
 
@@ -52,11 +65,21 @@ Murk++ was previously compiled and tested on...
 
 * Ubuntu 10.04 amd64 
   g++ (Ubuntu 4.4.3-4ubuntu5) 4.4.3 
+
+* Ubuntu 15.04 amd64 
+  g++ (Ubuntu 4.9.2-10ubuntu13) 4.9.2
  
 * Red Hat Fedora 12 i386 
   gcc version 4.2.2
 
 === Release Information
+
+Version 2.0
+* Updated to SQLite3 3.32.3
+* Made changes to sqlite3's shell.c to compile for Embarcadero C++
+* Added make file for Embarcadero C++
+* Compiled and tested on Msys2 mingw64
+* Added license file for github display.
 
 Version 1.9
 

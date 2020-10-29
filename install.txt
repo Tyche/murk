@@ -2,52 +2,79 @@
 
 (1) Unpack the release.
 
-  * On Linux, Msys2, or Cygwin	
+  * On Linux, Msys2, or Cygwin -	
+    
     type 'tar xzvf murk++-2.0.tar.gz' 
 
-  * On Windows you can use Winzip, WinRar or 7-zip to unpack the files.
+  * On Windows - 
+    You can use Winzip, WinRar or 7-zip to unpack the files.
     
-(2) Compile the mud:
+(2) Compile the mud
 
-  * For Linux, Msys2 and Cygwin - type 'make'.   
-    - You will need to edit the makefile to make sure the EXE suffix parameter 
-      is set correctly for Cygwin and Msys2. 
+  * For Linux, Msys2 and Cygwin - 
+    
+    type 'make'   
+    
+    Note - You will need to edit the makefile to make sure the EXE suffix 
+           parameter is set correctly for Cygwin and Msys2. 
 
-  * For FreeBSD - type 'gmake'.
+  * For FreeBSD - 
+    
+    type 'gmake'.
 
-  * For Windows using Embarcadero C++ - ensure the compiler is in your path, 
-    then type 'make -f Makefile.emb'.
+  * For Windows using Embarcadero C++ - 
+    ensure the compiler is in your path, then 
+    
+    type 'make -f Makefile.emb'.
 
-  * For Windows using Microsoft Visual C - ensure your Visual C bin directory
-    is in your path and your INCLUDE and LIB environment variables are setup
-    correctly.
-    - With Visual C++ Community edition you may use x64 Native tools Command prompt 
-      that calls vsvars64.bat
-    then type 'nmake -f makefile.vc15'
-    - To link with debugging information type 'set DEBUG=1' and then use
-      'nmake -f makefile.vc15'
+  * For Windows using Microsoft Visual C - 
+    ensure your Visual C++ bin directory is in your path and your environment
+    variables are setup correctly.  With Visual C++ Community edition you use
+    the 'x64 Native tools Command prompt' that calls vsvars64.bat, then
+    
+    type 'nmake -f makefile.vc15'
+    
+    Note - To link with debugging information type 'set DEBUG=1' and then 
+    
+    type 'nmake -f makefile.vc15'
       
   
 (3) Create the database
-   * Use one of the following depending on your OS and compiler.
-     'make database'
-     'gmake database'
-     'nmake -f makefile.vc database'
-     'make -f makefile.emb database'
+    
+  * On Linux, Msys2, or Cygwin -	
+
+    type 'make database' 
+
+  * For FreeBSD - 
+    
+    type 'gmake database'
+  
+  * For Windows using Embarcadero C++ - 
+
+    type 'make -f makefile.emb database'
+
+  * For Windows using Microsoft Visual C - 
+
+    type 'nmake -f makefile.vc15 database'
  
 (4) Start the game:
 
    * For Linux, FreeBSD or Cygwin
-	   ./startup &
+     
+     type './startup &'
+     
      If you do not have csh or tcsh shells installed you can use the bash script
-       ./startup.bash &
+     
+     type './startup.bash &'
 	
    * For Windows
-        startup.cmd
+     
+     type 'startup.cmd'
 
 (5) Telnet into the game.  The default port in the startup batch files is 4000.
+    Or use your favorite mud client
 
-    telnet localhost 4000
+    type 'telnet localhost 4000'
 
 (6) There is an immortal character named 'One' with a password of 'potrzebie'
     You can 'advance' new characters to immortal levels with the user 'One'.

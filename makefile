@@ -74,8 +74,8 @@ DATAFILES = area.lst limbo.are mid_cit.prg midgaard.are school.are help.are \
 DISTFILES = $(MURK_SRC) $(MURK_UTIL_SRC) $(MURK_HDR) $(DATAFILES) \
 	$(SQLITE_SRC) $(SQLITE_PRG_SRC) $(SQLITE_XTRA) \
 	makefile makefile.bor makefile.vc makefile.dgm makefile.vc15 \
-	doc.txt startup startup.bash startup.cmd \
-	license.crypt license.diku license.merc license.murk++ \
+	doc.txt install.txt release.txt startup startup.bash startup.cmd \
+	license license.crypt license.diku license.merc license.murk++ \
 	loadhelps.vcxproj murk.vcxproj murk++.sln \
 	loadhelps.cbproj murk.cbproj murk++.groupproj
   
